@@ -1,5 +1,5 @@
 describe('solidr', () => {
-    it('> TODO', () => {
-        // TODO
-    });
+	it('> TODO', () => {
+		// TODO
+	});
 });
