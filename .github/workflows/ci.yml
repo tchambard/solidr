@@ -1,0 +1,52 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Dev Continuous integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: tchambard/solana-test-validator:solana_1.18.12-anchor_0.30.0
+      options: --user root
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Yarn cache
+      uses: Andrews-McMeel-Universal/cache-yarn-install@v1
+      with:
+        enable-corepack: true
+        cache-node-modules: true
+        cache-install-state: true
+
+    - name: Rust cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: |
+          packages/programs/solidr-program
+
+    - name: Init solana-test-validator-docker tool
+      run: |
+        echo "{\"imageName\": \"tchambard/solana-test-validator:latest\", \"containerName\": \"solana-test-validator\", \"bypassLocalExe\": true }" >> .solrc
+
+    - name: Lint
+      run: |
+        yarn run lint-all
+
+    - name: Compile
+      run: |
+        yarn run compile-all
+
+    - name: Test
+      run: |
+        yarn run test-all
