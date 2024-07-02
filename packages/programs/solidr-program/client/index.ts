@@ -1,1 +1,2 @@
-// TODO export client classes and types
+export * from './SolidrClient';
+export * from './types/solidr';
