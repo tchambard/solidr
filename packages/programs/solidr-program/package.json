@@ -1,0 +1,30 @@
+{
+    "name": "solidr-program",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "scripts": {
+        "compile": "anchor-docker build && yarn run lint-fix",
+        "lint": "yarn run g:prettier",
+        "lint-fix": "yarn run g:prettier-fix",
+        "test": "anchor-docker test",
+        "compile-ts": "yarn run g:tsc -p tsconfig.build.json",
+        "compile-ts-watch": "yarn run g:tsc -w -p tsconfig.build.json",
+        "deploy-init": "anchor-docker deploy && ts-node migrations/deploy.ts"
+    },
+    "dependencies": {
+        "@coral-xyz/anchor": "^0.30.0",
+        "@solana/web3.js": "^1.93.3",
+        "js-sha256": "^0.11.0"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.16",
+        "@types/mocha": "^10.0.6",
+        "@types/shelljs": "^0",
+        "base-58": "^0.0.1",
+        "chai": "^4.4.1",
+        "mocha": "^10.4.0",
+        "shelljs": "^0.8.5",
+        "ts-mocha": "^10.0.0",
+        "ts-node": "^10.9.2"
+    }
+}

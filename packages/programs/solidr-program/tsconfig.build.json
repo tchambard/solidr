@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "outDir": "build",
+        "target": "es6",
+        "lib": [
+            "es6",
+            "dom"
+        ],
+        "module": "Node16",
+        "moduleResolution": "Node16",
+        "inlineSources": true,
+        "inlineSourceMap": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": false,
+        "useDefineForClassFields": false,
+    },
+    "include": [
+        "client/**/*"
+    ]
+}
