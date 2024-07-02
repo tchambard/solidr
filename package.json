@@ -1,0 +1,63 @@
+{
+    "name": "solana-training",
+    "version": "1.0.0",
+    "scripts": {
+        "lint-all": "yarn workspaces foreach -Apt run lint",
+        "lint-fix-all": "yarn workspaces foreach -Apt run lint-fix",
+        "clean-all": "yarn workspaces foreach -Apt run clean",
+        "compile-all": "yarn workspaces foreach -Apt run compile",
+        "clean-compile-all": "yarn workspaces foreach -Apt run clean-compile",
+        "test-all": "yarn workspaces foreach -Apt -j 1 run test",
+        "g:clean": "cd $INIT_CWD && rimraf",
+        "g:lint": "cd $INIT_CWD && yarn run g:lint",
+        "g:lint-fix": "cd $INIT_CWD && yarn run g:lint-fix",
+        "g:compile": "cd $INIT_CWD && echo $INIT_CWD && tsc -v && tsc --pretty",
+        "g:compile-watch": "cd $INIT_CWD && tsc --pretty -w",
+        "g:clean-compile": "cd $INIT_CWD && yarn run clean && yarn run compile",
+        "g:clean-lint-compile": "cd $INIT_CWD && yarn g:clean && yarn g:lint && yarn g:compile",
+        "g:depcheck": "cd $INIT_CWD && depcheck",
+        "g:mocha": "cd $INIT_CWD && mocha",
+        "g:tsc": "cd $INIT_CWD && tsc",
+        "g:ts-mocha": "cd $INIT_CWD && ts-mocha",
+        "g:prettier": "cd $INIT_CWD && prettier \"**/*.{js,jsx,ts,tsx}\" --check",
+        "g:prettier-fix": "cd $INIT_CWD && prettier \"**/*.{js,jsx,ts,tsx}\" -w",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.16",
+        "@types/chai-as-promised": "^7.1.8",
+        "@types/lodash": "^4.17.5",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.12.11",
+        "@yarnpkg/cli": "^4.2.2",
+        "@yarnpkg/core": "^4.0.5",
+        "chai": "^4.4.1",
+        "chai-as-promised": "^7.1.2",
+        "husky": "^9.0.11",
+        "nyc": "^15.1.0",
+        "prettier": "^3.2.5",
+        "rimraf": "^5.0.7",
+        "solana-test-validator-docker": "^1.0.18",
+        "typescript": "^5.4.5"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com/tchambard/solana-training.git"
+    },
+    "author": "teddy.chambard@gmail.com",
+    "license": "MIT",
+    "workspaces": [
+        "packages/programs/*",
+        "packages/fronts/*"
+    ],
+    "resolutions": {
+        "@types/react": "18.3.1",
+        "moment": "2.24.0",
+        "@trezor/connect-web": "9.2.2",
+        "@ledgerhq/errors": "6.16.3"
+    },
+    "overrides": {
+        "@ledgerhq/errors": "6.16.3"
+    },
+    "packageManager": "yarn@4.2.1"
+}

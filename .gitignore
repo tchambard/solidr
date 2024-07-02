@@ -1,0 +1,10 @@
+.idea
+build
+node_modules
+/coverage/
+yarn-error.log
+.yarn/*
+!.yarn/cache
+target
+.history
+.env
