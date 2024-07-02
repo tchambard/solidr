@@ -1,0 +1,58 @@
+{
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.tabSize": 4
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "editor.detectIndentation": false,
+    "search.exclude": {
+        "**/node_modules/**": true,
+        "**/build/**": true,
+        "**/dist/**": true,
+        "**/target/**": true
+    },
+    "gitlens.statusBar.enabled": false,
+    "gitlens.hovers.enabled": false,
+    "gitlens.blame.format": "${author|10} ${date}",
+    "gitlens.blame.highlight.locations": [
+        "gutter",
+        "line",
+        "overview"
+    ],
+    "gitlens.blame.avatars": false,
+    "gitlens.blame.compact": false,
+    "gitlens.defaultDateFormat": "DD/MM/YYYY",
+    "gitlens.defaultDateShortFormat": "DD/MM/YYYY",
+    "gitlens.blame.heatmap.enabled": false,
+    "gitlens.codeLens.enabled": false,
+    "files.autoSave": "afterDelay",
+    "workbench.iconTheme": "material-icon-theme",
+    "window.zoomLevel": 0,
+    "editor.minimap.enabled": false,
+    "editor.bracketPairColorization.enabled": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.fixAll": "explicit"
+    },
+    "javascript.preferences.quoteStyle": "single",
+    "typescript.preferences.quoteStyle": "single",
+    "explorer.confirmDelete": false,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "workbench.startupEditor": "welcomePage",
+    "workbench.statusBar.visible": true,
+    "files.trimTrailingWhitespace": true,
+    "rust-analyzer.linkedProjects": [
+        "Cargo.toml"
+    ],
+    "prettier.singleQuote": true,
+    "prettier.tabWidth": 4,
+    "prettier.trailingComma": "all",
+    "prettier.printWidth": 160,
+    "prettier.jsxSingleQuote": true
+}
