@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "packages/programs/solidr-program/programs/solidr-program"
+]
+resolver = "2"
