@@ -8,24 +8,24 @@ dotenv.config();
 
 const walletSecretKey = process.env.WALLET_SECRET_KEY;
 if (!walletSecretKey) {
-    throw new Error('Missing WALLET_SECRET_KEY in .env');
+	throw new Error('Missing WALLET_SECRET_KEY in .env');
 }
 const anchorProviderUrl = process.env.ANCHOR_PROVIDER_URL;
 if (!anchorProviderUrl) {
-    throw new Error('Missing ANCHOR_PROVIDER_URL in .env');
+	throw new Error('Missing ANCHOR_PROVIDER_URL in .env');
 }
 const secretKey = Uint8Array.from(JSON.parse(walletSecretKey));
 const walletKeypair = Keypair.fromSecretKey(secretKey);
 
 const deploy = async () => {
-    const connection = new Connection(anchorProviderUrl, 'confirmed');
-    const wallet = new Wallet(walletKeypair);
-    const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
+	const connection = new Connection(anchorProviderUrl, 'confirmed');
+	const wallet = new Wallet(walletKeypair);
+	const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
 
-    const program = new Program<Solidr>(idl as Solidr, provider);
-    const votingClient = new SolidrClient(program, { skipPreflight: false });
+	const program = new Program<Solidr>(idl as Solidr, provider);
+	const votingClient = new SolidrClient(program, { skipPreflight: false });
 
-    // TODO: call init instruction
+	// TODO: call init instruction
 };
 
 deploy().catch(console.error);
