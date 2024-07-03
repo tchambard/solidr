@@ -9,7 +9,13 @@
         "test": "anchor-docker test",
         "compile-ts": "yarn run g:tsc -p tsconfig.build.json",
         "compile-ts-watch": "yarn run g:tsc -w -p tsconfig.build.json",
-        "deploy-init": "anchor-docker deploy && ts-node migrations/deploy.ts"
+        "use-local": "solana-docker config set --url localhost --keypair /opt/.config/solana/id.json",
+        "deploy-local": "anchor-docker deploy --provider.cluster localnet",
+        "init-local": "ANCHOR_PROVIDER_URL=http://localhost:8899 ts-node migrations/initGlobal.ts",
+        "use-devnet": "solana-docker config set --url devnet --keypair /opt/.config/solana/id.json",
+        "deploy-devnet": "anchor-docker deploy --provider.cluster devnet",
+        "init-devnet": "ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ts-node migrations/initGlobal.ts",
+        "start-local-test-validator": "solana-docker-shell exec \"solana-test-validator --ledger /opt/.config/solana/.ledger -r --bind-address 0.0.0.0 --rpc-port 8899\""
     },
     "dependencies": {
         "@coral-xyz/anchor": "0.30.1",

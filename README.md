@@ -36,3 +36,24 @@ yarn run lint:all
 ```sh
 yarn run test:all
 ```
+
+### Useful scripts
+
+Inside `packages/programs/solidr-program`
+
+```sh
+yarn run use-local -> solana-docker config set --url localhost --keypair /opt/.config/solana/id.json
+yarn run deploy-local -> anchor-docker deploy --provider.cluster localhost
+yarn run init-local -> ANCHOR_PROVIDER_URL=http://localhost:8899 ts-node migrations/initGlobal.ts
+yarn run use-devnet -> solana-docker config set --url devnet --keypair /opt/.config/solana/id.json
+yarn run deploy-devnet -> anchor-docker deploy --provider.cluster devnet
+yarn run init-devnet -> ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ts-node migrations/initGlobal.ts
+yarn run start-local-test-validator -> solana-docker-shell exec "solana-test-validator --ledger /opt/.config/solana/.ledger --bind-address 0.0.0.0 --rpc-port 8899"
+```
+
+## Deployments
+
+### Devnet deployed program
+
+- program ID: 2xTttZsc5s65KyLmG1M6D5NpanUdYGj9SydbYnQFjnUP
+- init global tx: 2DSf2PoinWRgYuGZA4EamdyxBoGaYszhNHyvPR4UBBDxfVVB1VKrQEmpociW7EyDpVeKaTSriHK8PYXSqJMmASRq
