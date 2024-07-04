@@ -11,7 +11,7 @@ pub struct InitGlobalContextData<'info> {
         seeds = [GlobalAccount::SEED.as_ref()],
         bump,
     )]
-    pub global_account: Account<'info, GlobalAccount>,
+    pub global: Account<'info, GlobalAccount>,
 
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -20,7 +20,7 @@ pub struct InitGlobalContextData<'info> {
 }
 
 pub fn init_global(ctx: Context<InitGlobalContextData>) -> Result<()> {
-    let global_account = &mut ctx.accounts.global_account;
+    let global_account = &mut ctx.accounts.global;
     global_account.session_count = 0;
     Ok(())
 }
