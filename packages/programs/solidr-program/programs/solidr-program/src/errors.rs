@@ -6,4 +6,10 @@ pub enum SolidrError {
     SessionNameTooLong,
     #[msg("Session's description can't exceed 80 characters")]
     SessionDescriptionTooLong,
+    #[msg("Only session administrator is granted")]
+    ForbiddenAsNonAdmin,
+    #[msg("Session is closed")]
+    SessionClosed,
+    #[msg("Member already exists")]
+    MemberAlreadyExists,
 }
