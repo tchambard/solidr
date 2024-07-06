@@ -1,3 +1,5 @@
+[![Dev Continuous integration](https://github.com/tchambard/solidr/actions/workflows/ci.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci.yml)
+
 # Solid-R
 
 The decentralized application for simple sharing expenses.
