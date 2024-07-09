@@ -16,7 +16,6 @@ type InternalSession = {
     description: string;
     status: InternalSessionStatus;
     admin: PublicKey;
-    membersCount: number;
     expensesCount: number;
 };
 
@@ -31,8 +30,13 @@ export type Session = {
     description: string;
     status: SessionStatus;
     admin: PublicKey;
-    membersCount: number;
     expensesCount: number;
+};
+
+export type SessionMember = {
+    sessionId: BN;
+    name: string;
+    addr: PublicKey;
 };
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
@@ -88,6 +92,26 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async addSessionMember(payer: Wallet, sessionId: BN, addr: PublicKey, name: string): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, addr);
+
+            const tx = await this.program.methods
+                .addSessionMember(addr, name)
+                .accountsPartial({
+                    admin: payer.publicKey,
+                    session: sessionAccountPubkey,
+                    member: memberAccountAddress,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(payer, tx, {
+                memberAccountAddress,
+            });
+        });
+    }
+
     public async getNextSessionId(): Promise<BN> {
         return this.wrapFn(async () => {
             return (await this.program.account.globalAccount.fetch(this.globalAccountPubkey)).sessionCount;
@@ -101,9 +125,23 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async getSessionMember(memberAccountPubkey: PublicKey): Promise<SessionMember> {
+        return this.wrapFn(async () => {
+            return this.program.account.memberAccount.fetch(memberAccountPubkey);
+        });
+    }
+
     public findSessionAccountAddress(sessionId: BN): PublicKey {
         const [sessionAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('session'), sessionId.toBuffer('le', 8)], this.program.programId);
         return sessionAccountPubkey;
+    }
+
+    public findSessionMemberAccountAddress(sessionId: BN, memberPubkey: BN): PublicKey {
+        const [sessionMemberAccountPubkey] = PublicKey.findProgramAddressSync(
+            [Buffer.from('member'), sessionId.toBuffer('le', 8), memberPubkey.toBuffer()],
+            this.program.programId,
+        );
+        return sessionMemberAccountPubkey;
     }
 
     public mapSessionStatus(internalStatus: InternalSessionStatus): SessionStatus {

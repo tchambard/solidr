@@ -10,7 +10,6 @@ pub struct SessionAccount {
     #[max_len(80)]
     pub description: String, // 4 + 80
     pub admin: Pubkey,   // 32
-    pub members_count: u8, // 1
     pub expenses_count: u16, // 2
     pub status: SessionStatus, // 1
 }

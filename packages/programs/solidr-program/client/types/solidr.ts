@@ -14,11 +14,64 @@ export type Solidr = {
     };
     instructions: [
         {
+            name: 'addSessionMember';
+            docs: [
+                '* Session administrator can add members.\n     *\n     * @dev members can be added only by session administrator when session is opened\n     * An event MemberAdded is emitted\n     *\n     * @param addr The address of the member to add\n     * @param name The nickname of the member to add',
+            ];
+            discriminator: [182, 216, 208, 245, 11, 232, 215, 63];
+            accounts: [
+                {
+                    name: 'admin';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'member';
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: 'const';
+                                value: [109, 101, 109, 98, 101, 114];
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.session_id';
+                                account: 'sessionAccount';
+                            },
+                            {
+                                kind: 'arg';
+                                path: 'addr';
+                            },
+                        ];
+                    };
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'addr';
+                    type: 'pubkey';
+                },
+                {
+                    name: 'name';
+                    type: 'string';
+                },
+            ];
+        },
+        {
             name: 'initGlobal';
             discriminator: [44, 238, 77, 253, 76, 182, 192, 162];
             accounts: [
                 {
-                    name: 'globalAccount';
+                    name: 'global';
                     writable: true;
                     pda: {
                         seeds: [
@@ -97,11 +150,19 @@ export type Solidr = {
             discriminator: [129, 105, 124, 171, 189, 42, 108, 69];
         },
         {
+            name: 'memberAccount';
+            discriminator: [173, 25, 100, 97, 192, 177, 84, 139];
+        },
+        {
             name: 'sessionAccount';
             discriminator: [74, 34, 65, 133, 96, 163, 80, 69];
         },
     ];
     events: [
+        {
+            name: 'memberAdded';
+            discriminator: [198, 220, 228, 196, 92, 235, 240, 79];
+        },
         {
             name: 'sessionClosed';
             discriminator: [57, 237, 11, 243, 194, 34, 120, 27];
@@ -122,6 +183,21 @@ export type Solidr = {
             name: 'sessionDescriptionTooLong';
             msg: "Session's description can't exceed 80 characters";
         },
+        {
+            code: 6002;
+            name: 'forbiddenAsNonAdmin';
+            msg: 'Only session administrator is granted';
+        },
+        {
+            code: 6003;
+            name: 'sessionClosed';
+            msg: 'Session is closed';
+        },
+        {
+            code: 6004;
+            name: 'memberAlreadyExists';
+            msg: 'Member already exists';
+        },
     ];
     types: [
         {
@@ -132,6 +208,46 @@ export type Solidr = {
                     {
                         name: 'sessionCount';
                         type: 'u64';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'memberAccount';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'addr';
+                        type: 'pubkey';
+                    },
+                    {
+                        name: 'name';
+                        type: 'string';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'memberAdded';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'addr';
+                        type: 'pubkey';
+                    },
+                    {
+                        name: 'name';
+                        type: 'string';
                     },
                 ];
             };
@@ -156,10 +272,6 @@ export type Solidr = {
                     {
                         name: 'admin';
                         type: 'pubkey';
-                    },
-                    {
-                        name: 'membersCount';
-                        type: 'u8';
                     },
                     {
                         name: 'expensesCount';
