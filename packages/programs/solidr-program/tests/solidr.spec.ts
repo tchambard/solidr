@@ -33,13 +33,6 @@ describe('solidr', () => {
         assert.equal(globalAccount.sessionCount.toNumber(), 0);
     });
 
-    describe('> listUserSessions', () => {
-        it('> should return empty page', async () => {
-            const page = await client.listUserSessions(zoe.publicKey);
-            assert.isEmpty(page);
-        });
-    });
-
     describe('> openSession', () => {
         it('> should succeed when called with program deployer account', async () => {
             const expectedSessionId = 0;
@@ -116,6 +109,31 @@ describe('solidr', () => {
             });
         });
     });
+    describe('> closeSession', () => {
+        it('> should change session status and reset invitationHash', async () => {
+            const name = 'Session C';
+            const description = 'New session C';
+
+            // setup
+            const {
+                events: openEvents,
+                accounts: { sessionAccountPubkey },
+            } = await client.openSession(administrator, name, description, 'Admin');
+            const sid = openEvents.sessionOpened.sessionId;
+            const {
+                data: { token },
+            } = await client.generateSessionLink(administrator, sid);
+            let session = await client.getSession(sessionAccountPubkey);
+            assert.deepEqual(session.status, SessionStatus.Opened);
+            assert.sameOrderedMembers(session.invitationHash, [...hashToken(token)]);
+
+            // assert
+            const { events: closeEvents } = await client.closeSession(administrator, sid);
+            session = await client.getSession(sessionAccountPubkey);
+            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+            assert.equal(closeEvents.sessionClosed.sessionId.toNumber(), sid);
+        });
+    });
 
     context('> session is opened', () => {
         let sessionId: BN;
@@ -126,67 +144,6 @@ describe('solidr', () => {
             } = await client.openSession(alice, 'Weekend', 'A weekend with friends', 'Alice');
             const session = await client.getSession(sessionAccountPubkey);
             sessionId = session.sessionId;
-        });
-
-        describe('> listUserSessions', () => {
-            it('> should return owned and joined sessions with pagination', async () => {
-                // Alice create other session
-                const r1 = await client.openSession(alice, 'Z2', 'Alice session', 'Alice');
-                const s1 = r1.events.sessionOpened.sessionId;
-                // Zoe join alice's session
-                await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
-
-                // Zoe create multiple owned session
-                const zoeSessionIds: string[] = [];
-                for (let i = 1; i <= 5; i++) {
-                    const r = await client.openSession(zoe, `Z${i}`, `Zoe session ${i}`, 'Zoe');
-                    zoeSessionIds.push(r.events.sessionOpened.sessionId);
-                }
-
-                const page1 = await client.listUserSessions(zoe.publicKey, { page: 1, perPage: 5 });
-                assert.sameDeepMembers(page1, [
-                    {
-                        sessionId: s1,
-                        addr: zoe.publicKey,
-                        name: 'Zoééé',
-                        isAdmin: false,
-                    },
-                    {
-                        sessionId: zoeSessionIds[0],
-                        addr: zoe.publicKey,
-                        name: 'Zoe',
-                        isAdmin: true,
-                    },
-                    {
-                        sessionId: zoeSessionIds[1],
-                        addr: zoe.publicKey,
-                        name: 'Zoe',
-                        isAdmin: true,
-                    },
-                    {
-                        sessionId: zoeSessionIds[2],
-                        addr: zoe.publicKey,
-                        name: 'Zoe',
-                        isAdmin: true,
-                    },
-                    {
-                        sessionId: zoeSessionIds[3],
-                        addr: zoe.publicKey,
-                        name: 'Zoe',
-                        isAdmin: true,
-                    },
-                ]);
-
-                const page2 = await client.listUserSessions(zoe.publicKey, { page: 2, perPage: 5 });
-                assert.sameDeepMembers(page2, [
-                    {
-                        sessionId: zoeSessionIds[4],
-                        addr: zoe.publicKey,
-                        name: 'Zoe',
-                        isAdmin: true,
-                    },
-                ]);
-            });
         });
 
         describe('> add session member', () => {
@@ -287,6 +244,111 @@ describe('solidr', () => {
                     programId: program.programId.toString(),
                 });
             });
+        });
+
+        context('> session is closed', () => {
+            beforeEach(async () => {
+                await client.closeSession(alice, sessionId);
+            });
+
+            describe('> add session member', () => {
+                it('> should fail because session is closed', async () => {
+                    await assertError(async () => client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob'), {
+                        number: 6003,
+                        code: 'SessionClosed',
+                        message: `Session is closed`,
+                        programId: program.programId.toString(),
+                    });
+                });
+            });
+
+            describe('> create invitation link', () => {
+                it('> should fail because session is closed', async () => {
+                    await assertError(async () => client.generateSessionLink(alice, sessionId), {
+                        number: 6003,
+                        code: 'SessionClosed',
+                        message: `Session is closed`,
+                        programId: program.programId.toString(),
+                    });
+                });
+            });
+
+            describe('> close session', () => {
+                it('> should fail because session is closed', async () => {
+                    await assertError(async () => client.closeSession(alice, sessionId), {
+                        number: 6003,
+                        code: 'SessionClosed',
+                        message: `Session is closed`,
+                        programId: program.programId.toString(),
+                    });
+                });
+            });
+        });
+    });
+
+    describe('> listUserSessions', () => {
+        it('> should return empty page', async () => {
+            const page = await client.listUserSessions(zoe.publicKey);
+            assert.isEmpty(page);
+        });
+
+        it('> should return owned and joined sessions with pagination', async () => {
+            // Alice create other session
+            const r1 = await client.openSession(alice, 'Z2', 'Alice session', 'Alice');
+            const s1 = r1.events.sessionOpened.sessionId;
+            // Zoe join alice's session
+            await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
+
+            // Zoe create multiple owned session
+            const zoeSessionIds: string[] = [];
+            for (let i = 1; i <= 5; i++) {
+                const r = await client.openSession(zoe, `Z${i}`, `Zoe session ${i}`, 'Zoe');
+                zoeSessionIds.push(r.events.sessionOpened.sessionId);
+            }
+
+            const page1 = await client.listUserSessions(zoe.publicKey, { page: 1, perPage: 5 });
+            assert.sameDeepMembers(page1, [
+                {
+                    sessionId: s1,
+                    addr: zoe.publicKey,
+                    name: 'Zoééé',
+                    isAdmin: false,
+                },
+                {
+                    sessionId: zoeSessionIds[0],
+                    addr: zoe.publicKey,
+                    name: 'Zoe',
+                    isAdmin: true,
+                },
+                {
+                    sessionId: zoeSessionIds[1],
+                    addr: zoe.publicKey,
+                    name: 'Zoe',
+                    isAdmin: true,
+                },
+                {
+                    sessionId: zoeSessionIds[2],
+                    addr: zoe.publicKey,
+                    name: 'Zoe',
+                    isAdmin: true,
+                },
+                {
+                    sessionId: zoeSessionIds[3],
+                    addr: zoe.publicKey,
+                    name: 'Zoe',
+                    isAdmin: true,
+                },
+            ]);
+
+            const page2 = await client.listUserSessions(zoe.publicKey, { page: 2, perPage: 5 });
+            assert.sameDeepMembers(page2, [
+                {
+                    sessionId: zoeSessionIds[4],
+                    addr: zoe.publicKey,
+                    name: 'Zoe',
+                    isAdmin: true,
+                },
+            ]);
         });
     });
 });

@@ -38,6 +38,15 @@ pub mod solidr {
     }
 
     /**
+     * Administrator can close sessions he created.
+     *
+     * @dev An event SessionClosed is emitted
+     */
+    pub fn close_session(ctx: Context<CloseSessionContextData>) -> Result<()> {
+        sessions::close_session(ctx)
+    }
+
+    /**
      * Session's administrator can set invitation token hash
      *
      * @param hash The token hash to store in session
