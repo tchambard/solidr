@@ -67,6 +67,27 @@ export type Solidr = {
             ];
         },
         {
+            name: 'closeSession';
+            docs: ['* Administrator can close sessions he created.\n     *\n     * @dev An event SessionClosed is emitted'];
+            discriminator: [68, 114, 178, 140, 222, 38, 248, 211];
+            accounts: [
+                {
+                    name: 'admin';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [];
+        },
+        {
             name: 'initGlobal';
             discriminator: [44, 238, 77, 253, 76, 182, 192, 162];
             accounts: [

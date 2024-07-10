@@ -104,6 +104,24 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async closeSession(admin: Wallet, sessionId: BN): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+
+            const tx = await this.program.methods
+                .closeSession()
+                .accountsPartial({
+                    admin: admin.publicKey,
+                    session: sessionAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(admin, tx, {
+                sessionAccountPubkey,
+            });
+        });
+    }
+
     public async generateSessionLink(admin: Wallet, sessionId: string): Promise<ITransactionResult<{ token: string; hash: string }>> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
@@ -118,14 +136,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 })
                 .transaction();
 
-            return this.signAndSendTransaction(
-                admin,
-                tx,
-                {
-                    sessionAccountPubkey,
-                },
-                { token, hash },
-            );
+            return this.signAndSendTransaction(admin, tx, { sessionAccountPubkey }, { token, hash });
         });
     }
 

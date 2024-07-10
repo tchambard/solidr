@@ -76,6 +76,40 @@ pub fn open_session(
 }
 
 #[derive(Accounts)]
+pub struct CloseSessionContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn close_session(ctx: Context<CloseSessionContextData>) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+
+    session.status = SessionStatus::Closed;
+    session.invitation_hash = [0; 32];
+
+    emit!(SessionClosed {
+        session_id: session.session_id
+    });
+
+    Ok(())
+}
+
+#[derive(Accounts)]
 pub struct SetSessionHashContextData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
@@ -95,6 +129,11 @@ pub fn set_session_token_hash(
     require!(
         session.admin.key() == ctx.accounts.admin.key(),
         SolidrError::ForbiddenAsNonAdmin
+    );
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
     );
 
     session.invitation_hash = hash;
