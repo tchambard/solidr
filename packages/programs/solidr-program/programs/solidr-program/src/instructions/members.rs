@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use sha2::{Digest, Sha256};
 
 use crate::errors::*;
 use crate::state::members::*;
@@ -35,13 +36,73 @@ pub fn add_session_member(
     name: String,
 ) -> Result<()> {
     let session = &mut ctx.accounts.session;
-    let member = &mut ctx.accounts.member;
+    let member: &mut Account<MemberAccount> = &mut ctx.accounts.member;
 
     require!(
         session.admin.key() == ctx.accounts.admin.key(),
         SolidrError::ForbiddenAsNonAdmin
     );
 
+    add_member(addr, name, session, member)
+}
+
+#[derive(Accounts)]
+pub struct JoinSessionAsMemberContextData<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(
+        init,
+        payer = signer,
+        space = 8 + MemberAccount::INIT_SPACE,
+        seeds = [
+            MemberAccount::SEED_PREFIX,
+            session.session_id.to_le_bytes().as_ref(),
+            signer.key().as_ref(),
+        ],
+        bump
+    )]
+    pub member: Account<'info, MemberAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn join_session_as_member(
+    ctx: Context<JoinSessionAsMemberContextData>,
+    name: String,
+    token: String,
+) -> Result<()> {
+    let signer = &ctx.accounts.signer;
+
+    let session = &ctx.accounts.session;
+    let member: &mut Account<MemberAccount> = &mut ctx.accounts.member;
+
+    require!(
+        !session.invitation_hash.iter().all(|&x| x == 0),
+        SolidrError::MissingInvitationHash
+    );
+
+    let mut hasher = Sha256::new();
+    hasher.update(token.as_bytes());
+    let hashed_token = hasher.finalize();
+
+    require!(
+        hashed_token.as_slice() == session.invitation_hash.as_slice(),
+        SolidrError::InvalidInvitationHash
+    );
+
+    add_member(signer.key(), name, session, member)
+}
+
+fn add_member(
+    addr: Pubkey,
+    name: String,
+    session: &Account<SessionAccount>,
+    member: &mut Account<MemberAccount>,
+) -> Result<()> {
     require!(
         session.status == SessionStatus::Opened,
         SolidrError::SessionClosed

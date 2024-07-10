@@ -2,15 +2,14 @@ import * as _ from 'lodash';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
 import { assert } from 'chai';
-import { SessionStatus, Solidr, SolidrClient } from '../client';
+import { MISSING_INVITATION_HASH, SessionStatus, Solidr, SolidrClient } from '../client';
 import { assertError } from './test.helpers';
-import { BinaryLike } from 'crypto';
+import { hashToken } from '../client/TokenHelpers';
 
 describe('solidr', () => {
     const provider = anchor.AnchorProvider.env();
     anchor.setProvider(provider);
     const program = anchor.workspace.solidr as Program<Solidr>;
-    const connection = program.provider.connection;
 
     const administrator = provider.wallet as anchor.Wallet;
 
@@ -45,6 +44,7 @@ describe('solidr', () => {
             assert.equal(session.description, description);
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
+            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
 
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
@@ -67,6 +67,7 @@ describe('solidr', () => {
             assert.equal(session.description, description);
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
+            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
 
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
@@ -136,6 +137,61 @@ describe('solidr', () => {
                     number: 6004,
                     code: 'MemberAlreadyExists',
                     message: `Member already exists`,
+                    programId: program.programId.toString(),
+                });
+            });
+        });
+
+        describe('> create invitation link', () => {
+            it('> should fail with invalid sessionId', async () => {
+                await assertError(async () => client.generateSessionLink(alice, new BN(100)), {
+                    number: 3012,
+                    code: 'AccountNotInitialized',
+                    message: `The program expected this account to be already initialized`,
+                    programId: program.programId.toString(),
+                });
+            });
+
+            it('> should fail when called with non administrator', async () => {
+                await assertError(async () => client.generateSessionLink(bob, sessionId), {
+                    number: 6002,
+                    code: 'ForbiddenAsNonAdmin',
+                    message: `Only session administrator is granted`,
+                    programId: program.programId.toString(),
+                });
+            });
+
+            it('> should prevent anybody to join session without generated token', async () => {
+                await assertError(async () => client.joinSessionAsMember(bob, sessionId, 'Bob', 'bad_token'), {
+                    number: 6005,
+                    code: 'MissingInvitationHash',
+                    message: `Missing invitation link hash`,
+                    programId: program.programId.toString(),
+                });
+            });
+
+            it('> should set new invitation hash in session account', async () => {
+                const {
+                    data: { token },
+                    accounts: { sessionAccountPubkey },
+                } = await client.generateSessionLink(alice, sessionId);
+                const session = await client.getSession(sessionAccountPubkey);
+                assert.sameOrderedMembers(session.invitationHash, [...hashToken(token)]);
+            });
+
+            it('> should allow anybody to join session as member with correct token', async () => {
+                const {
+                    data: { token },
+                } = await client.generateSessionLink(alice, sessionId);
+                await client.joinSessionAsMember(bob, sessionId, 'Bob', token);
+            });
+
+            it('> should prevent anybody to join session with wrong token', async () => {
+                await client.generateSessionLink(alice, sessionId);
+                await assertError(async () => client.joinSessionAsMember(bob, sessionId, 'Bob', 'bad_token'), {
+                    number: 6006,
+                    code: 'InvalidInvitationHash',
+                    message: `Invalid invitation link hash`,
                     programId: program.programId.toString(),
                 });
             });
