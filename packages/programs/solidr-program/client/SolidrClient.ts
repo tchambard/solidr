@@ -1,9 +1,12 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
 import { PublicKey, SendOptions } from '@solana/web3.js';
+import { sha256 } from 'js-sha256';
+import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
 import { Solidr } from './types/solidr';
 import { generateSessionLinkTokenData } from './TokenHelpers';
+import { clone } from 'lodash';
 
 export type Global = {
     sessionCount: BN;
@@ -177,6 +180,25 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return this.wrapFn(async () => {
             const internal = await this.program.account.sessionAccount.fetch(sessionAccountPubkey);
             return this.mapSession(internal);
+        });
+    }
+
+    public async listUserSessions(memberAccountPubkey: PublicKey, paginationOptions?: { page: number; perPage: number }): Promise<SessionMember[]> {
+        return this.wrapFn(async () => {
+            const memberAccountDiscriminator = Buffer.from(sha256.digest('account:MemberAccount')).subarray(0, 8);
+            const accounts = await this.connection.getProgramAccounts(this.program.programId, {
+                dataSlice: { offset: 8, length: 8 },
+                filters: [
+                    { memcmp: { offset: 0, bytes: bs58.encode(memberAccountDiscriminator) } }, // Ensure it's a MemberAccount account.
+                    { memcmp: { offset: 8 + 8, bytes: memberAccountPubkey.toBase58() } },
+                ],
+            });
+            const addresses = accounts
+                .map(({ pubkey, account }) => ({ pubkey, sessionId: new BN(account.data, 'le').toNumber() }))
+                .sort((a, b) => a.sessionId - b.sessionId)
+                .map((account) => account.pubkey);
+
+            return this.getPage(this.program.account.memberAccount, addresses, paginationOptions?.page, paginationOptions?.perPage);
         });
     }
 

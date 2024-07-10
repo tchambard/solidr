@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(InitSpace)]
 pub struct MemberAccount {
-    pub session_id: u64, // 32
+    pub session_id: u64, // 8
     pub addr: Pubkey,    // 32
     #[max_len(40)]
     pub name: String, // 4 + 40
