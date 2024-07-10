@@ -60,8 +60,8 @@ pub fn open_session(
 
     session.session_id = global.session_count;
     session.admin = ctx.accounts.admin.key();
-    session.name = name.clone();
-    session.description = description.clone();
+    session.name.clone_from(&name);
+    session.description.clone_from(&description);
     session.status = SessionStatus::Opened;
     session.expenses_count = 0;
 

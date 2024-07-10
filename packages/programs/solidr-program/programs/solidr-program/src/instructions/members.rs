@@ -114,7 +114,7 @@ pub fn add_member(
     );
 
     member.session_id = session.session_id;
-    member.name = name.clone();
+    member.name.clone_from(&name);
     member.addr = addr.key();
     member.is_admin = addr.key() == session.admin.key();
 
