@@ -15,6 +15,7 @@ describe('solidr', () => {
 
     const alice = new Wallet(anchor.web3.Keypair.generate());
     const bob = new Wallet(anchor.web3.Keypair.generate());
+    const charlie = new Wallet(anchor.web3.Keypair.generate());
     // keep zoe for listing tests
     const zoe = new Wallet(anchor.web3.Keypair.generate());
 
@@ -24,6 +25,7 @@ describe('solidr', () => {
         await client.initGlobal(administrator);
         await client.airdrop(alice.publicKey, 100);
         await client.airdrop(bob.publicKey, 100);
+        await client.airdrop(charlie.publicKey, 100);
         await client.airdrop(zoe.publicKey, 100);
     });
 
@@ -293,7 +295,7 @@ describe('solidr', () => {
         it('> should return owned and joined sessions with pagination', async () => {
             // Alice create other session
             const r1 = await client.openSession(alice, 'A', 'Alice session', 'Alice');
-            const s1 = r1.events.sessionOpened.sessionId;
+            const s1 = new BN(r1.events.sessionOpened.sessionId);
             // Zoe join alice's session
             await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
 
@@ -301,7 +303,7 @@ describe('solidr', () => {
             const zoeSessionIds: string[] = [];
             for (let i = 1; i <= 5; i++) {
                 const r = await client.openSession(zoe, `Z${i}`, `Zoe session ${i}`, 'Zoe');
-                zoeSessionIds.push(r.events.sessionOpened.sessionId);
+                zoeSessionIds.push(new BN(r.events.sessionOpened.sessionId));
             }
 
             const page1 = await client.listUserSessions(zoe.publicKey, { page: 1, perPage: 5 });
@@ -365,6 +367,64 @@ describe('solidr', () => {
                     invitationHash: MISSING_INVITATION_HASH,
                 },
             ]);
+        });
+
+        describe('> listSessionMembers', () => {
+            it('> should return page with only admin member', async () => {
+                const r = await client.openSession(alice, 'A', 'Alice session', 'Alice');
+                const sessionId = new BN(r.events.sessionOpened.sessionId);
+                const page = await client.listSessionMembers(sessionId);
+                assert.sameDeepMembers(page, [
+                    {
+                        addr: alice.publicKey,
+                        isAdmin: true,
+                        name: 'Alice',
+                        sessionId,
+                    },
+                ]);
+            });
+
+            it('> should return paginated session members ordered alphabetically', async () => {
+                // Alice create a session
+                const r = await client.openSession(alice, 'A', 'Alice session', 'Alice');
+                const sessionId = new BN(r.events.sessionOpened.sessionId);
+                // Add members
+                await client.addSessionMember(alice, sessionId, zoe.publicKey, 'Zoé');
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+                await client.addSessionMember(alice, sessionId, charlie.publicKey, 'Charlie');
+
+                const page1 = await client.listSessionMembers(sessionId, { page: 1, perPage: 3 });
+                assert.sameDeepMembers(page1, [
+                    {
+                        addr: alice.publicKey,
+                        isAdmin: true,
+                        name: 'Alice',
+                        sessionId,
+                    },
+                    {
+                        addr: bob.publicKey,
+                        isAdmin: false,
+                        name: 'Bob',
+                        sessionId,
+                    },
+                    {
+                        addr: charlie.publicKey,
+                        isAdmin: false,
+                        name: 'Charlie',
+                        sessionId,
+                    },
+                ]);
+
+                const page2 = await client.listSessionMembers(sessionId, { page: 2, perPage: 3 });
+                assert.sameDeepMembers(page2, [
+                    {
+                        addr: zoe.publicKey,
+                        isAdmin: false,
+                        name: 'Zoé',
+                        sessionId,
+                    },
+                ]);
+            });
         });
     });
 });

@@ -6,7 +6,6 @@ import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
 import { Solidr } from './types/solidr';
 import { generateSessionLinkTokenData } from './TokenHelpers';
-import { clone } from 'lodash';
 
 export type Global = {
     sessionCount: BN;
@@ -221,6 +220,31 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public async getSessionMember(memberAccountPubkey: PublicKey): Promise<SessionMember> {
         return this.wrapFn(async () => {
             return this.program.account.memberAccount.fetch(memberAccountPubkey);
+        });
+    }
+
+    public async listSessionMembers(sessionId: BN, paginationOptions?: { page: number; perPage: number }): Promise<SessionMember[]> {
+        return this.wrapFn(async () => {
+            const memberAccountDiscriminator = Buffer.from(sha256.digest('account:MemberAccount')).subarray(0, 8);
+            const accounts = await this.connection.getProgramAccounts(this.program.programId, {
+                dataSlice: { offset: 8 + 8 + 32, length: 4 + 40 }, // name
+                filters: [
+                    { memcmp: { offset: 0, bytes: bs58.encode(memberAccountDiscriminator) } }, // Ensure it's a MemberAccount account.
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } },
+                ],
+            });
+            const addresses = accounts
+                .map(({ pubkey, account }) => {
+                    const len = account.data.subarray(0, 4).readUInt32LE(0);
+                    return {
+                        pubkey,
+                        name: account.data.subarray(4, 4 + len).toString('utf8'),
+                    };
+                })
+                .sort((a, b) => +(a.name > b.name) || -(a.name < b.name))
+                .map((account) => account.pubkey);
+
+            return this.getPage(this.program.account.memberAccount, addresses, paginationOptions?.page, paginationOptions?.perPage);
         });
     }
 
