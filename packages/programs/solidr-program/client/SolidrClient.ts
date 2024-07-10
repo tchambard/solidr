@@ -25,8 +25,8 @@ type InternalSession = {
 };
 
 export enum SessionStatus {
-    Opened,
-    Closed,
+    Opened = 'opened',
+    Closed = 'closed',
 }
 
 export type Session = {
@@ -36,7 +36,7 @@ export type Session = {
     status: SessionStatus;
     admin: PublicKey;
     expensesCount: number;
-    invitationHash: number[];
+    invitationHash: string;
 };
 
 export type SessionMember = {
@@ -46,7 +46,7 @@ export type SessionMember = {
     isAdmin: boolean;
 };
 
-export const MISSING_INVITATION_HASH = new Array(32).fill(0);
+export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
@@ -194,7 +194,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async listUserSessions(memberAccountPubkey: PublicKey, paginationOptions?: { page: number; perPage: number }): Promise<SessionMember[]> {
+    public async listUserSessions(memberAccountPubkey: PublicKey, paginationOptions?: { page: number; perPage: number }): Promise<Session[]> {
         return this.wrapFn(async () => {
             const memberAccountDiscriminator = Buffer.from(sha256.digest('account:MemberAccount')).subarray(0, 8);
             const accounts = await this.connection.getProgramAccounts(this.program.programId, {
@@ -205,23 +205,23 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 ],
             });
             const addresses = accounts
-                .map(({ pubkey, account }) => ({ pubkey, sessionId: new BN(account.data, 'le').toNumber() }))
-                .sort((a, b) => a.sessionId - b.sessionId)
-                .map((account) => account.pubkey);
+                .map(({ account }) => ({ sessionId: new BN(account.data, 'le') }))
+                .sort((a, b) => a.sessionId.toNumber() - b.sessionId.toNumber())
+                .map((account) => this.findSessionAccountAddress(account.sessionId));
 
-            return this.getPage(this.program.account.memberAccount, addresses, paginationOptions?.page, paginationOptions?.perPage);
-        });
-    }
-
-    public async getSessionMember(memberAccountPubkey: PublicKey): Promise<SessionMember> {
-        return this.wrapFn(async () => {
-            return this.program.account.memberAccount.fetch(memberAccountPubkey);
+            return (await this.getPage(this.program.account.sessionAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapSession);
         });
     }
 
     public findSessionAccountAddress(sessionId: BN): PublicKey {
         const [sessionAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('session'), sessionId.toBuffer('le', 8)], this.program.programId);
         return sessionAccountPubkey;
+    }
+
+    public async getSessionMember(memberAccountPubkey: PublicKey): Promise<SessionMember> {
+        return this.wrapFn(async () => {
+            return this.program.account.memberAccount.fetch(memberAccountPubkey);
+        });
     }
 
     public findSessionMemberAccountAddress(sessionId: BN, memberPubkey: BN): PublicKey {
@@ -242,6 +242,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return {
             ...internalSession,
             status: this.mapSessionStatus(internalSession.status),
+            invitationHash: internalSession.invitationHash.toString(),
         };
     };
 }

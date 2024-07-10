@@ -50,7 +50,7 @@ describe('solidr', () => {
             assert.equal(session.description, description);
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
-            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+            assert.equal(session.invitationHash, MISSING_INVITATION_HASH);
 
             const member = await client.getSessionMember(memberAccountAddress);
             assert.equal(member.name, 'Admin');
@@ -78,7 +78,7 @@ describe('solidr', () => {
             assert.equal(session.description, description);
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
-            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+            assert.equal(session.invitationHash, MISSING_INVITATION_HASH);
 
             const member = await client.getSessionMember(memberAccountAddress);
             assert.equal(member.name, 'Alice');
@@ -113,7 +113,6 @@ describe('solidr', () => {
         it('> should change session status and reset invitationHash', async () => {
             const name = 'Session C';
             const description = 'New session C';
-
             // setup
             const {
                 events: openEvents,
@@ -125,12 +124,11 @@ describe('solidr', () => {
             } = await client.generateSessionLink(administrator, sid);
             let session = await client.getSession(sessionAccountPubkey);
             assert.deepEqual(session.status, SessionStatus.Opened);
-            assert.sameOrderedMembers(session.invitationHash, [...hashToken(token)]);
-
+            assert.equal(session.invitationHash, [...hashToken(token)].toString());
             // assert
             const { events: closeEvents } = await client.closeSession(administrator, sid);
             session = await client.getSession(sessionAccountPubkey);
-            assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+            assert.equal(session.invitationHash, MISSING_INVITATION_HASH);
             assert.equal(closeEvents.sessionClosed.sessionId.toNumber(), sid);
         });
     });
@@ -218,7 +216,7 @@ describe('solidr', () => {
                     accounts: { sessionAccountPubkey },
                 } = await client.generateSessionLink(alice, sessionId);
                 const session = await client.getSession(sessionAccountPubkey);
-                assert.sameOrderedMembers(session.invitationHash, [...hashToken(token)]);
+                assert.equal(session.invitationHash, [...hashToken(token)].toString());
             });
 
             it('> should allow anybody to join session as member with correct token', async () => {
@@ -294,7 +292,7 @@ describe('solidr', () => {
 
         it('> should return owned and joined sessions with pagination', async () => {
             // Alice create other session
-            const r1 = await client.openSession(alice, 'Z2', 'Alice session', 'Alice');
+            const r1 = await client.openSession(alice, 'A', 'Alice session', 'Alice');
             const s1 = r1.events.sessionOpened.sessionId;
             // Zoe join alice's session
             await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
@@ -310,33 +308,48 @@ describe('solidr', () => {
             assert.sameDeepMembers(page1, [
                 {
                     sessionId: s1,
-                    addr: zoe.publicKey,
-                    name: 'Zoééé',
-                    isAdmin: false,
+                    name: 'A',
+                    description: 'Alice session',
+                    admin: alice.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
                 {
                     sessionId: zoeSessionIds[0],
-                    addr: zoe.publicKey,
-                    name: 'Zoe',
-                    isAdmin: true,
+                    name: 'Z1',
+                    description: `Zoe session 1`,
+                    admin: zoe.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
                 {
                     sessionId: zoeSessionIds[1],
-                    addr: zoe.publicKey,
-                    name: 'Zoe',
-                    isAdmin: true,
+                    name: 'Z2',
+                    description: `Zoe session 2`,
+                    admin: zoe.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
                 {
                     sessionId: zoeSessionIds[2],
-                    addr: zoe.publicKey,
-                    name: 'Zoe',
-                    isAdmin: true,
+                    name: 'Z3',
+                    description: `Zoe session 3`,
+                    admin: zoe.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
                 {
                     sessionId: zoeSessionIds[3],
-                    addr: zoe.publicKey,
-                    name: 'Zoe',
-                    isAdmin: true,
+                    name: 'Z4',
+                    description: `Zoe session 4`,
+                    admin: zoe.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
             ]);
 
@@ -344,9 +357,12 @@ describe('solidr', () => {
             assert.sameDeepMembers(page2, [
                 {
                     sessionId: zoeSessionIds[4],
-                    addr: zoe.publicKey,
-                    name: 'Zoe',
-                    isAdmin: true,
+                    name: 'Z5',
+                    description: `Zoe session 5`,
+                    admin: zoe.publicKey,
+                    expensesCount: 0,
+                    status: SessionStatus.Opened,
+                    invitationHash: MISSING_INVITATION_HASH,
                 },
             ]);
         });
