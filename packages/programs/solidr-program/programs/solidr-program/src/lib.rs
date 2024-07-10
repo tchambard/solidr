@@ -36,6 +36,18 @@ pub mod solidr {
     }
 
     /**
+     * Session's administrator can set invitation token hash
+     *
+     * @param hash The token hash to store in session
+     */
+    pub fn set_session_token_hash(
+        ctx: Context<SetSessionHashContextData>,
+        hash: [u8; 32],
+    ) -> Result<()> {
+        sessions::set_session_token_hash(ctx, hash)
+    }
+
+    /**
      * Session administrator can add members.
      *
      * @dev members can be added only by session administrator when session is opened
@@ -50,5 +62,21 @@ pub mod solidr {
         name: String,
     ) -> Result<()> {
         members::add_session_member(ctx, addr, name)
+    }
+
+    /**
+     * Anyone can join a session with correct information provided with a share link.
+     *
+     * An event MemberAdded is emitted
+     *
+     * @param name The nickname of the member to add
+     * @param token The token shared by session's administrator
+     */
+    pub fn join_session_as_member(
+        ctx: Context<JoinSessionAsMemberContextData>,
+        name: String,
+        token: String,
+    ) -> Result<()> {
+        members::join_session_as_member(ctx, name, token)
     }
 }

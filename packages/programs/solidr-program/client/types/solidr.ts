@@ -95,6 +95,59 @@ export type Solidr = {
             args: [];
         },
         {
+            name: 'joinSessionAsMember';
+            docs: [
+                "* Anyone can join a session with correct information provided with a share link.\n     *\n     * An event MemberAdded is emitted\n     *\n     * @param name The nickname of the member to add\n     * @param token The token shared by session's administrator",
+            ];
+            discriminator: [146, 154, 245, 82, 18, 241, 163, 206];
+            accounts: [
+                {
+                    name: 'signer';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'member';
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: 'const';
+                                value: [109, 101, 109, 98, 101, 114];
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.session_id';
+                                account: 'sessionAccount';
+                            },
+                            {
+                                kind: 'account';
+                                path: 'signer';
+                            },
+                        ];
+                    };
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'name';
+                    type: 'string';
+                },
+                {
+                    name: 'token';
+                    type: 'string';
+                },
+            ];
+        },
+        {
             name: 'openSession';
             docs: [
                 "* Anyone can open new session. Session's creator becomes session administrator.\n     *\n     * @dev An event SessionCreated is emitted\n     *\n     * @param name The session name\n     * @param description The session description",
@@ -140,6 +193,34 @@ export type Solidr = {
                 {
                     name: 'description';
                     type: 'string';
+                },
+            ];
+        },
+        {
+            name: 'setSessionTokenHash';
+            docs: ["* Session's administrator can set invitation token hash\n     *\n     * @param hash The token hash to store in session"];
+            discriminator: [162, 247, 90, 144, 182, 153, 184, 188];
+            accounts: [
+                {
+                    name: 'admin';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'hash';
+                    type: {
+                        array: ['u8', 32];
+                    };
                 },
             ];
         },
@@ -197,6 +278,16 @@ export type Solidr = {
             code: 6004;
             name: 'memberAlreadyExists';
             msg: 'Member already exists';
+        },
+        {
+            code: 6005;
+            name: 'missingInvitationHash';
+            msg: 'Missing invitation link hash';
+        },
+        {
+            code: 6006;
+            name: 'invalidInvitationHash';
+            msg: 'Invalid invitation link hash';
         },
     ];
     types: [
@@ -283,6 +374,12 @@ export type Solidr = {
                             defined: {
                                 name: 'sessionStatus';
                             };
+                        };
+                    },
+                    {
+                        name: 'invitationHash';
+                        type: {
+                            array: ['u8', 32];
                         };
                     },
                 ];

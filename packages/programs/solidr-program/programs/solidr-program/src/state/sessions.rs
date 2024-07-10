@@ -12,6 +12,7 @@ pub struct SessionAccount {
     pub admin: Pubkey,   // 32
     pub expenses_count: u16, // 2
     pub status: SessionStatus, // 1
+    pub invitation_hash: [u8; 32], // 32
 }
 
 impl SessionAccount {

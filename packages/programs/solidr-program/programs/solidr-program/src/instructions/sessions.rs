@@ -1,9 +1,9 @@
-use anchor_lang::prelude::*;
-
 use crate::{
     errors::*,
     state::{global::*, sessions::*},
 };
+
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct OpenSessionContextData<'info> {
@@ -54,5 +54,32 @@ pub fn open_session(
     emit!(SessionOpened {
         session_id: session.session_id
     });
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct SetSessionHashContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn set_session_token_hash(
+    ctx: Context<SetSessionHashContextData>,
+    hash: [u8; 32],
+) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+
+    session.invitation_hash = hash;
+
     Ok(())
 }

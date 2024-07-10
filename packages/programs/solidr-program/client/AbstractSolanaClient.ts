@@ -2,10 +2,11 @@ import { Address, BorshCoder, EventParser, Idl, IdlEvents, Program, Wallet } fro
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction, TransactionSignature } from '@solana/web3.js';
 import * as _ from 'lodash';
 
-export type ITransactionResult = {
+export type ITransactionResult<T = undefined> = {
     tx: string;
     accounts?: NodeJS.Dict<PublicKey>;
     events: any;
+    data: T;
 };
 
 export type ProgramInstructionWrapper<T = any> = (fn: () => Promise<T>) => Promise<T>;
@@ -23,7 +24,7 @@ export class AbstractSolanaClient<T extends Idl> {
         this.wrapFn = wrapFn || this._wrapFn.bind(this);
     }
 
-    public async signAndSendTransaction(payer: Wallet, tx: Transaction, accounts?: NodeJS.Dict<PublicKey>): Promise<ITransactionResult> {
+    public async signAndSendTransaction(payer: Wallet, tx: Transaction, accounts?: NodeJS.Dict<PublicKey>, data?: any): Promise<ITransactionResult> {
         const recentBlockhash = (await this.connection.getLatestBlockhash()).blockhash;
         tx.feePayer = payer.publicKey;
         tx.recentBlockhash = recentBlockhash;
@@ -36,6 +37,7 @@ export class AbstractSolanaClient<T extends Idl> {
             tx: sentTx,
             events: await this.getTxEvents(sentTx),
             accounts,
+            data,
         };
     }
 

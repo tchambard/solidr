@@ -3,6 +3,7 @@ import { PublicKey, SendOptions } from '@solana/web3.js';
 
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
 import { Solidr } from './types/solidr';
+import { generateSessionLinkTokenData } from './TokenHelpers';
 
 export type Global = {
     sessionCount: BN;
@@ -17,6 +18,7 @@ type InternalSession = {
     status: InternalSessionStatus;
     admin: PublicKey;
     expensesCount: number;
+    invitationHash: number[];
 };
 
 export enum SessionStatus {
@@ -31,6 +33,7 @@ export type Session = {
     status: SessionStatus;
     admin: PublicKey;
     expensesCount: number;
+    invitationHash: number[];
 };
 
 export type SessionMember = {
@@ -38,6 +41,8 @@ export type SessionMember = {
     name: string;
     addr: PublicKey;
 };
+
+export const MISSING_INVITATION_HASH = new Array(32).fill(0);
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
@@ -72,7 +77,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return globalAccountPubkey;
     }
 
-    public async openSession(payer: Wallet, name: string, description: string): Promise<ITransactionResult> {
+    public async openSession(admin: Wallet, name: string, description: string): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionId = (await this.getNextSessionId()) || new BN(0);
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
@@ -80,9 +85,54 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             const tx = await this.program.methods
                 .openSession(name, description)
                 .accountsPartial({
-                    admin: payer.publicKey,
+                    admin: admin.publicKey,
                     session: sessionAccountPubkey,
                     global: this.globalAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(admin, tx, {
+                sessionAccountPubkey,
+            });
+        });
+    }
+
+    public async generateSessionLink(admin: Wallet, sessionId: string): Promise<ITransactionResult<{ token: string; hash: string }>> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+
+            const { token, hash } = generateSessionLinkTokenData(sessionId, admin.payer);
+
+            const tx = await this.program.methods
+                .setSessionTokenHash([...hash])
+                .accountsPartial({
+                    admin: admin.publicKey,
+                    session: sessionAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(
+                admin,
+                tx,
+                {
+                    sessionAccountPubkey,
+                },
+                { token, hash },
+            );
+        });
+    }
+
+    public async joinSessionAsMember(payer: Wallet, sessionId: string, name: string, tokenBase64: string): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
+
+            const tx = await this.program.methods
+                .joinSessionAsMember(name, tokenBase64)
+                .accountsPartial({
+                    signer: payer.publicKey,
+                    session: sessionAccountPubkey,
+                    member: memberAccountAddress,
                 })
                 .transaction();
 

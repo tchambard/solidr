@@ -16,9 +16,9 @@ export async function assertError(fn: () => Promise<any>, expected: IExpectedErr
         assert.isArray(_err.logs);
         const err = AnchorError.parse(_err.logs);
         // console.log('err :>> ', err);
-        assert.strictEqual(err.error.errorMessage, expected.message);
-        assert.strictEqual(err.error.errorCode.code, expected.code);
         assert.strictEqual(err.error.errorCode.number, expected.number);
+        assert.strictEqual(err.error.errorCode.code, expected.code);
+        assert.strictEqual(err.error.errorMessage, expected.message);
         assert.strictEqual(err.program.toString(), expected.programId);
     }
 }

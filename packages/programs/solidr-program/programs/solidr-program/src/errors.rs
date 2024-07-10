@@ -12,4 +12,8 @@ pub enum SolidrError {
     SessionClosed,
     #[msg("Member already exists")]
     MemberAlreadyExists,
+    #[msg("Missing invitation link hash")]
+    MissingInvitationHash,
+    #[msg("Invalid invitation link hash")]
+    InvalidInvitationHash,
 }
