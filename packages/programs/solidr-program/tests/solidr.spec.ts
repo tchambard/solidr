@@ -30,14 +30,17 @@ describe('solidr', () => {
         assert.equal(globalAccount.sessionCount.toNumber(), 0);
     });
 
-    describe('> createVotingSession', () => {
+    describe('> openSession', () => {
         it('> should succeed when called with program deployer account', async () => {
             const expectedSessionId = 0;
             const name = 'Session A';
             const description = 'New session A';
 
-            const { accounts, events } = await client.openSession(administrator, name, description);
-            const session = await client.getSession(accounts.sessionAccountPubkey);
+            const {
+                accounts: { sessionAccountPubkey, memberAccountAddress },
+                events,
+            } = await client.openSession(administrator, name, description, 'Admin');
+            const session = await client.getSession(sessionAccountPubkey);
             assert.equal(session.sessionId.toNumber(), expectedSessionId);
             assert.equal(session.admin.toString(), administrator.payer.publicKey.toString());
             assert.equal(session.name, name);
@@ -45,6 +48,11 @@ describe('solidr', () => {
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
             assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+
+            const member = await client.getSessionMember(memberAccountAddress);
+            assert.equal(member.name, 'Admin');
+            assert.equal(member.addr.toString(), administrator.publicKey.toString());
+            assert.isTrue(member.isAdmin);
 
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
@@ -57,8 +65,8 @@ describe('solidr', () => {
 
             const {
                 events,
-                accounts: { sessionAccountPubkey },
-            } = await client.openSession(alice, name, description);
+                accounts: { sessionAccountPubkey, memberAccountAddress },
+            } = await client.openSession(alice, name, description, 'Alice');
 
             const session = await client.getSession(sessionAccountPubkey);
             assert.equal(session.sessionId.toNumber(), expectedSessionId);
@@ -69,13 +77,18 @@ describe('solidr', () => {
             assert.equal(session.expensesCount, 0);
             assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
 
+            const member = await client.getSessionMember(memberAccountAddress);
+            assert.equal(member.name, 'Alice');
+            assert.equal(member.addr.toString(), alice.publicKey.toString());
+            assert.isTrue(member.isAdmin);
+
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
         });
 
         it('> should fail when called with too long name', async () => {
             const longName = _.times(21, () => 'X').join('');
-            await assertError(async () => client.openSession(alice, longName, ''), {
+            await assertError(async () => client.openSession(alice, longName, '', 'Alice'), {
                 number: 6000,
                 code: 'SessionNameTooLong',
                 message: `Session's name can't exceed 20 characters`,
@@ -85,7 +98,7 @@ describe('solidr', () => {
 
         it('> should fail when called with too long description', async () => {
             const longDescription = _.times(81, () => 'X').join('');
-            await assertError(async () => client.openSession(alice, 'name', longDescription), {
+            await assertError(async () => client.openSession(alice, 'name', longDescription, 'Alice'), {
                 number: 6001,
                 code: 'SessionDescriptionTooLong',
                 message: `Session's description can't exceed 80 characters`,
@@ -94,13 +107,13 @@ describe('solidr', () => {
         });
     });
 
-    context('> Voting session is opened', () => {
+    context('> session is opened', () => {
         let sessionId: BN;
 
         beforeEach(async () => {
             const {
                 accounts: { sessionAccountPubkey },
-            } = await client.openSession(alice, 'Weekend', 'A weekend with friends');
+            } = await client.openSession(alice, 'Weekend', 'A weekend with friends', 'Alice');
             const session = await client.getSession(sessionAccountPubkey);
             sessionId = session.sessionId;
         });
@@ -115,6 +128,7 @@ describe('solidr', () => {
                 const member = await client.getSessionMember(memberAccountAddress);
                 assert.equal(member.name, 'Bob');
                 assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
 
                 assert.equal(memberAdded.sessionId.toNumber(), sessionId.toNumber());
                 assert.equal(memberAdded.name, 'Bob');
@@ -183,7 +197,14 @@ describe('solidr', () => {
                 const {
                     data: { token },
                 } = await client.generateSessionLink(alice, sessionId);
-                await client.joinSessionAsMember(bob, sessionId, 'Bob', token);
+                const {
+                    accounts: { memberAccountAddress },
+                } = await client.joinSessionAsMember(bob, sessionId, 'Bob', token);
+
+                const member = await client.getSessionMember(memberAccountAddress);
+                assert.equal(member.name, 'Bob');
+                assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
             });
 
             it('> should prevent anybody to join session with wrong token', async () => {

@@ -7,6 +7,7 @@ pub struct MemberAccount {
     pub addr: Pubkey,    // 32
     #[max_len(40)]
     pub name: String, // 4 + 40
+    pub is_admin: bool,  // 1
 }
 
 impl MemberAccount {
@@ -18,4 +19,5 @@ pub struct MemberAdded {
     pub session_id: u64,
     pub addr: Pubkey,
     pub name: String,
+    pub is_admin: bool,
 }

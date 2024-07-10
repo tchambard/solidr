@@ -40,6 +40,7 @@ export type SessionMember = {
     sessionId: BN;
     name: string;
     addr: PublicKey;
+    isAdmin: boolean;
 };
 
 export const MISSING_INVITATION_HASH = new Array(32).fill(0);
@@ -77,22 +78,25 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return globalAccountPubkey;
     }
 
-    public async openSession(admin: Wallet, name: string, description: string): Promise<ITransactionResult> {
+    public async openSession(admin: Wallet, name: string, description: string, memberName: string): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionId = (await this.getNextSessionId()) || new BN(0);
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, admin.publicKey);
 
             const tx = await this.program.methods
-                .openSession(name, description)
+                .openSession(name, description, memberName)
                 .accountsPartial({
+                    global: this.globalAccountPubkey,
                     admin: admin.publicKey,
                     session: sessionAccountPubkey,
-                    global: this.globalAccountPubkey,
+                    member: memberAccountAddress,
                 })
                 .transaction();
 
             return this.signAndSendTransaction(admin, tx, {
                 sessionAccountPubkey,
+                memberAccountAddress,
             });
         });
     }
@@ -138,6 +142,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
             return this.signAndSendTransaction(payer, tx, {
                 sessionAccountPubkey,
+                memberAccountAddress,
             });
         });
     }
