@@ -1,6 +1,7 @@
 use crate::{
     errors::*,
-    state::{global::*, sessions::*},
+    instructions::members::add_member,
+    state::{global::*, members::*, sessions::*},
 };
 
 use anchor_lang::prelude::*;
@@ -25,6 +26,19 @@ pub struct OpenSessionContextData<'info> {
     )]
     pub session: Account<'info, SessionAccount>,
 
+    #[account(
+        init_if_needed,
+        payer = admin,
+        space = 8 + MemberAccount::INIT_SPACE,
+        seeds = [
+            MemberAccount::SEED_PREFIX,
+            global.session_count.to_le_bytes().as_ref(),
+            admin.key().as_ref(),
+        ],
+        bump
+    )]
+    pub member: Account<'info, MemberAccount>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -32,9 +46,11 @@ pub fn open_session(
     ctx: Context<OpenSessionContextData>,
     name: String,
     description: String,
+    member_name: String,
 ) -> Result<()> {
     let global = &mut ctx.accounts.global;
     let session = &mut ctx.accounts.session;
+    let member = &mut ctx.accounts.member;
 
     require!(name.len() <= 20, SolidrError::SessionNameTooLong);
     require!(
@@ -44,12 +60,14 @@ pub fn open_session(
 
     session.session_id = global.session_count;
     session.admin = ctx.accounts.admin.key();
-    session.name = name.clone();
-    session.description = description.clone();
+    session.name.clone_from(&name);
+    session.description.clone_from(&description);
     session.status = SessionStatus::Opened;
     session.expenses_count = 0;
 
     global.session_count += 1;
+
+    let _ = add_member(ctx.accounts.admin.key(), member_name, session, member);
 
     emit!(SessionOpened {
         session_id: session.session_id

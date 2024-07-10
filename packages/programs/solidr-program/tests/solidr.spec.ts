@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
 import { assert } from 'chai';
-import { MISSING_INVITATION_HASH, SessionStatus, Solidr, SolidrClient } from '../client';
+import { MISSING_INVITATION_HASH, SessionMember, SessionStatus, Solidr, SolidrClient } from '../client';
 import { assertError } from './test.helpers';
 import { hashToken } from '../client/TokenHelpers';
 
@@ -15,6 +15,8 @@ describe('solidr', () => {
 
     const alice = new Wallet(anchor.web3.Keypair.generate());
     const bob = new Wallet(anchor.web3.Keypair.generate());
+    // keep zoe for listing tests
+    const zoe = new Wallet(anchor.web3.Keypair.generate());
 
     const client = new SolidrClient(program, { skipPreflight: false, preflightCommitment: 'confirmed' });
 
@@ -22,6 +24,7 @@ describe('solidr', () => {
         await client.initGlobal(administrator);
         await client.airdrop(alice.publicKey, 100);
         await client.airdrop(bob.publicKey, 100);
+        await client.airdrop(zoe.publicKey, 100);
     });
 
     it('> should set session counter to zero', async () => {
@@ -30,14 +33,24 @@ describe('solidr', () => {
         assert.equal(globalAccount.sessionCount.toNumber(), 0);
     });
 
-    describe('> createVotingSession', () => {
+    describe('> listUserSessions', () => {
+        it('> should return empty page', async () => {
+            const page = await client.listUserSessions(zoe.publicKey);
+            assert.isEmpty(page);
+        });
+    });
+
+    describe('> openSession', () => {
         it('> should succeed when called with program deployer account', async () => {
             const expectedSessionId = 0;
             const name = 'Session A';
             const description = 'New session A';
 
-            const { accounts, events } = await client.openSession(administrator, name, description);
-            const session = await client.getSession(accounts.sessionAccountPubkey);
+            const {
+                accounts: { sessionAccountPubkey, memberAccountAddress },
+                events,
+            } = await client.openSession(administrator, name, description, 'Admin');
+            const session = await client.getSession(sessionAccountPubkey);
             assert.equal(session.sessionId.toNumber(), expectedSessionId);
             assert.equal(session.admin.toString(), administrator.payer.publicKey.toString());
             assert.equal(session.name, name);
@@ -45,6 +58,11 @@ describe('solidr', () => {
             assert.deepEqual(session.status, SessionStatus.Opened);
             assert.equal(session.expensesCount, 0);
             assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
+
+            const member = await client.getSessionMember(memberAccountAddress);
+            assert.equal(member.name, 'Admin');
+            assert.equal(member.addr.toString(), administrator.publicKey.toString());
+            assert.isTrue(member.isAdmin);
 
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
@@ -57,8 +75,8 @@ describe('solidr', () => {
 
             const {
                 events,
-                accounts: { sessionAccountPubkey },
-            } = await client.openSession(alice, name, description);
+                accounts: { sessionAccountPubkey, memberAccountAddress },
+            } = await client.openSession(alice, name, description, 'Alice');
 
             const session = await client.getSession(sessionAccountPubkey);
             assert.equal(session.sessionId.toNumber(), expectedSessionId);
@@ -69,13 +87,18 @@ describe('solidr', () => {
             assert.equal(session.expensesCount, 0);
             assert.sameOrderedMembers(session.invitationHash, MISSING_INVITATION_HASH);
 
+            const member = await client.getSessionMember(memberAccountAddress);
+            assert.equal(member.name, 'Alice');
+            assert.equal(member.addr.toString(), alice.publicKey.toString());
+            assert.isTrue(member.isAdmin);
+
             const { sessionOpened } = events;
             assert.equal(sessionOpened.sessionId.toNumber(), expectedSessionId);
         });
 
         it('> should fail when called with too long name', async () => {
             const longName = _.times(21, () => 'X').join('');
-            await assertError(async () => client.openSession(alice, longName, ''), {
+            await assertError(async () => client.openSession(alice, longName, '', 'Alice'), {
                 number: 6000,
                 code: 'SessionNameTooLong',
                 message: `Session's name can't exceed 20 characters`,
@@ -85,7 +108,7 @@ describe('solidr', () => {
 
         it('> should fail when called with too long description', async () => {
             const longDescription = _.times(81, () => 'X').join('');
-            await assertError(async () => client.openSession(alice, 'name', longDescription), {
+            await assertError(async () => client.openSession(alice, 'name', longDescription, 'Alice'), {
                 number: 6001,
                 code: 'SessionDescriptionTooLong',
                 message: `Session's description can't exceed 80 characters`,
@@ -94,15 +117,76 @@ describe('solidr', () => {
         });
     });
 
-    context('> Voting session is opened', () => {
+    context('> session is opened', () => {
         let sessionId: BN;
 
         beforeEach(async () => {
             const {
                 accounts: { sessionAccountPubkey },
-            } = await client.openSession(alice, 'Weekend', 'A weekend with friends');
+            } = await client.openSession(alice, 'Weekend', 'A weekend with friends', 'Alice');
             const session = await client.getSession(sessionAccountPubkey);
             sessionId = session.sessionId;
+        });
+
+        describe('> listUserSessions', () => {
+            it('> should return owned and joined sessions with pagination', async () => {
+                // Alice create other session
+                const r1 = await client.openSession(alice, 'Z2', 'Alice session', 'Alice');
+                const s1 = r1.events.sessionOpened.sessionId;
+                // Zoe join alice's session
+                await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
+
+                // Zoe create multiple owned session
+                const zoeSessionIds: string[] = [];
+                for (let i = 1; i <= 5; i++) {
+                    const r = await client.openSession(zoe, `Z${i}`, `Zoe session ${i}`, 'Zoe');
+                    zoeSessionIds.push(r.events.sessionOpened.sessionId);
+                }
+
+                const page1 = await client.listUserSessions(zoe.publicKey, { page: 1, perPage: 5 });
+                assert.sameDeepMembers(page1, [
+                    {
+                        sessionId: s1,
+                        addr: zoe.publicKey,
+                        name: 'Zoééé',
+                        isAdmin: false,
+                    },
+                    {
+                        sessionId: zoeSessionIds[0],
+                        addr: zoe.publicKey,
+                        name: 'Zoe',
+                        isAdmin: true,
+                    },
+                    {
+                        sessionId: zoeSessionIds[1],
+                        addr: zoe.publicKey,
+                        name: 'Zoe',
+                        isAdmin: true,
+                    },
+                    {
+                        sessionId: zoeSessionIds[2],
+                        addr: zoe.publicKey,
+                        name: 'Zoe',
+                        isAdmin: true,
+                    },
+                    {
+                        sessionId: zoeSessionIds[3],
+                        addr: zoe.publicKey,
+                        name: 'Zoe',
+                        isAdmin: true,
+                    },
+                ]);
+
+                const page2 = await client.listUserSessions(zoe.publicKey, { page: 2, perPage: 5 });
+                assert.sameDeepMembers(page2, [
+                    {
+                        sessionId: zoeSessionIds[4],
+                        addr: zoe.publicKey,
+                        name: 'Zoe',
+                        isAdmin: true,
+                    },
+                ]);
+            });
         });
 
         describe('> add session member', () => {
@@ -115,6 +199,7 @@ describe('solidr', () => {
                 const member = await client.getSessionMember(memberAccountAddress);
                 assert.equal(member.name, 'Bob');
                 assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
 
                 assert.equal(memberAdded.sessionId.toNumber(), sessionId.toNumber());
                 assert.equal(memberAdded.name, 'Bob');
@@ -183,7 +268,14 @@ describe('solidr', () => {
                 const {
                     data: { token },
                 } = await client.generateSessionLink(alice, sessionId);
-                await client.joinSessionAsMember(bob, sessionId, 'Bob', token);
+                const {
+                    accounts: { memberAccountAddress },
+                } = await client.joinSessionAsMember(bob, sessionId, 'Bob', token);
+
+                const member = await client.getSessionMember(memberAccountAddress);
+                assert.equal(member.name, 'Bob');
+                assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
             });
 
             it('> should prevent anybody to join session with wrong token', async () => {

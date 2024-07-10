@@ -26,13 +26,15 @@ pub mod solidr {
      *
      * @param name The session name
      * @param description The session description
+     * @param member_name The administrator's name
      */
     pub fn open_session(
         ctx: Context<OpenSessionContextData>,
         name: String,
         description: String,
+        member_name: String,
     ) -> Result<()> {
-        sessions::open_session(ctx, name, description)
+        sessions::open_session(ctx, name, description, member_name)
     }
 
     /**

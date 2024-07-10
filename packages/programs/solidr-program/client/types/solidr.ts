@@ -150,7 +150,7 @@ export type Solidr = {
         {
             name: 'openSession';
             docs: [
-                "* Anyone can open new session. Session's creator becomes session administrator.\n     *\n     * @dev An event SessionCreated is emitted\n     *\n     * @param name The session name\n     * @param description The session description",
+                "* Anyone can open new session. Session's creator becomes session administrator.\n     *\n     * @dev An event SessionCreated is emitted\n     *\n     * @param name The session name\n     * @param description The session description\n     * @param member_name The administrator's name",
             ];
             discriminator: [130, 54, 124, 7, 236, 20, 104, 104];
             accounts: [
@@ -181,6 +181,27 @@ export type Solidr = {
                     };
                 },
                 {
+                    name: 'member';
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: 'const';
+                                value: [109, 101, 109, 98, 101, 114];
+                            },
+                            {
+                                kind: 'account';
+                                path: 'global.session_count';
+                                account: 'globalAccount';
+                            },
+                            {
+                                kind: 'account';
+                                path: 'admin';
+                            },
+                        ];
+                    };
+                },
+                {
                     name: 'systemProgram';
                     address: '11111111111111111111111111111111';
                 },
@@ -192,6 +213,10 @@ export type Solidr = {
                 },
                 {
                     name: 'description';
+                    type: 'string';
+                },
+                {
+                    name: 'memberName';
                     type: 'string';
                 },
             ];
@@ -320,6 +345,10 @@ export type Solidr = {
                         name: 'name';
                         type: 'string';
                     },
+                    {
+                        name: 'isAdmin';
+                        type: 'bool';
+                    },
                 ];
             };
         },
@@ -339,6 +368,10 @@ export type Solidr = {
                     {
                         name: 'name';
                         type: 'string';
+                    },
+                    {
+                        name: 'isAdmin';
+                        type: 'bool';
                     },
                 ];
             };
