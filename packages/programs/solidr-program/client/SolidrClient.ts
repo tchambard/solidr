@@ -11,9 +11,11 @@ export type Global = {
     sessionCount: BN;
 };
 
-type InternalSessionStatus = ({ closed?: never } & { opened: Record<string, never> }) | ({ opened?: never } & {
-    closed: Record<string, never>
-});
+type InternalSessionStatus =
+    | ({ closed?: never } & { opened: Record<string, never> })
+    | ({ opened?: never } & {
+          closed: Record<string, never>;
+      });
 
 type InternalSession = {
     sessionId: BN;
@@ -55,7 +57,7 @@ export type Expense = {
     member: PublicKey;
     date: BN;
     participants: Array<PublicKey>;
-}
+};
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
@@ -131,10 +133,15 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async generateSessionLink(admin: Wallet, sessionId: string): Promise<ITransactionResult<{
-        token: string;
-        hash: string
-    }>> {
+    public async generateSessionLink(
+        admin: Wallet,
+        sessionId: string,
+    ): Promise<
+        ITransactionResult<{
+            token: string;
+            hash: string;
+        }>
+    > {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
 
@@ -206,10 +213,13 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async listUserSessions(memberAccountPubkey: PublicKey, paginationOptions?: {
-        page: number;
-        perPage: number
-    }): Promise<Session[]> {
+    public async listUserSessions(
+        memberAccountPubkey: PublicKey,
+        paginationOptions?: {
+            page: number;
+            perPage: number;
+        },
+    ): Promise<Session[]> {
         return this.wrapFn(async () => {
             const memberAccountDiscriminator = Buffer.from(sha256.digest('account:MemberAccount')).subarray(0, 8);
             const accounts = await this.connection.getProgramAccounts(this.program.programId, {

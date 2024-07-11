@@ -429,7 +429,6 @@ describe('solidr', () => {
     });
 
     describe('> addNewExpense', () => {
-
         let sessionId: BN;
 
         beforeEach(async () => {
@@ -444,15 +443,18 @@ describe('solidr', () => {
         });
 
         it('> should fail when called with amount equals to 0', async () => {
-            await assertError(async () => {
-                const invalidAmount = 0;
-                return client.addExpense(administrator, sessionId, 'name', invalidAmount);
-            }, {
-                number: 6002,
-                code: 'AmountMustBeGreaterThanZero',
-                message: `Expense amount must be greater than zero`,
-                programId: program.programId.toString(),
-            });
+            await assertError(
+                async () => {
+                    const invalidAmount = 0;
+                    return client.addExpense(administrator, sessionId, 'name', invalidAmount);
+                },
+                {
+                    number: 6002,
+                    code: 'AmountMustBeGreaterThanZero',
+                    message: `Expense amount must be greater than zero`,
+                    programId: program.programId.toString(),
+                },
+            );
         });
 
         it('> should fail when called with to long name', async () => {
@@ -464,9 +466,7 @@ describe('solidr', () => {
             });
         });
 
-        it.skip('> should fail when called with empty participant', async () => {
-
-        });
+        it.skip('> should fail when called with empty participant', async () => {});
 
         it('> should succeed when called by administrator ', async () => {
             const expectedExpenseId = 0;
@@ -492,7 +492,6 @@ describe('solidr', () => {
         });
 
         it('> should failed when called by a non member', async () => {
-
             await assertError(async () => client.addExpense(alice, sessionId, 'name', 10), {
                 code: 'AccountNotInitialized',
                 message: `The program expected this account to be already initialized`,
