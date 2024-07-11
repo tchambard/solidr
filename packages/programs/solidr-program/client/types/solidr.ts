@@ -417,6 +417,10 @@ export type Solidr = {
                 kind: 'struct';
                 fields: [
                     {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
                         name: 'expenseId';
                         type: 'u16';
                     },

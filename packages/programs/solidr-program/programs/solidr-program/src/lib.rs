@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::instructions::{global::*, expenses::*, members::*, sessions::*};
+use crate::instructions::{expenses::*, global::*, members::*, sessions::*};
 
 pub mod errors;
 pub mod instructions;
@@ -10,9 +10,8 @@ declare_id!("2xTttZsc5s65KyLmG1M6D5NpanUdYGj9SydbYnQFjnUP");
 
 #[program]
 pub mod solidr {
-    use std::env::current_exe;
-    use instructions::*;
     use super::*;
+    use instructions::*;
 
     pub fn init_global(ctx: Context<InitGlobalContextData>) -> Result<()> {
         global::init_global(ctx)

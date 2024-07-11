@@ -11,11 +11,7 @@ export type Global = {
     sessionCount: BN;
 };
 
-type InternalSessionStatus =
-    | ({ closed?: never } & { opened: Record<string, never> })
-    | ({ opened?: never } & {
-          closed: Record<string, never>;
-      });
+type InternalSessionStatus = ({ closed?: never } & { opened: Record<string, never> }) | ({ opened?: never } & { closed: Record<string, never> });
 
 type InternalSession = {
     sessionId: BN;
@@ -56,7 +52,7 @@ export type Expense = {
     name: string;
     member: PublicKey;
     date: BN;
-    participants: Array<PublicKey>;
+    // participants: Array<PublicKey>;
 };
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
@@ -133,15 +129,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async generateSessionLink(
-        admin: Wallet,
-        sessionId: string,
-    ): Promise<
-        ITransactionResult<{
-            token: string;
-            hash: string;
-        }>
-    > {
+    public async generateSessionLink(admin: Wallet, sessionId: string): Promise<ITransactionResult<{ token: string; hash: string }>> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
 
@@ -313,6 +301,8 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .transaction();
 
             return this.signAndSendTransaction(member, tx, {
+                sessionAccountPubkey,
+                memberAccountAddress,
                 expenseAccountPubkey,
             });
         });

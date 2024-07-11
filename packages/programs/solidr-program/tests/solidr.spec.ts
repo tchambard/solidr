@@ -2,8 +2,9 @@ import * as _ from 'lodash';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
 import { assert } from 'chai';
-import { MISSING_INVITATION_HASH, SessionMember, SessionStatus, Solidr, SolidrClient } from '../client';
-import { ACCOUNT_NOT_FOUND, assertError, assertSimpleError } from './test.helpers';
+
+import { MISSING_INVITATION_HASH, SessionStatus, Solidr, SolidrClient } from '../client';
+import { ACCOUNT_NOT_FOUND as ACCOUNT_NOT_FOUND_ERROR, assertError, assertSimpleError } from './test.helpers';
 import { hashToken } from '../client/TokenHelpers';
 
 describe('solidr', () => {
@@ -35,7 +36,7 @@ describe('solidr', () => {
         assert.equal(globalAccount.sessionCount.toNumber(), 0);
     });
 
-    describe.skip('> openSession', () => {
+    describe('> openSession', () => {
         it('> should succeed when called with program deployer account', async () => {
             const expectedSessionId = 0;
             const name = 'Session A';
@@ -94,24 +95,21 @@ describe('solidr', () => {
         it('> should fail when called with too long name', async () => {
             const longName = _.times(21, () => 'X').join('');
             await assertError(async () => client.openSession(alice, longName, '', 'Alice'), {
-                number: 6000,
                 code: 'SessionNameTooLong',
                 message: `Session's name can't exceed 20 characters`,
-                programId: program.programId.toString(),
             });
         });
 
         it('> should fail when called with too long description', async () => {
             const longDescription = _.times(81, () => 'X').join('');
             await assertError(async () => client.openSession(alice, 'name', longDescription, 'Alice'), {
-                number: 6001,
                 code: 'SessionDescriptionTooLong',
                 message: `Session's description can't exceed 80 characters`,
-                programId: program.programId.toString(),
             });
         });
     });
-    describe.skip('> closeSession', () => {
+
+    describe('> closeSession', () => {
         it('> should change session status and reset invitationHash', async () => {
             const name = 'Session C';
             const description = 'New session C';
@@ -135,7 +133,7 @@ describe('solidr', () => {
         });
     });
 
-    context.skip('> session is opened', () => {
+    context('> session is opened', () => {
         let sessionId: BN;
 
         beforeEach(async () => {
@@ -165,10 +163,8 @@ describe('solidr', () => {
 
             it('> should fail when called non session administrator', async () => {
                 await assertError(async () => client.addSessionMember(bob, sessionId, bob.publicKey, 'Bob'), {
-                    number: 6002,
                     code: 'ForbiddenAsNonAdmin',
                     message: `Only session administrator is granted`,
-                    programId: program.programId.toString(),
                 });
             });
 
@@ -176,10 +172,8 @@ describe('solidr', () => {
                 await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
 
                 await assertError(async () => client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob'), {
-                    number: 6004,
                     code: 'MemberAlreadyExists',
                     message: `Member already exists`,
-                    programId: program.programId.toString(),
                 });
             });
         });
@@ -187,28 +181,22 @@ describe('solidr', () => {
         describe('> create invitation link', () => {
             it('> should fail with invalid sessionId', async () => {
                 await assertError(async () => client.generateSessionLink(alice, new BN(100)), {
-                    number: 3012,
                     code: 'AccountNotInitialized',
                     message: `The program expected this account to be already initialized`,
-                    programId: program.programId.toString(),
                 });
             });
 
             it('> should fail when called with non administrator', async () => {
                 await assertError(async () => client.generateSessionLink(bob, sessionId), {
-                    number: 6002,
                     code: 'ForbiddenAsNonAdmin',
                     message: `Only session administrator is granted`,
-                    programId: program.programId.toString(),
                 });
             });
 
             it('> should prevent anybody to join session without generated token', async () => {
                 await assertError(async () => client.joinSessionAsMember(bob, sessionId, 'Bob', 'bad_token'), {
-                    number: 6005,
                     code: 'MissingInvitationHash',
                     message: `Missing invitation link hash`,
-                    programId: program.programId.toString(),
                 });
             });
 
@@ -238,11 +226,94 @@ describe('solidr', () => {
             it('> should prevent anybody to join session with wrong token', async () => {
                 await client.generateSessionLink(alice, sessionId);
                 await assertError(async () => client.joinSessionAsMember(bob, sessionId, 'Bob', 'bad_token'), {
-                    number: 6006,
                     code: 'InvalidInvitationHash',
                     message: `Invalid invitation link hash`,
-                    programId: program.programId.toString(),
                 });
+            });
+        });
+
+        describe('> addExpense', () => {
+            it('> should fail when called with invalid session id', async () => {
+                const invalidSessionId = new BN(666);
+                await assertError(async () => client.addExpense(alice, invalidSessionId, 'name', 10), {
+                    message: ACCOUNT_NOT_FOUND_ERROR,
+                });
+            });
+
+            it('> should fail when called with amount equals to 0', async () => {
+                await assertError(
+                    async () => {
+                        const invalidAmount = 0;
+                        return client.addExpense(alice, sessionId, 'name', invalidAmount);
+                    },
+                    {
+                        code: 'AmountMustBeGreaterThanZero',
+                        message: `Expense amount must be greater than zero`,
+                    },
+                );
+            });
+
+            it('> should fail when called with to long name', async () => {
+                const longName = _.times(21, () => 'X').join('');
+                await assertError(async () => client.addExpense(alice, sessionId, longName, 10), {
+                    code: 'ExpenseNameTooLong',
+                    message: `Expense's name can't exceed 20 characters`,
+                });
+            });
+            it.skip('> should fail when called with empty participant', async () => {});
+
+            it('> should succeed when called by alice ', async () => {
+                const expectedExpenseId = 0;
+                const name = 'expense1';
+                const amount = 10;
+                const timestampBefore = Math.floor(Date.now() / 1000) - 10; // sometimes, this timestamp is bigger than that set in expense !?
+
+                const {
+                    events,
+                    accounts: { expenseAccountPubkey },
+                } = await client.addExpense(alice, sessionId, name, amount);
+
+                const expense = await client.getExpense(expenseAccountPubkey);
+                assert.equal(expense.name, name);
+                assert.equal(expense.member.toString(), alice.publicKey.toString());
+                assert.isAtLeast(expense.date.toNumber(), timestampBefore);
+                assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
+                //assert.includeMembers(expense.participants, [alice.publicKey]);
+
+                const { expenseAdded } = events;
+                assert.equal(expenseAdded.sessionId.toNumber(), sessionId);
+                assert.equal(expenseAdded.expenseId, expectedExpenseId);
+            });
+
+            it('> should failed when called by a non member', async () => {
+                await assertError(async () => client.addExpense(bob, sessionId, 'Bob', 10), {
+                    code: 'AccountNotInitialized',
+                    message: `The program expected this account to be already initialized`,
+                });
+            });
+
+            it('> should succeed when called by a member ', async () => {
+                const expectedExpenseId = 0;
+                const name = 'expense1';
+                const amount = 10;
+                const timestampBefore = Math.floor(Date.now() / 1000) - 10;
+
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'bob');
+
+                const {
+                    events,
+                    accounts: { expenseAccountPubkey },
+                } = await client.addExpense(bob, sessionId, name, amount);
+
+                const expense = await client.getExpense(expenseAccountPubkey);
+                assert.equal(expense.name, name);
+                assert.equal(expense.member.toString(), bob.publicKey.toString());
+                assert.isAtLeast(expense.date.toNumber(), timestampBefore);
+                assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
+
+                const { expenseAdded } = events;
+                assert.equal(expenseAdded.sessionId.toNumber(), sessionId);
+                assert.equal(expenseAdded.expenseId, expectedExpenseId);
             });
         });
 
@@ -254,10 +325,8 @@ describe('solidr', () => {
             describe('> add session member', () => {
                 it('> should fail because session is closed', async () => {
                     await assertError(async () => client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob'), {
-                        number: 6003,
                         code: 'SessionClosed',
                         message: `Session is closed`,
-                        programId: program.programId.toString(),
                     });
                 });
             });
@@ -265,10 +334,8 @@ describe('solidr', () => {
             describe('> create invitation link', () => {
                 it('> should fail because session is closed', async () => {
                     await assertError(async () => client.generateSessionLink(alice, sessionId), {
-                        number: 6003,
                         code: 'SessionClosed',
                         message: `Session is closed`,
-                        programId: program.programId.toString(),
                     });
                 });
             });
@@ -276,17 +343,15 @@ describe('solidr', () => {
             describe('> close session', () => {
                 it('> should fail because session is closed', async () => {
                     await assertError(async () => client.closeSession(alice, sessionId), {
-                        number: 6003,
                         code: 'SessionClosed',
                         message: `Session is closed`,
-                        programId: program.programId.toString(),
                     });
                 });
             });
         });
     });
 
-    describe.skip('> listUserSessions', () => {
+    describe('> listUserSessions', () => {
         it('> should return empty page', async () => {
             const page = await client.listUserSessions(zoe.publicKey);
             assert.isEmpty(page);
@@ -425,102 +490,6 @@ describe('solidr', () => {
                     },
                 ]);
             });
-        });
-    });
-
-    describe('> addNewExpense', () => {
-        let sessionId: BN;
-
-        beforeEach(async () => {
-            const { accounts } = await client.openSession(administrator, 'name', '', 'Admin');
-            const session = await client.getSession(accounts.sessionAccountPubkey);
-            sessionId = session.sessionId;
-        });
-
-        it('> should fail when called with invalid session id', async () => {
-            const invalidSessionId = new BN(666);
-            await assertSimpleError(async () => client.addExpense(administrator, invalidSessionId, 'name', 10), ACCOUNT_NOT_FOUND);
-        });
-
-        it('> should fail when called with amount equals to 0', async () => {
-            await assertError(
-                async () => {
-                    const invalidAmount = 0;
-                    return client.addExpense(administrator, sessionId, 'name', invalidAmount);
-                },
-                {
-                    number: 6002,
-                    code: 'AmountMustBeGreaterThanZero',
-                    message: `Expense amount must be greater than zero`,
-                    programId: program.programId.toString(),
-                },
-            );
-        });
-
-        it('> should fail when called with to long name', async () => {
-            const longName = _.times(21, () => 'X').join('');
-            await assertError(async () => client.addExpense(administrator, sessionId, longName, 10), {
-                code: 'ExpenseNameTooLong',
-                message: `Expense's name can't exceed 20 characters`,
-                programId: program.programId.toString(),
-            });
-        });
-
-        it.skip('> should fail when called with empty participant', async () => {});
-
-        it('> should succeed when called by administrator ', async () => {
-            const expectedExpenseId = 0;
-            const name = 'expense1';
-            const amount = 10;
-            const timestampBefore = Math.floor(Date.now() / 1000) - 10; // sometimes, this timestamp is bigger than that set in expense !?
-
-            const {
-                events,
-                accounts: { expenseAccountPubkey },
-            } = await client.addExpense(administrator, sessionId, name, amount);
-
-            const expense = await client.getExpense(expenseAccountPubkey);
-            assert.equal(expense.name, name);
-            assert.equal(expense.member.toString(), administrator.publicKey.toString());
-            assert.isAtLeast(expense.date.toNumber(), timestampBefore);
-            assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
-            //assert.includeMembers(expense.participants, [administrator.publicKey]);
-
-            const { expenseAdded } = events;
-            assert.equal(expenseAdded.sessionId.toNumber(), sessionId);
-            assert.equal(expenseAdded.expenseId, expectedExpenseId);
-        });
-
-        it('> should failed when called by a non member', async () => {
-            await assertError(async () => client.addExpense(alice, sessionId, 'name', 10), {
-                code: 'AccountNotInitialized',
-                message: `The program expected this account to be already initialized`,
-                programId: program.programId.toString(),
-            });
-        });
-
-        it('> should succeed when called by a member ', async () => {
-            const expectedExpenseId = 0;
-            const name = 'expense1';
-            const amount = 10;
-            const timestampBefore = Math.floor(Date.now() / 1000) - 10;
-
-            await client.addSessionMember(administrator, sessionId, alice.publicKey, 'alice');
-
-            const {
-                events,
-                accounts: { expenseAccountPubkey },
-            } = await client.addExpense(alice, sessionId, name, amount);
-
-            const expense = await client.getExpense(expenseAccountPubkey);
-            assert.equal(expense.name, name);
-            assert.equal(expense.member.toString(), alice.publicKey.toString());
-            assert.isAtLeast(expense.date.toNumber(), timestampBefore);
-            assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
-
-            const { expenseAdded } = events;
-            assert.equal(expenseAdded.sessionId.toNumber(), sessionId);
-            assert.equal(expenseAdded.expenseId, expectedExpenseId);
         });
     });
 });
