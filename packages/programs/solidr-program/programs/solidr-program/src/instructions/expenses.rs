@@ -38,6 +38,10 @@ pub fn add_expense(ctx: Context<AddExpenseContextData>, name: String, amount: u1
     let expense = &mut ctx.accounts.expense;
     //let participants = &mut ctx.accounts.participants;
 
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
     require!(amount > 0, SolidrError::AmountMustBeGreaterThanZero);
     require!(name.len() <= 20, SolidrError::ExpenseNameTooLong);
 

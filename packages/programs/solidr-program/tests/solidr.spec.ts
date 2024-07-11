@@ -260,6 +260,7 @@ describe('solidr', () => {
                     message: `Expense's name can't exceed 20 characters`,
                 });
             });
+
             it.skip('> should fail when called with empty participant', async () => {});
 
             it('> should succeed when called by alice ', async () => {
@@ -343,6 +344,15 @@ describe('solidr', () => {
             describe('> close session', () => {
                 it('> should fail because session is closed', async () => {
                     await assertError(async () => client.closeSession(alice, sessionId), {
+                        code: 'SessionClosed',
+                        message: `Session is closed`,
+                    });
+                });
+            });
+
+            describe('> add expense', () => {
+                it('> should fail when called with to long name', async () => {
+                    await assertError(async () => client.addExpense(alice, sessionId, 'New expense', 10), {
                         code: 'SessionClosed',
                         message: `Session is closed`,
                     });
