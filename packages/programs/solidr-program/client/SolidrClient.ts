@@ -47,6 +47,14 @@ export type SessionMember = {
 
 export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
 
+export type Expense = {
+    expenseId: BN;
+    name: string;
+    member: PublicKey;
+    date: BN;
+    // participants: Array<PublicKey>;
+};
+
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
 
@@ -193,7 +201,13 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async listUserSessions(memberAccountPubkey: PublicKey, paginationOptions?: { page: number; perPage: number }): Promise<Session[]> {
+    public async listUserSessions(
+        memberAccountPubkey: PublicKey,
+        paginationOptions?: {
+            page: number;
+            perPage: number;
+        },
+    ): Promise<Session[]> {
         return this.wrapFn(async () => {
             const memberAccountDiscriminator = Buffer.from(sha256.digest('account:MemberAccount')).subarray(0, 8);
             const accounts = await this.connection.getProgramAccounts(this.program.programId, {
@@ -269,4 +283,45 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             invitationHash: internalSession.invitationHash.toString(),
         };
     };
+
+    public async addExpense(member: Wallet, sessionId: bigint, name: any, amount: any) {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
+            const expenseId = await this.getNextExpenseId(sessionAccountPubkey);
+            const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+            const tx = await this.program.methods
+                .addExpense(name, amount)
+                .accountsPartial({
+                    authority: member.publicKey,
+                    session: sessionAccountPubkey,
+                    member: memberAccountAddress,
+                    expense: expenseAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(member, tx, {
+                sessionAccountPubkey,
+                memberAccountAddress,
+                expenseAccountPubkey,
+            });
+        });
+    }
+
+    public async getNextExpenseId(sessionAccountPubkey): Promise<BN> {
+        return this.wrapFn(async () => {
+            return (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).expensesCount || new BN(0);
+        });
+    }
+
+    public findExpenseAccountAddress(sessionId: BN, expenseId: BN): PublicKey {
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toBuffer('le', 8), expenseId.toBuffer('le', 2)], this.program.programId);
+        return expenseAccountPubkey;
+    }
+
+    public async getExpense(expenseAccountPubkey: PublicKey): Promise<Expense> {
+        return this.wrapFn(async () => {
+            return await this.program.account.expenseAccount.fetch(expenseAccountPubkey);
+        });
+    }
 }
