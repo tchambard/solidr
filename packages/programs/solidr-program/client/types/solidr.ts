@@ -14,6 +14,62 @@ export type Solidr = {
     };
     instructions: [
         {
+            name: 'addExpense';
+            docs: ['* Adds a new expense to the session.\n     *\n     * @param name The name of the expense\n     * @param amount The amount of the expense'];
+            discriminator: [171, 23, 8, 240, 62, 31, 254, 144];
+            accounts: [
+                {
+                    name: 'authority';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'member';
+                    writable: true;
+                },
+                {
+                    name: 'expense';
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: 'const';
+                                value: [101, 120, 112, 101, 110, 115, 101];
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.session_id';
+                                account: 'sessionAccount';
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.expenses_count';
+                                account: 'sessionAccount';
+                            },
+                        ];
+                    };
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'name';
+                    type: 'string';
+                },
+                {
+                    name: 'amount';
+                    type: 'u16';
+                },
+            ];
+        },
+        {
             name: 'addSessionMember';
             docs: [
                 '* Session administrator can add members.\n     *\n     * @dev members can be added only by session administrator when session is opened\n     * An event MemberAdded is emitted\n     *\n     * @param addr The address of the member to add\n     * @param name The nickname of the member to add',
@@ -273,6 +329,10 @@ export type Solidr = {
     ];
     accounts: [
         {
+            name: 'expenseAccount';
+            discriminator: [35, 2, 83, 124, 115, 159, 63, 133];
+        },
+        {
             name: 'globalAccount';
             discriminator: [129, 105, 124, 171, 189, 42, 108, 69];
         },
@@ -286,6 +346,10 @@ export type Solidr = {
         },
     ];
     events: [
+        {
+            name: 'expenseAdded';
+            discriminator: [161, 49, 47, 2, 245, 167, 224, 67];
+        },
         {
             name: 'memberAdded';
             discriminator: [198, 220, 228, 196, 92, 235, 240, 79];
@@ -335,8 +399,72 @@ export type Solidr = {
             name: 'invalidInvitationHash';
             msg: 'Invalid invitation link hash';
         },
+        {
+            code: 6007;
+            name: 'amountMustBeGreaterThanZero';
+            msg: 'Expense amount must be greater than zero';
+        },
+        {
+            code: 6008;
+            name: 'expenseNameTooLong';
+            msg: "Expense's name can't exceed 20 characters";
+        },
     ];
     types: [
+        {
+            name: 'expenseAccount';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'name';
+                        type: 'string';
+                    },
+                    {
+                        name: 'date';
+                        type: 'i64';
+                    },
+                    {
+                        name: 'member';
+                        type: 'pubkey';
+                    },
+                    {
+                        name: 'amount';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'participants';
+                        type: {
+                            vec: 'pubkey';
+                        };
+                    },
+                ];
+            };
+        },
+        {
+            name: 'expenseAdded';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
+                    },
+                ];
+            };
+        },
         {
             name: 'globalAccount';
             type: {
