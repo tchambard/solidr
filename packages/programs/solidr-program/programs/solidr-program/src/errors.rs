@@ -16,4 +16,8 @@ pub enum SolidrError {
     MissingInvitationHash,
     #[msg("Invalid invitation link hash")]
     InvalidInvitationHash,
+    #[msg("Expense amount must be greater than zero")]
+    AmountMustBeGreaterThanZero,
+    #[msg("Expense's name can't exceed 20 characters")]
+    ExpenseNameTooLong,
 }

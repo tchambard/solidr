@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::instructions::{global::*, members::*, sessions::*};
+use crate::instructions::{global::*, expenses::*, members::*, sessions::*};
 
 pub mod errors;
 pub mod instructions;
@@ -10,9 +10,8 @@ declare_id!("2xTttZsc5s65KyLmG1M6D5NpanUdYGj9SydbYnQFjnUP");
 
 #[program]
 pub mod solidr {
-
+    use std::env::current_exe;
     use instructions::*;
-
     use super::*;
 
     pub fn init_global(ctx: Context<InitGlobalContextData>) -> Result<()> {
@@ -89,5 +88,19 @@ pub mod solidr {
         token: String,
     ) -> Result<()> {
         members::join_session_as_member(ctx, name, token)
+    }
+
+    /**
+     * Adds a new expense to the session.
+     *
+     * @param name The name of the expense
+     * @param amount The amount of the expense
+     */
+    pub fn add_expense(
+        ctx: Context<AddExpenseContextData>,
+        name: String,
+        amount: u16,
+    ) -> Result<()> {
+        expenses::add_expense(ctx, name, amount)
     }
 }
