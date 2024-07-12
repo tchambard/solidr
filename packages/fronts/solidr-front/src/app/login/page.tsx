@@ -37,10 +37,9 @@ export default function LoginPage() {
         </div>
         <h2 className='text-2xl font-semibold mb-2'>Sign in</h2>
         <p className='text-center mb-4'>
-          Save your tricounts to your profile, use Tricount on multiple devices
-          and get notifications.
+          Create your profile, start splitting expenses, we will handle the rest.
         </p>
-        <ConnectionProvider endpoint='https://api.mainnet-beta.solana.com'>
+        <ConnectionProvider endpoint='https://api.devnet.solana.com'>
           <WalletProvider wallets={wallets} autoConnect>
             <WalletModalProvider>
               <WalletMultiButton className='w-full bg-white text-black py-2 px-4 rounded mb-2' />
