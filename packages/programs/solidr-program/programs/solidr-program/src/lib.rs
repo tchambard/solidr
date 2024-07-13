@@ -99,7 +99,20 @@ pub mod solidr {
         ctx: Context<AddExpenseContextData>,
         name: String,
         amount: u16,
+        participants: Vec<Pubkey>,
     ) -> Result<()> {
-        expenses::add_expense(ctx, name, amount)
+        expenses::add_expense(ctx, name, amount, participants)
+    }
+
+    /**
+     * Adds a new participant to expense.
+     *
+     * @param participants The public keys of the participants
+     */
+    pub fn add_expense_participants(
+        ctx: Context<AddExpenseParticipantContextData>,
+        participants: Vec<Pubkey>,
+    ) -> Result<()> {
+        expenses::add_expense_participants(ctx, participants)
     }
 }

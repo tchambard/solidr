@@ -9,7 +9,7 @@ pub struct ExpenseAccount {
     #[max_len(20)]
     pub name: String, // 4 + 20
     pub date: i64,       // 8
-    pub member: Pubkey,  // 32
+    pub owner: Pubkey,   // 32
     pub amount: u16,     // 2
     #[max_len(10)]
     pub participants: Vec<Pubkey>, // ?
@@ -24,4 +24,11 @@ impl ExpenseAccount {
 pub struct ExpenseAdded {
     pub session_id: u64,
     pub expense_id: u16,
+}
+
+#[event]
+pub struct ExpenseParticipantAdded {
+    pub session_id: u64,
+    pub expense_id: u16,
+    pub member_pubkey: Pubkey,
 }

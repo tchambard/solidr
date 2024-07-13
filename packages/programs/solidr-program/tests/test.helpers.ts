@@ -2,6 +2,7 @@ import { AnchorError } from '@coral-xyz/anchor';
 import { assert } from 'chai';
 
 export const ACCOUNT_NOT_FOUND = `Error: Account does not exist or has no data`;
+export const ACCOUNT_NOT_INITIALIZED = `The program expected this account to be already initialized`;
 
 export interface IExpectedError {
     code?: string;

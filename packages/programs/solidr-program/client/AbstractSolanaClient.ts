@@ -100,9 +100,10 @@ export class AbstractSolanaClient<T extends Idl> {
                 // console.log('tx meta :>> ', txDetails?.meta);
                 const events = eventParser.parseLogs(txDetails?.meta?.logMessages || []);
                 // console.log('events :>> ', events.next());
-                const result: NodeJS.Dict<object> = {};
+                const result: NodeJS.Dict<object[]> = {};
                 for (let event of events) {
-                    result[event.name] = event.data;
+                    result[event.name] = result[event.name] || [];
+                    result[event.name].push(event.data);
                 }
                 return result;
             } catch (e) {

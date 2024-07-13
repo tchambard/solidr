@@ -1,7 +1,8 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { PublicKey, SendOptions } from '@solana/web3.js';
+import { AccountMeta, PublicKey, SendOptions, Transaction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
+import * as _ from 'lodash';
 
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
 import { Solidr } from './types/solidr';
@@ -45,15 +46,15 @@ export type SessionMember = {
     isAdmin: boolean;
 };
 
-export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
-
 export type Expense = {
     expenseId: BN;
     name: string;
-    member: PublicKey;
+    owner: PublicKey;
     date: BN;
-    // participants: Array<PublicKey>;
+    participants: PublicKey[];
 };
+
+export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
 
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
@@ -284,27 +285,60 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         };
     };
 
-    public async addExpense(member: Wallet, sessionId: bigint, name: any, amount: any) {
+    public async addExpense(member: Wallet, sessionId: BN, name: string, amount: number, participants?: PublicKey[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
-            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
+            const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
             const expenseId = await this.getNextExpenseId(sessionAccountPubkey);
             const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+
             const tx = await this.program.methods
-                .addExpense(name, amount)
+                .addExpense(name, amount, participants || [])
                 .accountsPartial({
-                    authority: member.publicKey,
+                    owner: member.publicKey,
+                    member: memberAccountPubkey,
                     session: sessionAccountPubkey,
-                    member: memberAccountAddress,
                     expense: expenseAccountPubkey,
                 })
+                .remainingAccounts(
+                    _.map(participants, (p) => ({
+                        pubkey: this.findSessionMemberAccountAddress(sessionId, p),
+                        isSigner: false,
+                        isWritable: false,
+                    })),
+                )
                 .transaction();
 
             return this.signAndSendTransaction(member, tx, {
                 sessionAccountPubkey,
-                memberAccountAddress,
+                memberAccountPubkey,
                 expenseAccountPubkey,
             });
+        });
+    }
+
+    public async addExpenseParticipants(owner: Wallet, sessionId: string, expenseId: BN, participants: PublicKey[]): Promise<ITransactionResult> {
+        const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+        const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+
+        const tx = await this.program.methods
+            .addExpenseParticipants(participants)
+            .accountsPartial({
+                owner: owner.publicKey,
+                expense: expenseAccountPubkey,
+            })
+            .remainingAccounts(
+                _.map(participants, (p) => ({
+                    pubkey: this.findSessionMemberAccountAddress(sessionId, p),
+                    isSigner: false,
+                    isWritable: false,
+                })),
+            )
+            .transaction();
+
+        return this.signAndSendTransaction(owner, tx, {
+            sessionAccountPubkey,
+            expenseAccountPubkey,
         });
     }
 
