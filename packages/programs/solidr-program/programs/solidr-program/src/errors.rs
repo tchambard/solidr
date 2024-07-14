@@ -28,4 +28,6 @@ pub enum SolidrError {
     NotExpenseOwner,
     #[msg("Only members can be added as participants")]
     ParticipantNotMember,
+    #[msg("Expense owner cannot be removed from participants")]
+    CannotRemoveExpenseOwner,
 }

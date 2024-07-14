@@ -32,3 +32,10 @@ pub struct ExpenseParticipantAdded {
     pub expense_id: u16,
     pub member_pubkey: Pubkey,
 }
+
+#[event]
+pub struct ExpenseParticipantRemoved {
+    pub session_id: u64,
+    pub expense_id: u16,
+    pub member_pubkey: Pubkey,
+}

@@ -1,4 +1,4 @@
-use crate::state::expenses::{ExpenseAccount, ExpenseAdded, ExpenseParticipantAdded};
+use crate::state::expenses::*;
 use crate::state::members::MemberAccount;
 use crate::{errors::*, state::sessions::*};
 use anchor_lang::prelude::*;
@@ -87,6 +87,9 @@ pub struct AddExpenseParticipantContextData<'info> {
     #[account(mut)]
     pub expense: Account<'info, ExpenseAccount>,
 
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -96,9 +99,14 @@ pub fn add_expense_participants(
 ) -> Result<()> {
     let owner = &mut ctx.accounts.owner;
     let expense = &mut ctx.accounts.expense;
+    let session = &mut ctx.accounts.session;
 
     require!(owner.key() == expense.owner, SolidrError::NotExpenseOwner);
 
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
     let _ = add_participants(
         &ctx.program_id,
         &ctx.remaining_accounts,
@@ -108,7 +116,84 @@ pub fn add_expense_participants(
     Ok(())
 }
 
-pub fn add_participants(
+#[derive(Accounts)]
+
+pub struct RemoveExpenseParticipantContextData<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(mut)]
+    pub expense: Account<'info, ExpenseAccount>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn remove_expense_participants(
+    ctx: Context<RemoveExpenseParticipantContextData>,
+    participants: Vec<Pubkey>,
+) -> Result<()> {
+    let owner = &mut ctx.accounts.owner;
+    let expense = &mut ctx.accounts.expense;
+    let session = &mut ctx.accounts.session;
+
+    require!(owner.key() == expense.owner, SolidrError::NotExpenseOwner);
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+
+    let mut i = 0;
+
+    while i < expense.participants.len() {
+        if participants.contains(&expense.participants[i]) {
+            require!(
+                expense.participants[i].key() != expense.owner.key(),
+                SolidrError::CannotRemoveExpenseOwner,
+            );
+            emit!(ExpenseParticipantRemoved {
+                session_id: expense.session_id,
+                expense_id: expense.expense_id,
+                member_pubkey: expense.participants[i],
+            });
+            expense.participants.remove(i);
+        } else {
+            i += 1;
+        }
+    }
+    Ok(())
+}
+
+fn get_member_pda_address(program_id: &Pubkey, session_id: u64, member: Pubkey) -> Pubkey {
+    let (pubkey, _) = Pubkey::find_program_address(
+        &[
+            b"member",
+            session_id.to_le_bytes().as_ref(),
+            member.as_ref(),
+        ],
+        program_id,
+    );
+    pubkey
+}
+
+fn is_member(
+    program_id: &Pubkey,
+    remaining_accounts: &&[AccountInfo<'_>],
+    member_pda_address: Pubkey,
+) -> Result<bool> {
+    match remaining_accounts
+        .iter()
+        .find(|account| account.key() == member_pda_address)
+    {
+        Some(account) => Ok(account.owner == program_id && !account.data_is_empty()),
+        None => Ok(false),
+    }
+}
+
+fn add_participants(
     program_id: &Pubkey,
     remaining_accounts: &&[AccountInfo<'_>],
     expense: &mut Account<ExpenseAccount>,
@@ -139,30 +224,4 @@ pub fn add_participants(
         }
     }
     Ok(())
-}
-
-fn get_member_pda_address(program_id: &Pubkey, session_id: u64, member: Pubkey) -> Pubkey {
-    let (pubkey, _) = Pubkey::find_program_address(
-        &[
-            b"member",
-            session_id.to_le_bytes().as_ref(),
-            member.as_ref(),
-        ],
-        program_id,
-    );
-    pubkey
-}
-
-fn is_member(
-    program_id: &Pubkey,
-    remaining_accounts: &&[AccountInfo<'_>],
-    member_pda_address: Pubkey,
-) -> Result<bool> {
-    match remaining_accounts
-        .iter()
-        .find(|account| account.key() == member_pda_address)
-    {
-        Some(account) => Ok(account.owner == program_id && !account.data_is_empty()),
-        None => Ok(false),
-    }
 }
