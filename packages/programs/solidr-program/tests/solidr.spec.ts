@@ -274,7 +274,7 @@ describe('solidr', () => {
                     const expectedExpenseId = 0;
                     const name = 'expense1';
                     const amount = 10;
-                    const timestampBefore = Math.floor(Date.now() / 1000) - 10; // sometimes, this timestamp is bigger than that set in expense !?
+                    const timestampBefore = Math.floor(Date.now()) - 10000; // sometimes, this timestamp is bigger than that set in expense !?
 
                     const {
                         events,
@@ -284,8 +284,8 @@ describe('solidr', () => {
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.equal(expense.name, name);
                     assert.equal(expense.owner.toString(), alice.publicKey.toString());
-                    assert.isAtLeast(expense.date.toNumber(), timestampBefore);
-                    assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
+                    assert.isAtLeast(expense.date.getTime(), timestampBefore);
+                    assert.isAtMost(expense.date.getTime(), Math.floor(Date.now()));
                     assert.lengthOf(expense.participants, 1);
                     assert.equal(expense.participants[0].toString(), alice.publicKey.toString());
 
@@ -298,7 +298,7 @@ describe('solidr', () => {
                     const expectedExpenseId = 0;
                     const name = 'expense1';
                     const amount = 10;
-                    const timestampBefore = Math.floor(Date.now() / 1000) - 10;
+                    const timestampBefore = Math.floor(Date.now()) - 10000;
 
                     const {
                         events,
@@ -308,8 +308,8 @@ describe('solidr', () => {
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.equal(expense.name, name);
                     assert.equal(expense.owner.toString(), bob.publicKey.toString());
-                    assert.isAtLeast(expense.date.toNumber(), timestampBefore);
-                    assert.isAtMost(expense.date.toNumber(), Math.floor(Date.now() / 1000));
+                    assert.isAtLeast(expense.date.getTime(), timestampBefore);
+                    assert.isAtMost(expense.date.getTime(), Math.floor(Date.now()));
                     assert.lengthOf(expense.participants, 1);
                     assert.equal(expense.participants[0].toString(), bob.publicKey.toString());
 
@@ -539,7 +539,7 @@ describe('solidr', () => {
 
                 it('> should succeed when called by session administrator ', async () => {
                     const expectedRefundId = 0;
-                    const timestampBefore = Math.floor(Date.now() / 1000) - 10; // sometimes, this timestamp is bigger than that set in expense !?
+                    const timestampBefore = Math.floor(Date.now()) - 10000; // sometimes, this timestamp is bigger than that set in expense !?
                     const senderBalanceBefore = await provider.connection.getBalance(alice.publicKey);
                     const receiverBalanceBefore = await provider.connection.getBalance(bob.publicKey);
 
@@ -555,8 +555,8 @@ describe('solidr', () => {
                     assert.equal(refund.sessionId.toString(), sessionId.toString());
                     assert.equal(refund.from.toString(), alice.publicKey.toString());
                     assert.equal(refund.to.toString(), bob.publicKey.toString());
-                    assert.isAtLeast(refund.date.toNumber(), timestampBefore);
-                    assert.isAtMost(refund.date.toNumber(), Math.floor(Date.now() / 1000));
+                    assert.isAtLeast(refund.date.getTime(), timestampBefore);
+                    assert.isAtMost(refund.date.getTime(), Math.floor(Date.now()));
                     assert.equal(refund.amount, 10);
                     assert.isAtLeast(transferedLamports, 1);
 
@@ -574,7 +574,7 @@ describe('solidr', () => {
 
                 it('> should succeed when called by a member', async () => {
                     const expectedRefundId = 0;
-                    const timestampBefore = Math.floor(Date.now() / 1000) - 10; // sometimes, this timestamp is bigger than that set in expense !?
+                    const timestampBefore = Math.floor(Date.now()) - 10000; // sometimes, this timestamp is bigger than that set in expense !?
                     const senderBalanceBefore = await provider.connection.getBalance(bob.publicKey);
                     const receiverBalanceBefore = await provider.connection.getBalance(charlie.publicKey);
 
@@ -590,8 +590,8 @@ describe('solidr', () => {
                     assert.equal(refund.sessionId.toString(), sessionId.toString());
                     assert.equal(refund.from.toString(), bob.publicKey.toString());
                     assert.equal(refund.to.toString(), charlie.publicKey.toString());
-                    assert.isAtLeast(refund.date.toNumber(), timestampBefore);
-                    assert.isAtMost(refund.date.toNumber(), Math.floor(Date.now() / 1000));
+                    assert.isAtLeast(refund.date.getTime(), timestampBefore);
+                    assert.isAtMost(refund.date.getTime(), Math.floor(Date.now()));
                     assert.equal(refund.amount, 10);
                     assert.isAtLeast(transferedLamports, 1);
 
@@ -797,6 +797,96 @@ describe('solidr', () => {
                     },
                 ]);
             });
+        });
+    });
+
+    describe('> listSessionExpenses', () => {
+        let sessionId: BN;
+
+        beforeEach(async () => {
+            // Alice create a session
+            const r = await client.openSession(alice, 'A', 'Alice session', 'Alice');
+            sessionId = new BN(r.events.sessionOpened[0].sessionId);
+            // Add members
+            await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+            await client.addSessionMember(alice, sessionId, charlie.publicKey, 'Charlie');
+            await client.addSessionMember(alice, sessionId, zoe.publicKey, 'Zoé');
+        });
+
+        it('> should return empty page', async () => {
+            const page = await client.listSessionExpenses(sessionId);
+            assert.isEmpty(page);
+        });
+
+        it('> should return correct number of expenses dependending on filter', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 50, [alice.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 3', 200);
+            const pageWithAllExpenses = await client.listSessionExpenses(sessionId);
+            assert.lengthOf(pageWithAllExpenses, 3);
+
+            const pageWithPaginatedExpenses = await client.listSessionExpenses(sessionId, undefined, { page: 1, perPage: 2 });
+            assert.lengthOf(pageWithPaginatedExpenses, 2);
+
+            const pageWithAliceExpenses = await client.listSessionExpenses(sessionId, { owner: alice.publicKey });
+            assert.lengthOf(pageWithAliceExpenses, 1);
+
+            const pageWithBobExpenses = await client.listSessionExpenses(sessionId, { owner: bob.publicKey });
+            assert.lengthOf(pageWithBobExpenses, 2);
+
+            const pageWithCharlieExpenses = await client.listSessionExpenses(sessionId, { owner: charlie.publicKey });
+            assert.lengthOf(pageWithCharlieExpenses, 0);
+        });
+    });
+
+    describe('> listSessionRefunds', () => {
+        let sessionId: BN;
+
+        beforeEach(async () => {
+            // Alice create a session
+            const r = await client.openSession(alice, 'A', 'Alice session', 'Alice');
+            sessionId = new BN(r.events.sessionOpened[0].sessionId);
+            // Add members
+            await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+            await client.addSessionMember(alice, sessionId, charlie.publicKey, 'Charlie');
+            await client.addSessionMember(alice, sessionId, zoe.publicKey, 'Zoé');
+            await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 50, [alice.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 3', 200);
+        });
+
+        it('> should return empty page', async () => {
+            const page = await client.listSessionRefunds(sessionId);
+            assert.isEmpty(page);
+        });
+
+        it('> should return correct number of expenses dependending on filter', async () => {
+            await client.addRefund(charlie, sessionId, 100, bob.publicKey);
+            await client.addRefund(charlie, sessionId, 50, alice.publicKey);
+            await client.addRefund(alice, sessionId, 50, bob.publicKey);
+            const pageWithAllExpenses = await client.listSessionRefunds(sessionId);
+            assert.lengthOf(pageWithAllExpenses, 3);
+
+            const pageWithPaginatedExpenses = await client.listSessionRefunds(sessionId, undefined, { page: 1, perPage: 2 });
+            assert.lengthOf(pageWithPaginatedExpenses, 2);
+
+            const pageFromAliceExpenses = await client.listSessionRefunds(sessionId, { from: alice.publicKey });
+            assert.lengthOf(pageFromAliceExpenses, 1);
+
+            const pageFromBobExpenses = await client.listSessionRefunds(sessionId, { from: bob.publicKey });
+            assert.lengthOf(pageFromBobExpenses, 0);
+
+            const pageFromCharlieExpenses = await client.listSessionRefunds(sessionId, { from: charlie.publicKey });
+            assert.lengthOf(pageFromCharlieExpenses, 2);
+
+            const pageToAliceExpenses = await client.listSessionRefunds(sessionId, { to: alice.publicKey });
+            assert.lengthOf(pageToAliceExpenses, 1);
+
+            const pageToBobExpenses = await client.listSessionRefunds(sessionId, { to: bob.publicKey });
+            assert.lengthOf(pageToBobExpenses, 2);
+
+            const pageToCharlieExpenses = await client.listSessionRefunds(sessionId, { to: charlie.publicKey });
+            assert.lengthOf(pageToCharlieExpenses, 0);
         });
     });
 });

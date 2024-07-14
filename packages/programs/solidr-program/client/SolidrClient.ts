@@ -25,6 +25,26 @@ type InternalSession = {
     invitationHash: number[];
 };
 
+type InternalExpense = {
+    sessionId: BN;
+    expenseId: BN;
+    name: string;
+    owner: PublicKey;
+    date: BN;
+    amount: BN;
+    participants: PublicKey[];
+};
+
+type InternalRefund = {
+    sessionId: BN;
+    refundId: BN;
+    date: BN;
+    from: PublicKey;
+    to: PublicKey;
+    amount: BN;
+    amountInLamports: BN;
+};
+
 export enum SessionStatus {
     Opened = 'opened',
     Closed = 'closed',
@@ -53,7 +73,7 @@ export type Expense = {
     expenseId: BN;
     name: string;
     owner: PublicKey;
-    date: BN;
+    date: Date;
     amount: BN;
     participants: PublicKey[];
 };
@@ -61,7 +81,7 @@ export type Expense = {
 export type Refund = {
     sessionId: BN;
     refundId: BN;
-    date: BN;
+    date: Date;
     from: PublicKey;
     to: PublicKey;
     amount: BN;
@@ -105,7 +125,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
     public async openSession(admin: Wallet, name: string, description: string, memberName: string): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
-            const sessionId = (await this.getNextSessionId()) || new BN(0);
+            const sessionId = await this.getNextSessionId();
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, admin.publicKey);
 
@@ -200,12 +220,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             return this.signAndSendTransaction(payer, tx, {
                 memberAccountAddress,
             });
-        });
-    }
-
-    public async getNextSessionId(): Promise<BN> {
-        return this.wrapFn(async () => {
-            return (await this.program.account.globalAccount.fetch(this.globalAccountPubkey)).sessionCount;
         });
     }
 
@@ -317,6 +331,43 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async listSessionExpenses(sessionId: BN, filters?: { owner?: PublicKey } | undefined, paginationOptions?: { page: number; perPage: number }): Promise<Expense[]> {
+        return this.wrapFn(async () => {
+            const expenseAccountDiscriminator = Buffer.from(sha256.digest('account:ExpenseAccount')).subarray(0, 8);
+            const accounts = await this.connection.getProgramAccounts(this.program.programId, {
+                dataSlice: { offset: 8 + 8 + 2, length: 8 }, // date
+                filters: _.compact([
+                    { memcmp: { offset: 0, bytes: bs58.encode(expenseAccountDiscriminator) } }, // Ensure it's a ExpenseAccount account.
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } }, // sessionId
+                    filters?.owner ? { memcmp: { offset: 8 + 8 + 2 + 8, bytes: filters.owner.toBase58() } } : undefined, // owner
+                ]),
+            });
+            const addresses = accounts
+                .map(({ pubkey, account }) => {
+                    return {
+                        pubkey,
+                        date: new BN(account.data, 'le'),
+                    };
+                })
+                .sort((a, b) => +(a.date > b.date) || -(a.date < b.date))
+                .map((account) => account.pubkey);
+
+            return (await this.getPage(this.program.account.expenseAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapExpense);
+        });
+    }
+
+    public findExpenseAccountAddress(sessionId: BN, expenseId: BN): PublicKey {
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toBuffer('le', 8), expenseId.toBuffer('le', 2)], this.program.programId);
+        return expenseAccountPubkey;
+    }
+
+    public async getExpense(expenseAccountPubkey: PublicKey): Promise<Expense> {
+        return this.wrapFn(async () => {
+            const expense = await this.program.account.expenseAccount.fetch(expenseAccountPubkey);
+            return this.mapExpense(expense);
+        });
+    }
+
     public async addExpenseParticipants(owner: Wallet, sessionId: string, expenseId: BN, participants: PublicKey[]): Promise<ITransactionResult> {
         const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
         const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
@@ -369,17 +420,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public findExpenseAccountAddress(sessionId: BN, expenseId: BN): PublicKey {
-        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toBuffer('le', 8), expenseId.toBuffer('le', 2)], this.program.programId);
-        return expenseAccountPubkey;
-    }
-
-    public async getExpense(expenseAccountPubkey: PublicKey): Promise<Expense> {
-        return this.wrapFn(async () => {
-            return await this.program.account.expenseAccount.fetch(expenseAccountPubkey);
-        });
-    }
-
     public async addRefund(payer: Wallet, sessionId: BN, amount: number, recipient: PublicKey): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
@@ -410,6 +450,36 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async listSessionRefunds(
+        sessionId: BN,
+        filters?: { from?: PublicKey; to?: PublicKey } | undefined,
+        paginationOptions?: { page: number; perPage: number },
+    ): Promise<Refund[]> {
+        return this.wrapFn(async () => {
+            const refundAccountDiscriminator = Buffer.from(sha256.digest('account:RefundAccount')).subarray(0, 8);
+            const accounts = await this.connection.getProgramAccounts(this.program.programId, {
+                dataSlice: { offset: 8 + 8 + 2, length: 8 }, // date
+                filters: _.compact([
+                    { memcmp: { offset: 0, bytes: bs58.encode(refundAccountDiscriminator) } }, // Ensure it's a RefundAccount account.
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } }, // sessionId
+                    filters?.from ? { memcmp: { offset: 8 + 8 + 2 + 8, bytes: filters.from.toBase58() } } : undefined, // from
+                    filters?.to ? { memcmp: { offset: 8 + 8 + 2 + 8 + 32, bytes: filters.to.toBase58() } } : undefined, // to
+                ]),
+            });
+            const addresses = accounts
+                .map(({ pubkey, account }) => {
+                    return {
+                        pubkey,
+                        date: new BN(account.data, 'le'),
+                    };
+                })
+                .sort((a, b) => +(a.date > b.date) || -(a.date < b.date))
+                .map((account) => account.pubkey);
+
+            return (await this.getPage(this.program.account.refundAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapRefund);
+        });
+    }
+
     public findRefundAccountAddress(sessionId: BN, refundId: BN): PublicKey {
         const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('refund'), sessionId.toBuffer('le', 8), refundId.toBuffer('le', 2)], this.program.programId);
         return expenseAccountPubkey;
@@ -417,7 +487,8 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
     public async getRefund(refundAccountPubkey: PublicKey): Promise<Refund> {
         return this.wrapFn(async () => {
-            return await this.program.account.refundAccount.fetch(refundAccountPubkey);
+            const refund = await this.program.account.refundAccount.fetch(refundAccountPubkey);
+            return this.mapRefund(refund);
         });
     }
 
@@ -435,15 +506,38 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         };
     };
 
-    private async getNextExpenseId(sessionAccountPubkey): Promise<BN> {
+    private mapExpense = (internalExpense: InternalExpense): Expense => {
+        return {
+            ...internalExpense,
+            date: new Date(internalExpense.date.toNumber() * 1000),
+        };
+    };
+
+    private mapRefund = (internalRefund: InternalRefund): Refund => {
+        return {
+            ...internalRefund,
+            date: new Date(internalRefund.date.toNumber() * 1000),
+        };
+    };
+
+    private async getNextSessionId(): Promise<BN> {
         return this.wrapFn(async () => {
-            return (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).expensesCount || new BN(0);
+            const sessionCount = (await this.program.account.globalAccount.fetch(this.globalAccountPubkey)).sessionCount ?? 0;
+            return new BN(sessionCount);
         });
     }
 
-    private async getNextRefundId(sessionAccountPubkey): Promise<BN> {
+    private async getNextExpenseId(sessionAccountPubkey: PublicKey): Promise<BN> {
         return this.wrapFn(async () => {
-            return (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).refundsCount || new BN(0);
+            const expensesCount = (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).expensesCount ?? 0;
+            return new BN(expensesCount);
+        });
+    }
+
+    private async getNextRefundId(sessionAccountPubkey: PublicKey): Promise<BN> {
+        return this.wrapFn(async () => {
+            const refundsCount = (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).refundsCount ?? 0;
+            return new BN(refundsCount);
         });
     }
 }
