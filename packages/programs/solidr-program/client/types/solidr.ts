@@ -613,10 +613,6 @@ export type Solidr = {
                         type: 'u16';
                     },
                     {
-                        name: 'name';
-                        type: 'string';
-                    },
-                    {
                         name: 'date';
                         type: 'i64';
                     },
@@ -627,6 +623,10 @@ export type Solidr = {
                     {
                         name: 'amount';
                         type: 'u16';
+                    },
+                    {
+                        name: 'name';
+                        type: 'string';
                     },
                     {
                         name: 'participants';
