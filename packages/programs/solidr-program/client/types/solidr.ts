@@ -19,7 +19,7 @@ export type Solidr = {
             discriminator: [171, 23, 8, 240, 62, 31, 254, 144];
             accounts: [
                 {
-                    name: 'authority';
+                    name: 'owner';
                     writable: true;
                     signer: true;
                 },
@@ -66,6 +66,40 @@ export type Solidr = {
                 {
                     name: 'amount';
                     type: 'u16';
+                },
+                {
+                    name: 'participants';
+                    type: {
+                        vec: 'pubkey';
+                    };
+                },
+            ];
+        },
+        {
+            name: 'addExpenseParticipants';
+            docs: ['* Adds a new participant to expense.\n     *\n     * @param participants The public keys of the participants'];
+            discriminator: [4, 224, 182, 171, 3, 134, 164, 27];
+            accounts: [
+                {
+                    name: 'owner';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'expense';
+                    writable: true;
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'participants';
+                    type: {
+                        vec: 'pubkey';
+                    };
                 },
             ];
         },
@@ -351,6 +385,10 @@ export type Solidr = {
             discriminator: [161, 49, 47, 2, 245, 167, 224, 67];
         },
         {
+            name: 'expenseParticipantAdded';
+            discriminator: [116, 202, 216, 162, 22, 73, 148, 87];
+        },
+        {
             name: 'memberAdded';
             discriminator: [198, 220, 228, 196, 92, 235, 240, 79];
         },
@@ -409,6 +447,26 @@ export type Solidr = {
             name: 'expenseNameTooLong';
             msg: "Expense's name can't exceed 20 characters";
         },
+        {
+            code: 6009;
+            name: 'maxParticipantsReached';
+            msg: 'Expense cannot have more than 20 participants';
+        },
+        {
+            code: 6010;
+            name: 'notSessionMember';
+            msg: 'Only session member can add an expense';
+        },
+        {
+            code: 6011;
+            name: 'notExpenseOwner';
+            msg: 'Only expense owner can add participants';
+        },
+        {
+            code: 6012;
+            name: 'participantNotMember';
+            msg: 'Only members can be added as participants';
+        },
     ];
     types: [
         {
@@ -433,7 +491,7 @@ export type Solidr = {
                         type: 'i64';
                     },
                     {
-                        name: 'member';
+                        name: 'owner';
                         type: 'pubkey';
                     },
                     {
@@ -461,6 +519,26 @@ export type Solidr = {
                     {
                         name: 'expenseId';
                         type: 'u16';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'expenseParticipantAdded';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'memberPubkey';
+                        type: 'pubkey';
                     },
                 ];
             };

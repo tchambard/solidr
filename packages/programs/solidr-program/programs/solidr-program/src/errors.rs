@@ -20,4 +20,12 @@ pub enum SolidrError {
     AmountMustBeGreaterThanZero,
     #[msg("Expense's name can't exceed 20 characters")]
     ExpenseNameTooLong,
+    #[msg("Expense cannot have more than 20 participants")]
+    MaxParticipantsReached,
+    #[msg("Only session member can add an expense")]
+    NotSessionMember,
+    #[msg("Only expense owner can add participants")]
+    NotExpenseOwner,
+    #[msg("Only members can be added as participants")]
+    ParticipantNotMember,
 }
