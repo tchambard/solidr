@@ -105,7 +105,7 @@ pub mod solidr {
     }
 
     /**
-     * Adds a new participant to expense.
+     * Adds participants to expense.
      *
      * @param participants The public keys of the participants
      */
@@ -114,5 +114,17 @@ pub mod solidr {
         participants: Vec<Pubkey>,
     ) -> Result<()> {
         expenses::add_expense_participants(ctx, participants)
+    }
+
+    /**
+     * Removes participant from expense.
+     *
+     * @param participants The public keys of the participants
+     */
+    pub fn remove_expense_participants(
+        ctx: Context<RemoveExpenseParticipantContextData>,
+        participants: Vec<Pubkey>,
+    ) -> Result<()> {
+        expenses::remove_expense_participants(ctx, participants)
     }
 }

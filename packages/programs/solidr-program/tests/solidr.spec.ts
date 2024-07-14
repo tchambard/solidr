@@ -17,6 +17,7 @@ describe('solidr', () => {
     const alice = new Wallet(anchor.web3.Keypair.generate());
     const bob = new Wallet(anchor.web3.Keypair.generate());
     const charlie = new Wallet(anchor.web3.Keypair.generate());
+    const paul = new Wallet(anchor.web3.Keypair.generate());
     // keep zoe for listing tests
     const zoe = new Wallet(anchor.web3.Keypair.generate());
 
@@ -27,6 +28,7 @@ describe('solidr', () => {
         await client.airdrop(alice.publicKey, 100);
         await client.airdrop(bob.publicKey, 100);
         await client.airdrop(charlie.publicKey, 100);
+        await client.airdrop(paul.publicKey, 100);
         await client.airdrop(zoe.publicKey, 100);
     });
 
@@ -261,7 +263,7 @@ describe('solidr', () => {
             });
 
             it('> should failed when called by a non member', async () => {
-                await assertError(async () => client.addExpense(zoe, sessionId, 'Zoe', 10), {
+                await assertError(async () => client.addExpense(paul, sessionId, 'Paul', 10), {
                     code: 'AccountNotInitialized',
                     message: `The program expected this account to be already initialized`,
                 });
@@ -362,7 +364,7 @@ describe('solidr', () => {
                     const {
                         accounts: { expenseAccountPubkey },
                         events: { expenseParticipantAdded },
-                    } = await client.addExpense(alice, sessionId, name, amount, [zoe.publicKey]);
+                    } = await client.addExpense(alice, sessionId, name, amount, [paul.publicKey]);
 
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.lengthOf(expense.participants, 1);
@@ -392,7 +394,7 @@ describe('solidr', () => {
 
                 it('> should fail when called with non expense owner', async () => {
                     await assertError(async () => client.addExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
-                        code: '',
+                        code: 'NotExpenseOwner',
                         message: 'Only expense owner can add participants',
                     });
                 });
@@ -434,13 +436,75 @@ describe('solidr', () => {
                     const {
                         accounts: { expenseAccountPubkey },
                         events: { expenseParticipantAdded },
-                    } = await client.addExpenseParticipants(alice, sessionId, expenseId, [zoe.publicKey]);
+                    } = await client.addExpenseParticipants(alice, sessionId, expenseId, [paul.publicKey]);
 
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.lengthOf(expense.participants, 1);
                     assert.equal(expense.participants[0].toString(), alice.publicKey.toString());
 
                     assert.isUndefined(expenseParticipantAdded);
+                });
+            });
+
+            context('> participants are added to the expense', () => {
+                beforeEach(async () => {
+                    await client.addSessionMember(alice, sessionId, paul.publicKey, 'paul');
+                    await client.addExpenseParticipants(alice, sessionId, expenseId, [bob.publicKey, charlie.publicKey, paul.publicKey]);
+                });
+
+                describe('> removeExpenseParticipants', () => {
+                    it('> should fail when called with invalid session id', async () => {
+                        await assertError(async () => client.removeExpenseParticipants(alice, new BN(666), expenseId, [bob.publicKey]), {
+                            message: ACCOUNT_NOT_INITIALIZED,
+                        });
+                    });
+
+                    it('> should fail when called with non expense owner', async () => {
+                        await assertError(async () => client.removeExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
+                            code: 'NotExpenseOwner',
+                            message: 'Only expense owner can add participants',
+                        });
+                    });
+
+                    it('> should fail when called to remove expense owner', async () => {
+                        await assertError(async () => client.removeExpenseParticipants(alice, sessionId, expenseId, [alice.publicKey]), {
+                            code: 'CannotRemoveExpenseOwner',
+                            message: 'Expense owner cannot be removed from participants',
+                        });
+                    });
+
+                    it('> should succeed with one member', async () => {
+                        const {
+                            accounts: { expenseAccountPubkey },
+                            events: { expenseParticipantRemoved },
+                        } = await client.removeExpenseParticipants(alice, sessionId, expenseId, [charlie.publicKey]);
+
+                        const expense = await client.getExpense(expenseAccountPubkey);
+                        assert.lengthOf(expense.participants, 3);
+                        assert.equal(expense.participants[0].toString(), alice.publicKey.toString());
+                        assert.equal(expense.participants[1].toString(), bob.publicKey.toString());
+                        assert.equal(expense.participants[2].toString(), paul.publicKey.toString());
+
+                        assert.equal(expenseParticipantRemoved[0].expenseId, 0);
+                        assert.equal(expenseParticipantRemoved[0].memberPubkey.toString(), charlie.publicKey.toString());
+                    });
+
+                    it('> should succeed with two members', async () => {
+                        const {
+                            accounts: { expenseAccountPubkey },
+                            events: { expenseParticipantRemoved },
+                        } = await client.removeExpenseParticipants(alice, sessionId, expenseId, [bob.publicKey, charlie.publicKey]);
+
+                        const expense = await client.getExpense(expenseAccountPubkey);
+                        assert.lengthOf(expense.participants, 2);
+                        assert.equal(expense.participants[0].toString(), alice.publicKey.toString());
+                        assert.equal(expense.participants[1].toString(), paul.publicKey.toString());
+
+                        assert.equal(expenseParticipantRemoved[0].expenseId, 0);
+                        assert.equal(expenseParticipantRemoved[0].memberPubkey.toString(), bob.publicKey.toString());
+                        assert.equal(expenseParticipantRemoved[1].expenseId, 0);
+                        assert.equal(expenseParticipantRemoved[1].memberPubkey.toString(), charlie.publicKey.toString());
+                    });
                 });
             });
         });

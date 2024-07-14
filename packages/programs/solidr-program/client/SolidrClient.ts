@@ -326,6 +326,33 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             .accountsPartial({
                 owner: owner.publicKey,
                 expense: expenseAccountPubkey,
+                session: sessionAccountPubkey,
+            })
+            .remainingAccounts(
+                _.map(participants, (p) => ({
+                    pubkey: this.findSessionMemberAccountAddress(sessionId, p),
+                    isSigner: false,
+                    isWritable: false,
+                })),
+            )
+            .transaction();
+
+        return this.signAndSendTransaction(owner, tx, {
+            sessionAccountPubkey,
+            expenseAccountPubkey,
+        });
+    }
+
+    public async removeExpenseParticipants(owner: Wallet, sessionId: string, expenseId: BN, participants: PublicKey[]): Promise<ITransactionResult> {
+        const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+        const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+
+        const tx = await this.program.methods
+            .removeExpenseParticipants(participants)
+            .accountsPartial({
+                owner: owner.publicKey,
+                expense: expenseAccountPubkey,
+                session: sessionAccountPubkey,
             })
             .remainingAccounts(
                 _.map(participants, (p) => ({

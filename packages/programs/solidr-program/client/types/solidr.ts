@@ -77,7 +77,7 @@ export type Solidr = {
         },
         {
             name: 'addExpenseParticipants';
-            docs: ['* Adds a new participant to expense.\n     *\n     * @param participants The public keys of the participants'];
+            docs: ['* Adds participants to expense.\n     *\n     * @param participants The public keys of the participants'];
             discriminator: [4, 224, 182, 171, 3, 134, 164, 27];
             accounts: [
                 {
@@ -87,6 +87,10 @@ export type Solidr = {
                 },
                 {
                     name: 'expense';
+                    writable: true;
+                },
+                {
+                    name: 'session';
                     writable: true;
                 },
                 {
@@ -333,6 +337,38 @@ export type Solidr = {
             ];
         },
         {
+            name: 'removeExpenseParticipants';
+            docs: ['* Removes participant from expense.\n     *\n     * @param participants The public keys of the participants'];
+            discriminator: [248, 203, 50, 173, 70, 6, 146, 166];
+            accounts: [
+                {
+                    name: 'owner';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'expense';
+                    writable: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'participants';
+                    type: {
+                        vec: 'pubkey';
+                    };
+                },
+            ];
+        },
+        {
             name: 'setSessionTokenHash';
             docs: ["* Session's administrator can set invitation token hash\n     *\n     * @param hash The token hash to store in session"];
             discriminator: [162, 247, 90, 144, 182, 153, 184, 188];
@@ -387,6 +423,10 @@ export type Solidr = {
         {
             name: 'expenseParticipantAdded';
             discriminator: [116, 202, 216, 162, 22, 73, 148, 87];
+        },
+        {
+            name: 'expenseParticipantRemoved';
+            discriminator: [37, 178, 57, 228, 101, 203, 244, 215];
         },
         {
             name: 'memberAdded';
@@ -467,6 +507,11 @@ export type Solidr = {
             name: 'participantNotMember';
             msg: 'Only members can be added as participants';
         },
+        {
+            code: 6013;
+            name: 'cannotRemoveExpenseOwner';
+            msg: 'Expense owner cannot be removed from participants';
+        },
     ];
     types: [
         {
@@ -525,6 +570,26 @@ export type Solidr = {
         },
         {
             name: 'expenseParticipantAdded';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'memberPubkey';
+                        type: 'pubkey';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'expenseParticipantRemoved';
             type: {
                 kind: 'struct';
                 fields: [
