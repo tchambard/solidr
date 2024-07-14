@@ -1,3 +1,4 @@
+use crate::is_session_member;
 use crate::state::expenses::*;
 use crate::state::members::MemberAccount;
 use crate::{errors::*, state::sessions::*};
@@ -50,7 +51,7 @@ pub fn add_expense(
         owner.key() == member.addr.key() && member.session_id == session.session_id,
         SolidrError::NotSessionMember
     );
-    require!(amount > 0, SolidrError::AmountMustBeGreaterThanZero);
+    require!(amount > 0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
     require!(name.len() <= 20, SolidrError::ExpenseNameTooLong);
 
     expense.session_id = session.session_id;
@@ -179,20 +180,6 @@ fn get_member_pda_address(program_id: &Pubkey, session_id: u64, member: Pubkey) 
     pubkey
 }
 
-fn is_member(
-    program_id: &Pubkey,
-    remaining_accounts: &&[AccountInfo<'_>],
-    member_pda_address: Pubkey,
-) -> Result<bool> {
-    match remaining_accounts
-        .iter()
-        .find(|account| account.key() == member_pda_address)
-    {
-        Some(account) => Ok(account.owner == program_id && !account.data_is_empty()),
-        None => Ok(false),
-    }
-}
-
 fn add_participants(
     program_id: &Pubkey,
     remaining_accounts: &&[AccountInfo<'_>],
@@ -205,11 +192,10 @@ fn add_participants(
     );
 
     for &participant in participants.iter() {
-        // Vérifier si le participant est un membre de la session
         let member_pda_address =
             get_member_pda_address(&program_id, expense.session_id, participant);
 
-        if !is_member(&program_id, &remaining_accounts, member_pda_address)? {
+        if !is_session_member(&program_id, &remaining_accounts, member_pda_address)? {
             return Err(SolidrError::ParticipantNotMember.into());
         }
 

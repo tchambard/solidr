@@ -2,6 +2,10 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum SolidrError {
+    #[msg("Overflow when performing arithmetic operations")]
+    Overflow,
+    #[msg("Division by zero when converting amount to lamports")]
+    DivisionByZero,
     #[msg("Session's name can't exceed 20 characters")]
     SessionNameTooLong,
     #[msg("Session's description can't exceed 80 characters")]
@@ -17,7 +21,9 @@ pub enum SolidrError {
     #[msg("Invalid invitation link hash")]
     InvalidInvitationHash,
     #[msg("Expense amount must be greater than zero")]
-    AmountMustBeGreaterThanZero,
+    ExpenseAmountMustBeGreaterThanZero,
+    #[msg("Refund amount must be greater than zero")]
+    RefundAmountMustBeGreaterThanZero,
     #[msg("Expense's name can't exceed 20 characters")]
     ExpenseNameTooLong,
     #[msg("Expense cannot have more than 20 participants")]

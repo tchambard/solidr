@@ -126,3 +126,17 @@ pub fn add_member(
     });
     Ok(())
 }
+
+pub fn is_session_member(
+    program_id: &Pubkey,
+    remaining_accounts: &&[AccountInfo<'_>],
+    member_pda_address: Pubkey,
+) -> Result<bool> {
+    match remaining_accounts
+        .iter()
+        .find(|account| account.key() == member_pda_address)
+    {
+        Some(account) => Ok(account.owner == program_id && !account.data_is_empty()),
+        None => Ok(false),
+    }
+}

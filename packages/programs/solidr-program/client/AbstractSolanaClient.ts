@@ -1,11 +1,17 @@
-import { Address, BorshCoder, EventParser, Idl, IdlEvents, Program, Wallet } from '@coral-xyz/anchor';
+import { Address, BN, BorshCoder, EventParser, Idl, IdlEvents, Program, Wallet } from '@coral-xyz/anchor';
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction, TransactionSignature } from '@solana/web3.js';
 import * as _ from 'lodash';
+
+export interface ITxInfo {
+    events: NodeJS.Dict<any> | undefined;
+    fees: BN;
+}
 
 export type ITransactionResult<T = undefined> = {
     tx: string;
     accounts?: NodeJS.Dict<PublicKey>;
     events: any;
+    fees: BN;
     data: T;
 };
 
@@ -32,10 +38,12 @@ export class AbstractSolanaClient<T extends Idl> {
         const serializedTx = signedTransaction.serialize();
         const sentTx = await this.connection.sendRawTransaction(serializedTx, this.options);
         await this.confirmTx(sentTx);
+        const { events, fees } = await this.getTxInfo(sentTx);
 
         return {
             tx: sentTx,
-            events: await this.getTxEvents(sentTx),
+            events,
+            fees,
             accounts,
             data,
         };
@@ -87,7 +95,7 @@ export class AbstractSolanaClient<T extends Idl> {
         return (await this.connection.getLatestBlockhash()).blockhash;
     }
 
-    private async getTxEvents(tx: string): Promise<NodeJS.Dict<any> | undefined> {
+    private async getTxInfo(tx: string): Promise<ITxInfo> {
         return this.callWithRetry(async () => {
             const txDetails = await this.connection.getTransaction(tx, {
                 maxSupportedTransactionVersion: 0,
@@ -98,14 +106,15 @@ export class AbstractSolanaClient<T extends Idl> {
             try {
                 const eventParser = new EventParser(this.program.programId, new BorshCoder(this.program.idl));
                 // console.log('tx meta :>> ', txDetails?.meta);
-                const events = eventParser.parseLogs(txDetails?.meta?.logMessages || []);
+                const logs = eventParser.parseLogs(txDetails?.meta?.logMessages || []);
                 // console.log('events :>> ', events.next());
-                const result: NodeJS.Dict<object[]> = {};
-                for (let event of events) {
-                    result[event.name] = result[event.name] || [];
-                    result[event.name].push(event.data);
+                const events: NodeJS.Dict<object[]> = {};
+                for (let log of logs) {
+                    events[log.name] = events[log.name] || [];
+                    events[log.name].push(log.data);
                 }
-                return result;
+                const fees = txDetails.meta.fee;
+                return { events, fees };
             } catch (e) {
                 return;
             }
