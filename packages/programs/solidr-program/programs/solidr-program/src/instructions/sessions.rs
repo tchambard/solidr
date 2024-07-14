@@ -64,6 +64,7 @@ pub fn open_session(
     session.description.clone_from(&description);
     session.status = SessionStatus::Opened;
     session.expenses_count = 0;
+    session.refunds_count = 0;
 
     global.session_count += 1;
 

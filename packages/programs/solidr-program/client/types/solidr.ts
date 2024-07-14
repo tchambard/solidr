@@ -108,6 +108,68 @@ export type Solidr = {
             ];
         },
         {
+            name: 'addRefund';
+            docs: [
+                '* Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned "to" account\n     *\n     * @param amount The amount of the refund corresponding to session currency',
+            ];
+            discriminator: [174, 141, 186, 43, 213, 19, 84, 140];
+            accounts: [
+                {
+                    name: 'fromAddr';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'sender';
+                    writable: true;
+                },
+                {
+                    name: 'toAddr';
+                    writable: true;
+                },
+                {
+                    name: 'receiver';
+                    writable: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'refund';
+                    writable: true;
+                    pda: {
+                        seeds: [
+                            {
+                                kind: 'const';
+                                value: [114, 101, 102, 117, 110, 100];
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.session_id';
+                                account: 'sessionAccount';
+                            },
+                            {
+                                kind: 'account';
+                                path: 'session.refunds_count';
+                                account: 'sessionAccount';
+                            },
+                        ];
+                    };
+                },
+                {
+                    name: 'systemProgram';
+                    address: '11111111111111111111111111111111';
+                },
+            ];
+            args: [
+                {
+                    name: 'amount';
+                    type: 'u16';
+                },
+            ];
+        },
+        {
             name: 'addSessionMember';
             docs: [
                 '* Session administrator can add members.\n     *\n     * @dev members can be added only by session administrator when session is opened\n     * An event MemberAdded is emitted\n     *\n     * @param addr The address of the member to add\n     * @param name The nickname of the member to add',
@@ -411,6 +473,10 @@ export type Solidr = {
             discriminator: [173, 25, 100, 97, 192, 177, 84, 139];
         },
         {
+            name: 'refundAccount';
+            discriminator: [33, 196, 176, 53, 44, 213, 37, 99];
+        },
+        {
             name: 'sessionAccount';
             discriminator: [74, 34, 65, 133, 96, 163, 80, 69];
         },
@@ -433,6 +499,10 @@ export type Solidr = {
             discriminator: [198, 220, 228, 196, 92, 235, 240, 79];
         },
         {
+            name: 'refundAdded';
+            discriminator: [97, 13, 130, 101, 137, 7, 155, 116];
+        },
+        {
             name: 'sessionClosed';
             discriminator: [57, 237, 11, 243, 194, 34, 120, 27];
         },
@@ -444,71 +514,86 @@ export type Solidr = {
     errors: [
         {
             code: 6000;
+            name: 'overflow';
+            msg: 'Overflow when performing arithmetic operations';
+        },
+        {
+            code: 6001;
+            name: 'divisionByZero';
+            msg: 'Division by zero when converting amount to lamports';
+        },
+        {
+            code: 6002;
             name: 'sessionNameTooLong';
             msg: "Session's name can't exceed 20 characters";
         },
         {
-            code: 6001;
+            code: 6003;
             name: 'sessionDescriptionTooLong';
             msg: "Session's description can't exceed 80 characters";
         },
         {
-            code: 6002;
+            code: 6004;
             name: 'forbiddenAsNonAdmin';
             msg: 'Only session administrator is granted';
         },
         {
-            code: 6003;
+            code: 6005;
             name: 'sessionClosed';
             msg: 'Session is closed';
         },
         {
-            code: 6004;
+            code: 6006;
             name: 'memberAlreadyExists';
             msg: 'Member already exists';
         },
         {
-            code: 6005;
+            code: 6007;
             name: 'missingInvitationHash';
             msg: 'Missing invitation link hash';
         },
         {
-            code: 6006;
+            code: 6008;
             name: 'invalidInvitationHash';
             msg: 'Invalid invitation link hash';
         },
         {
-            code: 6007;
-            name: 'amountMustBeGreaterThanZero';
+            code: 6009;
+            name: 'expenseAmountMustBeGreaterThanZero';
             msg: 'Expense amount must be greater than zero';
         },
         {
-            code: 6008;
+            code: 6010;
+            name: 'refundAmountMustBeGreaterThanZero';
+            msg: 'Refund amount must be greater than zero';
+        },
+        {
+            code: 6011;
             name: 'expenseNameTooLong';
             msg: "Expense's name can't exceed 20 characters";
         },
         {
-            code: 6009;
+            code: 6012;
             name: 'maxParticipantsReached';
             msg: 'Expense cannot have more than 20 participants';
         },
         {
-            code: 6010;
+            code: 6013;
             name: 'notSessionMember';
             msg: 'Only session member can add an expense';
         },
         {
-            code: 6011;
+            code: 6014;
             name: 'notExpenseOwner';
             msg: 'Only expense owner can add participants';
         },
         {
-            code: 6012;
+            code: 6015;
             name: 'participantNotMember';
             msg: 'Only members can be added as participants';
         },
         {
-            code: 6013;
+            code: 6016;
             name: 'cannotRemoveExpenseOwner';
             msg: 'Expense owner cannot be removed from participants';
         },
@@ -669,6 +754,58 @@ export type Solidr = {
             };
         },
         {
+            name: 'refundAccount';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'refundId';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'date';
+                        type: 'i64';
+                    },
+                    {
+                        name: 'from';
+                        type: 'pubkey';
+                    },
+                    {
+                        name: 'to';
+                        type: 'pubkey';
+                    },
+                    {
+                        name: 'amount';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'amountInLamports';
+                        type: 'u64';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'refundAdded';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'refundId';
+                        type: 'u16';
+                    },
+                ];
+            };
+        },
+        {
             name: 'sessionAccount';
             type: {
                 kind: 'struct';
@@ -691,6 +828,10 @@ export type Solidr = {
                     },
                     {
                         name: 'expensesCount';
+                        type: 'u16';
+                    },
+                    {
+                        name: 'refundsCount';
                         type: 'u16';
                     },
                     {

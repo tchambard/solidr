@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::instructions::{expenses::*, global::*, members::*, sessions::*};
+use crate::instructions::{expenses::*, global::*, members::*, refunds::*, sessions::*};
 
 pub mod errors;
 pub mod instructions;
@@ -126,5 +126,14 @@ pub mod solidr {
         participants: Vec<Pubkey>,
     ) -> Result<()> {
         expenses::remove_expense_participants(ctx, participants)
+    }
+
+    /**
+     * Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned "to" account
+     *
+     * @param amount The amount of the refund corresponding to session currency
+     */
+    pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
+        refunds::add_refund(ctx, amount)
     }
 }
