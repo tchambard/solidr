@@ -9,7 +9,7 @@ export default function ExpensesPage() {
   const router = useRouter();
 
   const balances = [
-    { name: 'Alex.sol (me)', balance: '+€83.25', me: true },
+    { name: 'Alex.sol', balance: '+€83.25', me: true },
     { name: 'Brian.sol', balance: '-€43.75', me: false },
     { name: 'Julia.sol', balance: '+€12.25', me: false },
     { name: 'Thomas.sol', balance: '-€51.75', me: false },
@@ -20,7 +20,7 @@ export default function ExpensesPage() {
       <Head>
         <title>City trip</title>
       </Head>
-      <section className='bg-black text-white h-screen flex flex-col'>
+      <section className='bg-white text-black h-screen flex flex-col'>
         <header className='flex justify-between items-center p-4'>
           <div className='flex items-center'>
             <button onClick={() => router.back()} className='mr-2'>
@@ -47,8 +47,12 @@ export default function ExpensesPage() {
             </button>
           </div>
           <div className='flex flex-col items-center bg-gray-900 p-4 rounded mb-4 w-3/4'>
-            <p className='text-lg mb-2'>You are owed <span className='font-bold'>€83.25</span></p>
-            <p className='text-sm mb-4 text-gray-400'>See how Brian and Thomas need to pay you back</p>
+            <p className='text-lg mb-2 text-white'>
+              You are owed <span className='font-bold text-white'>€83.25</span>
+            </p>
+            <p className='text-sm mb-4 text-gray-400'>
+              See how Brian.sol and Thomas.sol need to pay you back
+            </p>
             <button className='px-4 py-2 bg-blue-600 text-white rounded'>
               View All Suggested Reimbursements
             </button>
@@ -65,10 +69,14 @@ export default function ExpensesPage() {
                     {balance.name.charAt(0)}
                   </div>
                   <div>
-                    <p className='text-lg'>{balance.name} {balance.me && '(Me)'}</p>
+                    <p className='text-lg text-white'>
+                      {balance.name} {balance.me && '(Me)'}
+                    </p>
                   </div>
                 </div>
-                <p className={`text-lg font-bold ${balance.balance.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                <p
+                  className={`text-lg font-bold ${balance.balance.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {balance.balance}
                 </p>
               </div>
