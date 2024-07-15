@@ -15,11 +15,11 @@ export default function HomePage() {
   return (
     <main>
       <Head>
-        <title>Main Page</title>
+        <title>Solidr</title>
       </Head>
       <section className='bg-white h-screen flex flex-col justify-between'>
         <header className='flex justify-between items-center p-4'>
-          <h1 className='text-lg font-bold'>Main Page</h1>
+          <h1 className='text-lg font-bold'>Solidr</h1>
         </header>
         <div className='flex flex-col items-center justify-end flex-grow pb-10'>
           <button
