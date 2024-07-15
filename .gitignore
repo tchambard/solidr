@@ -5,6 +5,7 @@ node_modules
 yarn-error.log
 .yarn/*
 !.yarn/cache
+.yarn/releases
 target
 .history
 .env

@@ -12,9 +12,7 @@ export default function RootLayout({
   return (
     <html>
       <body>
-        <RecoilRoot>
-          {children}
-        </RecoilRoot>
+        <RecoilRoot>{children}</RecoilRoot>
       </body>
     </html>
   );

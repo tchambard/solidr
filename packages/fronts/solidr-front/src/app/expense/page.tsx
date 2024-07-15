@@ -9,11 +9,20 @@ export default function ExpensesPage() {
   const router = useRouter();
 
   const expenses = [
-    { date: 'Xxx XX, 20XX', items: [
-      { id: 1, name: 'Hotel', payer: 'Alex (me)', amount: '€X.00', icon: '🏨' },
-      { id: 2, name: 'Picnic', payer: 'Brian', amount: '€X.00', icon: '🍔' },
-      { id: 3, name: 'Car', payer: 'Julia', amount: '€X.00', icon: '🚗' }
-    ]}
+    {
+      date: 'Xxx XX, 20XX',
+      items: [
+        {
+          id: 1,
+          name: 'Hotel',
+          payer: 'Alex (me)',
+          amount: '€X.00',
+          icon: '🏨',
+        },
+        { id: 2, name: 'Picnic', payer: 'Brian', amount: '€X.00', icon: '🍔' },
+        { id: 3, name: 'Car', payer: 'Julia', amount: '€X.00', icon: '🚗' },
+      ],
+    },
   ];
 
   return (
@@ -24,7 +33,9 @@ export default function ExpensesPage() {
       <section className='bg-white text-black h-screen flex flex-col'>
         <header className='flex justify-between items-center p-4'>
           <div className='flex items-center'>
-            <button onClick={() => router.back()} className='mr-2'>◀️</button>
+            <button onClick={() => router.back()} className='mr-2'>
+              ◀️
+            </button>
             <h1 className='text-lg font-bold'>Solidr</h1>
           </div>
         </header>
@@ -38,8 +49,12 @@ export default function ExpensesPage() {
           />
           <h2 className='text-2xl font-semibold mb-4'>Your trip</h2>
           <div className='flex mb-4'>
-            <button className='px-4 py-2 bg-gray-200 text-black rounded-l'>Expenses</button>
-            <button className='px-4 py-2 bg-gray-300 text-black rounded-r'>Balances</button>
+            <button className='px-4 py-2 bg-gray-200 text-black rounded-l'>
+              Expenses
+            </button>
+            <button className='px-4 py-2 bg-gray-300 text-black rounded-r'>
+              Balances
+            </button>
           </div>
           <div className='flex justify-between w-full px-8 mb-2'>
             <p>My Expenses</p>
@@ -54,12 +69,17 @@ export default function ExpensesPage() {
           <div key={expense.date} className='w-full px-8 mb-4'>
             <p className='text-lg font-bold mb-2'>{expense.date}</p>
             {expense.items.map((item) => (
-              <div key={item.id} className='flex justify-between items-center bg-gray-200 p-4 rounded mb-2'>
+              <div
+                key={item.id}
+                className='flex justify-between items-center bg-gray-200 p-4 rounded mb-2'
+              >
                 <div className='flex items-center'>
                   <span className='text-2xl mr-4'>{item.icon}</span>
                   <div>
                     <p className='text-lg'>{item.name}</p>
-                    <p className='text-sm text-gray-600'>Paid by {item.payer}</p>
+                    <p className='text-sm text-gray-600'>
+                      Paid by {item.payer}
+                    </p>
                   </div>
                 </div>
                 <p className='text-lg font-bold'>{item.amount}</p>
