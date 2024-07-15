@@ -44,12 +44,12 @@ export default function LoginPage() {
         <title>Login</title>
       </Head>
       <section className='bg-white text-black h-screen flex flex-col items-center justify-center p-4'>
-        <h1 className='text-lg font-bold mb-4'>Profile</h1>
+        <h1 className='text-lg font-bold mb-4'>Create your profile</h1>
         <div className='mb-4'>
           <img
             className='rounded-full'
-            src='/default-profile.png'
-            alt='Profile'
+            src='/images/profile-picture-image.jpeg'
+            alt='Profile picture'
             width='80'
             height='80'
           />
