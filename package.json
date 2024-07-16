@@ -6,7 +6,7 @@
         "lint-all": "yarn workspaces foreach -Apt run lint",
         "lint-fix-all": "yarn workspaces foreach -Apt run lint-fix",
         "clean-all": "yarn workspaces foreach -Apt run clean",
-        "compile-all": "yarn workspaces foreach -Apt run compile",
+        "compile-all": "yarn workspaces foreach -At run compile",
         "clean-compile-all": "yarn workspaces foreach -Apt run clean-compile",
         "test-all": "yarn workspaces foreach -Apt -j 1 run test",
         "g:clean": "cd $INIT_CWD && rimraf",

@@ -11373,6 +11373,7 @@ __metadata:
     react-lazy-load-image-component: "npm:1.6.0"
     react-router-dom: "npm:6.23.1"
     recoil: "npm:0.7.7"
+    solidr-program: "workspace:^"
     tweetnacl: "npm:^1.0.3"
     typescript: "npm:^4.9.3"
     vite: "npm:^4.0.0"
@@ -11383,7 +11384,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"solidr-program@workspace:packages/programs/solidr-program":
+"solidr-program@workspace:^, solidr-program@workspace:packages/programs/solidr-program":
   version: 0.0.0-use.local
   resolution: "solidr-program@workspace:packages/programs/solidr-program"
   dependencies:
