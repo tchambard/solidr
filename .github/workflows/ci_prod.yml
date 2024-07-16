@@ -1,17 +1,17 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Dev Continuous integration
+name: Prod Continuous integration
 env:
     VERCEL_ORG_ID: '${{ secrets.VERCEL_ORG_ID }}'
     VERCEL_PROJECT_ID: '${{ secrets.VERCEL_PROJECT_ID }}'
 # on:
 #     push:
-#         branches-ignore:
+#         branches:
 #             - master
 on:
     push:
-        branches:
+        branches-ignore:
             - master
 jobs:
     build:
@@ -42,14 +42,29 @@ jobs:
               run: |
                   echo "{\"imageName\": \"tchambard/solana-test-validator:latest\", \"containerName\": \"solana-test-validator\", \"bypassLocalExe\": true }" >> .solrc
 
-            - name: Lint
-              run: |
-                  yarn run lint-all
+            # - name: Lint
+            #   run: |
+            #       yarn run lint-all
 
             - name: Compile
               run: |
                   yarn run compile-all
 
-            - name: Test
-              run: |
-                  yarn run test-all
+            # - name: Test
+            #   run: |
+            #       yarn run test-all
+
+            - name: Install Vercel CLI
+              run: npm install -g vercel@latest
+
+            - name: Pull Vercel Environment Information
+              run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+              working-directory: packages/fronts/solidr-front-dapp
+
+            - name: Build Project Artifacts
+              run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+              working-directory: packages/fronts/solidr-front-dapp
+
+            - name: Deploy Project Artifacts Production to Vercel
+              run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+              working-directory: packages/fronts/solidr-front-dapp
