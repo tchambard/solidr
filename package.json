@@ -49,7 +49,7 @@
     "license": "MIT",
     "workspaces": [
         "packages/programs/*",
-        "packages/fronts/solidr-front-dapp/*"
+        "packages/fronts/*"
     ],
     "resolutions": {
         "@types/react": "18.3.1",
