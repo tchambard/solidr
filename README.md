@@ -57,5 +57,5 @@ yarn run start-local-test-validator -> solana-docker-shell exec "solana-test-val
 
 ### Devnet deployed program
 
-- program ID: 2xTttZsc5s65KyLmG1M6D5NpanUdYGj9SydbYnQFjnUP
+- program ID: 9yRToMqBifuubLRmssBnHW6v3Jv1QZGZ25tRqYgrzttQ
 - init global tx: 2DSf2PoinWRgYuGZA4EamdyxBoGaYszhNHyvPR4UBBDxfVVB1VKrQEmpociW7EyDpVeKaTSriHK8PYXSqJMmASRq

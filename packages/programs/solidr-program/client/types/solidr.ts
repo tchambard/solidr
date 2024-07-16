@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/solidr.json`.
  */
 export type Solidr = {
-    address: '2xTttZsc5s65KyLmG1M6D5NpanUdYGj9SydbYnQFjnUP';
+    address: '9yRToMqBifuubLRmssBnHW6v3Jv1QZGZ25tRqYgrzttQ';
     metadata: {
         name: 'solidr';
         version: '0.1.0';

@@ -4,14 +4,14 @@ import * as _ from 'lodash';
 
 export interface ITxInfo {
     events: NodeJS.Dict<any> | undefined;
-    fees: BN;
+    fees: number;
 }
 
 export type ITransactionResult<T = undefined> = {
     tx: string;
     accounts?: NodeJS.Dict<PublicKey>;
     events: any;
-    fees: BN;
+    fees: number;
     data: T;
 };
 
@@ -57,10 +57,7 @@ export class AbstractSolanaClient<T extends Idl> {
         return account.fetchMultiple(paginatedPublicKeys);
     }
 
-    public addEventListener<E extends keyof IdlEvents<T>>(
-        eventName: E & string,
-        callback: (event: IdlEvents<any>[E], slot: number, signature: string) => void,
-    ): number | undefined {
+    public addEventListener<E extends keyof IdlEvents<T>>(eventName: E & string, callback: (event: IdlEvents<T>[E], slot: number, signature: string) => void): number | undefined {
         try {
             return this.program.addEventListener(eventName, callback);
         } catch (e) {
@@ -111,9 +108,9 @@ export class AbstractSolanaClient<T extends Idl> {
                 const events: NodeJS.Dict<object[]> = {};
                 for (let log of logs) {
                     events[log.name] = events[log.name] || [];
-                    events[log.name].push(log.data);
+                    events[log.name]!.push(log.data);
                 }
-                const fees = txDetails.meta.fee;
+                const fees = +(txDetails.meta?.fee.toPrecision() ?? '0');
                 return { events, fees };
             } catch (e) {
                 return;
@@ -135,11 +132,12 @@ export class AbstractSolanaClient<T extends Idl> {
                     throw new Error('No result');
                 }
             } catch (e) {
+                const err = e as Error | undefined;
                 if (attempt < retry) {
                     await this.delay(timeMs);
                     return call(attempt + 1);
-                } else if (!e.message.match(/No result/)) {
-                    throw new Error(`Maximum retries reached without success. Last error: ${e.stack}`);
+                } else if (!err?.message?.match(/No result/)) {
+                    throw new Error(`Maximum retries reached without success. Last error: ${err?.stack}`);
                 }
             }
         };

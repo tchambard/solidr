@@ -666,7 +666,7 @@ describe('solidr', () => {
             await client.addSessionMember(alice, s1, zoe.publicKey, 'Zoééé');
 
             // Zoe create multiple owned session
-            const zoeSessionIds: string[] = [];
+            const zoeSessionIds: BN[] = [];
             for (let i = 1; i <= 5; i++) {
                 const r = await client.openSession(zoe, `Z${i}`, `Zoe session ${i}`, 'Zoe');
                 zoeSessionIds.push(new BN(r.events.sessionOpened[0].sessionId));
