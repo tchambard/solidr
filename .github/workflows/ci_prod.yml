@@ -5,14 +5,11 @@ name: Prod Continuous integration
 env:
     VERCEL_ORG_ID: '${{ secrets.VERCEL_ORG_ID }}'
     VERCEL_PROJECT_ID: '${{ secrets.VERCEL_PROJECT_ID }}'
-# on:
-#     push:
-#         branches:
-#             - master
 on:
     push:
-        branches-ignore:
+        branches:
             - master
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -42,17 +39,17 @@ jobs:
               run: |
                   echo "{\"imageName\": \"tchambard/solana-test-validator:latest\", \"containerName\": \"solana-test-validator\", \"bypassLocalExe\": true }" >> .solrc
 
-            # - name: Lint
-            #   run: |
-            #       yarn run lint-all
+            - name: Lint
+              run: |
+                  yarn run lint-all
 
             - name: Compile
               run: |
                   yarn run compile-all
 
-            # - name: Test
-            #   run: |
-            #       yarn run test-all
+            - name: Test
+              run: |
+                  yarn run test-all
 
             - name: Install Vercel CLI
               run: npm install -g vercel@latest
