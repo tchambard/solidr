@@ -12,11 +12,7 @@ export type Global = {
     sessionCount: BN;
 };
 
-type InternalSessionStatus =
-    | ({ closed?: never } & { opened: Record<string, never> })
-    | ({ opened?: never } & {
-          closed: Record<string, never>;
-      });
+type InternalSessionStatus = ({ closed?: never } & { opened: Record<string, never> }) | ({ opened?: never } & { closed: Record<string, never> });
 
 type InternalSession = {
     sessionId: BN;
@@ -597,6 +593,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     private mapExpense = (internalExpense: InternalExpense): Expense => {
         return {
             ...internalExpense,
+            amount: Math.round(internalExpense.amount * 100) / 100,
             date: new Date(internalExpense.date.toNumber() * 1000),
         };
     };

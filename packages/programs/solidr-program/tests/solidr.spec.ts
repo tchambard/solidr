@@ -298,7 +298,7 @@ describe('solidr', () => {
                 it('> should succeed when called by a member', async () => {
                     const expectedExpenseId = 0;
                     const name = 'expense1';
-                    const amount = 10;
+                    const amount = 10.45;
                     const timestampBefore = Math.floor(Date.now()) - 10000;
 
                     const {
@@ -394,7 +394,7 @@ describe('solidr', () => {
 
                 it("> should update expense when I'm the owner", async () => {
                     const updatedName = 'exp 3 updated';
-                    const updatedAmount = 100;
+                    const updatedAmount = 100.37;
                     await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
                     const expense = await client.getExpense(currentExpenseAccountPubkey);
 
