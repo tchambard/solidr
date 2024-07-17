@@ -6,6 +6,7 @@ import { assert } from 'chai';
 import { MISSING_INVITATION_HASH, SessionStatus, Solidr, SolidrClient } from '../client';
 import { ACCOUNT_NOT_FOUND, ACCOUNT_NOT_FOUND as ACCOUNT_NOT_FOUND_ERROR, ACCOUNT_NOT_INITIALIZED, assertError } from './test.helpers';
 import { hashToken } from '../client/TokenHelpers';
+import { PublicKey } from '@solana/web3.js';
 
 describe('solidr', () => {
     const provider = anchor.AnchorProvider.env();
@@ -298,7 +299,7 @@ describe('solidr', () => {
                 it('> should succeed when called by a member', async () => {
                     const expectedExpenseId = 0;
                     const name = 'expense1';
-                    const amount = 10;
+                    const amount = 10.45;
                     const timestampBefore = Math.floor(Date.now()) - 10000;
 
                     const {
@@ -393,7 +394,7 @@ describe('solidr', () => {
 
                 it("> should update expense when I'm the owner", async () => {
                     const updatedName = 'exp 3 updated';
-                    const updatedAmount = 100;
+                    const updatedAmount = 100.37;
                     const {
                         events: { expenseUpdated },
                     } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
@@ -979,6 +980,84 @@ describe('solidr', () => {
 
             const pageToCharlieExpenses = await client.listSessionRefunds(sessionId, { to: charlie.publicKey });
             assert.lengthOf(pageToCharlieExpenses, 0);
+        });
+    });
+
+    describe('> calculateBalance', () => {
+        let sessionId: BN;
+
+        beforeEach(async () => {
+            // Alice create a session
+            const r = await client.openSession(alice, 'A', 'Alice session', 'Alice');
+            sessionId = new BN(r.events.sessionOpened[0].sessionId);
+            // Add members
+            await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+            await client.addSessionMember(alice, sessionId, charlie.publicKey, 'Charlie');
+            await client.addSessionMember(alice, sessionId, zoe.publicKey, 'Zoé');
+        });
+
+        it('> Should handle a simple case with three people', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 30, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 20, [alice.publicKey, charlie.publicKey]);
+            await client.addExpense(charlie, sessionId, 'exp 3', 10, [alice.publicKey, bob.publicKey]);
+
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 1);
+            assert.includeDeepMembers(transfers, [{ from: charlie.publicKey, to: alice.publicKey, amount: 10 }]);
+        });
+
+        it('> Should handle partial participation', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 90, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 50, [alice.publicKey]);
+            await client.addExpense(charlie, sessionId, 'exp 3', 200, [alice.publicKey]);
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
+                { from: bob.publicKey, to: charlie.publicKey, amount: 5 },
+                { from: alice.publicKey, to: charlie.publicKey, amount: 65 },
+            ]);
+        });
+
+        it('> Should handle advance refund', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 60, [alice.publicKey]);
+            await client.addExpense(charlie, sessionId, 'exp 3', 30, [alice.publicKey]);
+            await client.addRefund(bob, sessionId, 20, alice.publicKey);
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
+                { from: charlie.publicKey, to: alice.publicKey, amount: 1.67 },
+                { from: charlie.publicKey, to: bob.publicKey, amount: 16.66 },
+            ]);
+        });
+
+        it('> Should handle when one person pays everything', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(alice, sessionId, 'exp 2', 50, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(alice, sessionId, 'exp 3', 30, [bob.publicKey, charlie.publicKey]);
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
+                { from: bob.publicKey, to: alice.publicKey, amount: 60 },
+                { from: charlie.publicKey, to: alice.publicKey, amount: 60 },
+            ]);
+        });
+
+        it('> Should handle fractional amounts', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 33.33, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 66.67, [alice.publicKey, charlie.publicKey]);
+            await client.addExpense(charlie, sessionId, 'exp 3', 100, [bob.publicKey, alice.publicKey]);
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 1);
+            assert.includeDeepMembers(transfers, [{ from: alice.publicKey, to: charlie.publicKey, amount: 33.33 }]);
+        });
+
+        it('> Should handle when no transfers are needed (already balanced)', async () => {
+            await client.addExpense(alice, sessionId, 'exp 1', 30, [bob.publicKey, charlie.publicKey]);
+            await client.addExpense(bob, sessionId, 'exp 2', 30, [alice.publicKey, charlie.publicKey]);
+            await client.addExpense(charlie, sessionId, 'exp 3', 30, [bob.publicKey, alice.publicKey]);
+            const transfers = await client.computeBalance(sessionId);
+            assert.lengthOf(transfers, 0);
         });
     });
 });

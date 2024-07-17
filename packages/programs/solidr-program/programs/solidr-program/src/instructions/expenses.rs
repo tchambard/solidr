@@ -35,7 +35,7 @@ pub struct AddExpenseContextData<'info> {
 pub fn add_expense(
     ctx: Context<AddExpenseContextData>,
     name: String,
-    amount: u16,
+    amount: f32,
     participants: Vec<Pubkey>,
 ) -> Result<()> {
     let owner = &mut ctx.accounts.owner;
@@ -51,7 +51,7 @@ pub fn add_expense(
         owner.key() == member.addr.key() && member.session_id == session.session_id,
         SolidrError::NotSessionMember
     );
-    require!(amount > 0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
+    require!(amount > 0.0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
     require!(name.len() <= 20, SolidrError::ExpenseNameTooLong);
 
     expense.session_id = session.session_id;
@@ -94,7 +94,7 @@ pub struct UpdateExpenseContextData<'info> {
 pub fn update_expense(
     ctx: Context<UpdateExpenseContextData>,
     name: String,
-    amount: u16,
+    amount: f32,
 ) -> Result<()> {
     let owner = &mut ctx.accounts.owner;
     let session = &mut ctx.accounts.session;
@@ -108,7 +108,7 @@ pub fn update_expense(
         owner.key() == expense.owner.key() && session.session_id == expense.session_id,
         SolidrError::NotExpenseOwner
     );
-    require!(amount > 0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
+    require!(amount > 0.0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
     require!(name.len() <= 20, SolidrError::ExpenseNameTooLong);
 
     expense.name = name;
