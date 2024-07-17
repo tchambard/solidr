@@ -283,6 +283,7 @@ describe('solidr', () => {
 
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.equal(expense.name, name);
+                    assert.equal(expense.amount, amount);
                     assert.equal(expense.owner.toString(), alice.publicKey.toString());
                     assert.isAtLeast(expense.date.getTime(), timestampBefore);
                     assert.isAtMost(expense.date.getTime(), Math.floor(Date.now()));
@@ -307,6 +308,7 @@ describe('solidr', () => {
 
                     const expense = await client.getExpense(expenseAccountPubkey);
                     assert.equal(expense.name, name);
+                    assert.equal(expense.amount, amount);
                     assert.equal(expense.owner.toString(), bob.publicKey.toString());
                     assert.isAtLeast(expense.date.getTime(), timestampBefore);
                     assert.isAtMost(expense.date.getTime(), Math.floor(Date.now()));
@@ -372,6 +374,82 @@ describe('solidr', () => {
                         assert.equal(expense.participants[0].toString(), alice.publicKey.toString());
 
                         assert.isUndefined(expenseParticipantAdded);
+                    });
+                });
+            });
+
+            describe('> updateExpense', () => {
+                let currentExpenseId: BN;
+                let currentExpenseAccountPubkey: PublicKey;
+
+                beforeEach(async () => {
+                    const {
+                        accounts: { expenseAccountPubkey },
+                        events: { expenseParticipantAdded },
+                        data: { expenseId },
+                    } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
+                    currentExpenseId = expenseId;
+                    currentExpenseAccountPubkey = expenseAccountPubkey;
+                });
+
+                it("> should update expense when I'm the owner", async () => {
+                    const updatedName = 'exp 3 updated';
+                    const updatedAmount = 100;
+                    await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
+                    const expense = await client.getExpense(currentExpenseAccountPubkey);
+
+                    assert.equal(expense.name, updatedName);
+                    assert.equal(expense.amount, updatedAmount);
+                });
+
+                it('> should fail when called with non owner of expense', async () => {
+                    await assertError(async () => client.updateExpense(bob, sessionId, currentExpenseId, 'exp 3 updated', 100), {
+                        code: 'NotExpenseOwner',
+                        message: 'Only expense owner can add participants',
+                    });
+                });
+
+                it('> should fail when called with invalid session id', async () => {
+                    await assertError(async () => client.updateExpense(alice, new BN(666), currentExpenseId, 'exp 3 updated', 100), {
+                        code: 'AccountNotInitialized',
+                        message: 'The program expected this account to be already initialized',
+                    });
+                });
+            });
+
+            describe('> deleteExpense', () => {
+                let currentExpenseId: BN;
+                let currentExpenseAccountPubkey: PublicKey;
+
+                beforeEach(async () => {
+                    const {
+                        accounts: { expenseAccountPubkey },
+                        events: { expenseParticipantAdded },
+                        data: { expenseId },
+                    } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
+                    currentExpenseId = expenseId;
+                    currentExpenseAccountPubkey = expenseAccountPubkey;
+                });
+
+                it("> should delete expense when I'm the owner", async () => {
+                    await client.deleteExpense(alice, sessionId, currentExpenseId);
+
+                    await assertError(async () => client.getExpense(currentExpenseAccountPubkey), {
+                        message: ACCOUNT_NOT_FOUND,
+                    });
+                });
+
+                it('> should fail when called with non owner of expense', async () => {
+                    await assertError(async () => client.deleteExpense(bob, sessionId, currentExpenseId), {
+                        code: 'NotExpenseOwner',
+                        message: 'Only expense owner can add participants',
+                    });
+                });
+
+                it('> should fail when called with invalid session id', async () => {
+                    await assertError(async () => client.deleteExpense(alice, new BN(666), currentExpenseId), {
+                        code: 'AccountNotInitialized',
+                        message: 'The program expected this account to be already initialized',
                     });
                 });
             });
@@ -825,7 +903,10 @@ describe('solidr', () => {
             const pageWithAllExpenses = await client.listSessionExpenses(sessionId);
             assert.lengthOf(pageWithAllExpenses, 3);
 
-            const pageWithPaginatedExpenses = await client.listSessionExpenses(sessionId, undefined, { page: 1, perPage: 2 });
+            const pageWithPaginatedExpenses = await client.listSessionExpenses(sessionId, undefined, {
+                page: 1,
+                perPage: 2,
+            });
             assert.lengthOf(pageWithPaginatedExpenses, 2);
 
             const pageWithAliceExpenses = await client.listSessionExpenses(sessionId, { owner: alice.publicKey });
@@ -867,7 +948,10 @@ describe('solidr', () => {
             const pageWithAllExpenses = await client.listSessionRefunds(sessionId);
             assert.lengthOf(pageWithAllExpenses, 3);
 
-            const pageWithPaginatedExpenses = await client.listSessionRefunds(sessionId, undefined, { page: 1, perPage: 2 });
+            const pageWithPaginatedExpenses = await client.listSessionRefunds(sessionId, undefined, {
+                page: 1,
+                perPage: 2,
+            });
             assert.lengthOf(pageWithPaginatedExpenses, 2);
 
             const pageFromAliceExpenses = await client.listSessionRefunds(sessionId, { from: alice.publicKey });

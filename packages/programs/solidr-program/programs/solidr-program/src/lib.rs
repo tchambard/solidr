@@ -129,6 +129,32 @@ pub mod solidr {
     }
 
     /**
+     * Updates an existing expense in the session.
+     *
+     * @param name The name of the expense to be updated
+     * @param amount The new amount of the expense
+     */
+    pub fn update_expense(
+        ctx: Context<UpdateExpenseContextData>,
+        name: String,
+        amount: u16,
+    ) -> Result<()> {
+        expenses::update_expense(ctx, name, amount)
+    }
+
+    /**
+     * Deletes an existing expense in the session.
+     *
+     * @param name The name of the expense to be deleted
+     * @param amount The amount of the expense to be deleted
+     */
+    pub fn delete_expense(
+        ctx: Context<DeleteExpenseContextData>,
+    ) -> Result<()> {
+        expenses::delete_expense(ctx)
+    }
+
+    /**
      * Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned "to" account
      *
      * @param amount The amount of the refund corresponding to session currency
