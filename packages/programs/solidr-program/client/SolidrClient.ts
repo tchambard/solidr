@@ -299,7 +299,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return sessionMemberAccountPubkey;
     }
 
-    public async addExpense(member: Wallet, sessionId: BN, name: string, amount: number, participants?: PublicKey[]): Promise<ITransactionResult> {
+    public async addExpense(member: Wallet, sessionId: BN, name: string, amount: number, participants?: PublicKey[]): Promise<ITransactionResult<{ expenseId: BN }>> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
@@ -321,6 +321,54 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                         isWritable: false,
                     })),
                 )
+                .transaction();
+
+            return this.signAndSendTransaction(member, tx, {
+                sessionAccountPubkey,
+                memberAccountPubkey,
+                expenseAccountPubkey,
+            }, {expenseId});
+        });
+    }
+
+    public async updateExpense(member: Wallet, sessionId: BN, expenseId:BN, name: string, amount: number): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
+            const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+
+            const tx = await this.program.methods
+                .updateExpense(name, amount)
+                .accountsPartial({
+                    owner: member.publicKey,
+                    member: memberAccountPubkey,
+                    session: sessionAccountPubkey,
+                    expense: expenseAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(member, tx, {
+                sessionAccountPubkey,
+                memberAccountPubkey,
+                expenseAccountPubkey,
+            });
+        });
+    }
+
+    public async deleteExpense(member: Wallet, sessionId: BN, expenseId:BN): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
+            const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
+
+            const tx = await this.program.methods
+                .deleteExpense()
+                .accountsPartial({
+                    owner: member.publicKey,
+                    member: memberAccountPubkey,
+                    session: sessionAccountPubkey,
+                    expense: expenseAccountPubkey,
+                })
                 .transaction();
 
             return this.signAndSendTransaction(member, tx, {

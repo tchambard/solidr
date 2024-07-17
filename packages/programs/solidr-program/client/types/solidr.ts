@@ -244,6 +244,33 @@ export type Solidr = {
             args: [];
         },
         {
+            name: 'deleteExpense';
+            docs: [
+                '* Deletes an existing expense in the session.\n     *\n     * @param name The name of the expense to be deleted\n     * @param amount The amount of the expense to be deleted',
+            ];
+            discriminator: [117, 203, 143, 99, 175, 155, 125, 144];
+            accounts: [
+                {
+                    name: 'owner';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'member';
+                    writable: true;
+                },
+                {
+                    name: 'expense';
+                    writable: true;
+                },
+            ];
+            args: [];
+        },
+        {
             name: 'initGlobal';
             discriminator: [44, 238, 77, 253, 76, 182, 192, 162];
             accounts: [
@@ -458,6 +485,42 @@ export type Solidr = {
                 },
             ];
         },
+        {
+            name: 'updateExpense';
+            docs: [
+                '* Updates an existing expense in the session.\n     *\n     * @param name The name of the expense to be updated\n     * @param amount The new amount of the expense',
+            ];
+            discriminator: [122, 188, 72, 67, 172, 189, 179, 163];
+            accounts: [
+                {
+                    name: 'owner';
+                    writable: true;
+                    signer: true;
+                },
+                {
+                    name: 'session';
+                    writable: true;
+                },
+                {
+                    name: 'member';
+                    writable: true;
+                },
+                {
+                    name: 'expense';
+                    writable: true;
+                },
+            ];
+            args: [
+                {
+                    name: 'name';
+                    type: 'string';
+                },
+                {
+                    name: 'amount';
+                    type: 'u16';
+                },
+            ];
+        },
     ];
     accounts: [
         {
@@ -487,12 +550,20 @@ export type Solidr = {
             discriminator: [161, 49, 47, 2, 245, 167, 224, 67];
         },
         {
+            name: 'expenseDeleted';
+            discriminator: [246, 52, 62, 55, 242, 249, 158, 23];
+        },
+        {
             name: 'expenseParticipantAdded';
             discriminator: [116, 202, 216, 162, 22, 73, 148, 87];
         },
         {
             name: 'expenseParticipantRemoved';
             discriminator: [37, 178, 57, 228, 101, 203, 244, 215];
+        },
+        {
+            name: 'expenseUpdated';
+            discriminator: [132, 21, 179, 234, 31, 228, 223, 159];
         },
         {
             name: 'memberAdded';
@@ -654,6 +725,22 @@ export type Solidr = {
             };
         },
         {
+            name: 'expenseDeleted';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
+                    },
+                ];
+            };
+        },
+        {
             name: 'expenseParticipantAdded';
             type: {
                 kind: 'struct';
@@ -689,6 +776,22 @@ export type Solidr = {
                     {
                         name: 'memberPubkey';
                         type: 'pubkey';
+                    },
+                ];
+            };
+        },
+        {
+            name: 'expenseUpdated';
+            type: {
+                kind: 'struct';
+                fields: [
+                    {
+                        name: 'sessionId';
+                        type: 'u64';
+                    },
+                    {
+                        name: 'expenseId';
+                        type: 'u16';
                     },
                 ];
             };

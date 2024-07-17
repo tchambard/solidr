@@ -80,7 +80,92 @@ pub fn add_expense(
 }
 
 #[derive(Accounts)]
+pub struct UpdateExpenseContextData<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
 
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(mut)]
+    pub member: Account<'info, MemberAccount>,
+
+    #[account(mut)]
+    pub expense: Account<'info, ExpenseAccount>,
+}
+
+pub fn update_expense(
+    ctx: Context<UpdateExpenseContextData>,
+    name: String,
+    amount: u16,
+) -> Result<()> {
+    let owner = &mut ctx.accounts.owner;
+    let session = &mut ctx.accounts.session;
+    let expense = &mut ctx.accounts.expense;
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+    require!(
+        owner.key() == expense.owner.key() && session.session_id == expense.session_id,
+        SolidrError::NotExpenseOwner
+    );
+    require!(amount > 0, SolidrError::ExpenseAmountMustBeGreaterThanZero);
+    require!(name.len() <= 20, SolidrError::ExpenseNameTooLong);
+
+    expense.name = name;
+    expense.amount = amount;
+
+    emit!(ExpenseUpdated {
+        session_id: session.session_id,
+        expense_id: expense.expense_id,
+    });
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DeleteExpenseContextData<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(mut)]
+    pub member: Account<'info, MemberAccount>,
+
+    #[account(mut, close=owner)]
+    pub expense: Account<'info, ExpenseAccount>,
+}
+
+pub fn delete_expense(
+    ctx: Context<DeleteExpenseContextData>
+) -> Result<()> {
+    let owner = &mut ctx.accounts.owner;
+    let session = &mut ctx.accounts.session;
+    let member = &mut ctx.accounts.member;
+    let expense = &mut ctx.accounts.expense;
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+    require!(
+        owner.key() == expense.owner.key() && session.session_id == expense.session_id,
+        SolidrError::NotExpenseOwner
+    );
+
+    emit!(ExpenseDeleted {
+        session_id: session.session_id,
+        expense_id: expense.expense_id,
+    });
+
+    Ok(())
+}
+
+#[derive(Accounts)]
 pub struct AddExpenseParticipantContextData<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -118,7 +203,6 @@ pub fn add_expense_participants(
 }
 
 #[derive(Accounts)]
-
 pub struct RemoveExpenseParticipantContextData<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
