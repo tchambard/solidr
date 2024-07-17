@@ -30,7 +30,7 @@ pub enum SolidrError {
     MaxParticipantsReached,
     #[msg("Only session member can add an expense")]
     NotSessionMember,
-    #[msg("Only expense owner can add participants")]
+    #[msg("Only expense owner can update or delete expense")]
     NotExpenseOwner,
     #[msg("Only members can be added as participants")]
     ParticipantNotMember,

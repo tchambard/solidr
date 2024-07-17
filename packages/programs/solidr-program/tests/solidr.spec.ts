@@ -386,27 +386,31 @@ describe('solidr', () => {
                 beforeEach(async () => {
                     const {
                         accounts: { expenseAccountPubkey },
-                        events: { expenseParticipantAdded },
-                        data: { expenseId },
+                        events: { expenseAdded },
                     } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
-                    currentExpenseId = expenseId;
+                    currentExpenseId = new BN(expenseAdded[0].expenseId);
                     currentExpenseAccountPubkey = expenseAccountPubkey;
                 });
 
                 it("> should update expense when I'm the owner", async () => {
                     const updatedName = 'exp 3 updated';
                     const updatedAmount = 100.37;
-                    await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
+                    const {
+                        events: { expenseUpdated },
+                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
                     const expense = await client.getExpense(currentExpenseAccountPubkey);
 
                     assert.equal(expense.name, updatedName);
                     assert.equal(expense.amount, updatedAmount);
+
+                    assert.equal(expenseUpdated[0].sessionId.toNumber(), sessionId);
+                    assert.equal(expenseUpdated[0].expenseId, currentExpenseId);
                 });
 
                 it('> should fail when called with non owner of expense', async () => {
                     await assertError(async () => client.updateExpense(bob, sessionId, currentExpenseId, 'exp 3 updated', 100), {
                         code: 'NotExpenseOwner',
-                        message: 'Only expense owner can add participants',
+                        message: 'Only expense owner can update or delete expense',
                     });
                 });
 
@@ -425,25 +429,29 @@ describe('solidr', () => {
                 beforeEach(async () => {
                     const {
                         accounts: { expenseAccountPubkey },
-                        events: { expenseParticipantAdded },
-                        data: { expenseId },
+                        events: { expenseAdded },
                     } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
-                    currentExpenseId = expenseId;
+                    currentExpenseId = new BN(expenseAdded[0].expenseId);
                     currentExpenseAccountPubkey = expenseAccountPubkey;
                 });
 
                 it("> should delete expense when I'm the owner", async () => {
-                    await client.deleteExpense(alice, sessionId, currentExpenseId);
+                    const {
+                        events: { expenseDeleted },
+                    } = await client.deleteExpense(alice, sessionId, currentExpenseId);
 
                     await assertError(async () => client.getExpense(currentExpenseAccountPubkey), {
                         message: ACCOUNT_NOT_FOUND,
                     });
+
+                    assert.equal(expenseDeleted[0].sessionId.toNumber(), sessionId);
+                    assert.equal(expenseDeleted[0].expenseId, currentExpenseId);
                 });
 
                 it('> should fail when called with non owner of expense', async () => {
                     await assertError(async () => client.deleteExpense(bob, sessionId, currentExpenseId), {
                         code: 'NotExpenseOwner',
-                        message: 'Only expense owner can add participants',
+                        message: 'Only expense owner can update or delete expense',
                     });
                 });
 
@@ -473,7 +481,7 @@ describe('solidr', () => {
                     it('> should fail when called with non expense owner', async () => {
                         await assertError(async () => client.addExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
                             code: 'NotExpenseOwner',
-                            message: 'Only expense owner can add participants',
+                            message: 'Only expense owner can update or delete expense',
                         });
                     });
 
@@ -540,7 +548,7 @@ describe('solidr', () => {
                         it('> should fail when called with non expense owner', async () => {
                             await assertError(async () => client.removeExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
                                 code: 'NotExpenseOwner',
-                                message: 'Only expense owner can add participants',
+                                message: 'Only expense owner can update or delete expense',
                             });
                         });
 
