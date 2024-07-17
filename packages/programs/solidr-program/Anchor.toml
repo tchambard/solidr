@@ -6,16 +6,16 @@ skip-lint = false
 seeds = true
 
 [programs.localnet]
-solidr = "En8LUDWsvmGmcdi6zJqbTyfmEjJYkzqR9DUgEyKYKojT"
+solidr = "7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD"
 
 [programs.devnet]
-solidr = "En8LUDWsvmGmcdi6zJqbTyfmEjJYkzqR9DUgEyKYKojT"
+solidr = "7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "Devnet"
 wallet = "/opt/.config/solana/id.json"
 
 [scripts]

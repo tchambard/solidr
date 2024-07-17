@@ -6,7 +6,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("En8LUDWsvmGmcdi6zJqbTyfmEjJYkzqR9DUgEyKYKojT");
+declare_id!("7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD");
 
 #[program]
 pub mod solidr {
