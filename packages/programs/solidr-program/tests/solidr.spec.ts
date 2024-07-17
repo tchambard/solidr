@@ -395,11 +395,16 @@ describe('solidr', () => {
                 it("> should update expense when I'm the owner", async () => {
                     const updatedName = 'exp 3 updated';
                     const updatedAmount = 100;
-                    await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
+                    const {
+                        events: { expenseUpdated },
+                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
                     const expense = await client.getExpense(currentExpenseAccountPubkey);
 
                     assert.equal(expense.name, updatedName);
                     assert.equal(expense.amount, updatedAmount);
+
+                    assert.equal(expenseUpdated[0].sessionId.toNumber(), sessionId);
+                    assert.equal(expenseUpdated[0].expenseId, currentExpenseId);
                 });
 
                 it('> should fail when called with non owner of expense', async () => {
@@ -432,11 +437,16 @@ describe('solidr', () => {
                 });
 
                 it("> should delete expense when I'm the owner", async () => {
-                    await client.deleteExpense(alice, sessionId, currentExpenseId);
+                    const {
+                        events: { expenseDeleted },
+                    } = await client.deleteExpense(alice, sessionId, currentExpenseId);
 
                     await assertError(async () => client.getExpense(currentExpenseAccountPubkey), {
                         message: ACCOUNT_NOT_FOUND,
                     });
+
+                    assert.equal(expenseDeleted[0].sessionId.toNumber(), sessionId);
+                    assert.equal(expenseDeleted[0].expenseId, currentExpenseId);
                 });
 
                 it('> should fail when called with non owner of expense', async () => {
