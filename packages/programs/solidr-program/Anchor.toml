@@ -15,7 +15,7 @@ solidr = "7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "Localnet"
 wallet = "/opt/.config/solana/id.json"
 
 [scripts]
