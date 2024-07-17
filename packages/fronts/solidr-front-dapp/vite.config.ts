@@ -8,32 +8,43 @@ import { fileURLToPath } from 'url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react({ jsxRuntime: "classic" }),
-    (vitePluginDynamicImport as any)(),
-    splitVendorChunkPlugin(),
-    checker({ typescript: { tsconfigPath: "tsconfig.json" } }),
-    nodePolyfills({
-      include: [
-        "stream",
-        "process",
-        "querystring",
-        "buffer",
-        "util",
-        "events",
-        "assert",
-      ],
-    }),
-  ],
-  resolve: {
-    alias: {
-      "@solidr-idl": path.resolve(
-        "../../programs/solidr-program/target/idl/solidr.json"
-      ),
-      "@solidr": path.resolve("../../programs/solidr-program/client"),
-      "@": fileURLToPath(new URL("./src", import.meta.url))
+    plugins: [
+        react({ jsxRuntime: "classic" }),
+        (vitePluginDynamicImport as any)(),
+        splitVendorChunkPlugin(),
+        checker({ typescript: { tsconfigPath: "tsconfig.json" } }),
+        nodePolyfills({
+            include: [
+                "stream",
+                "process",
+                "querystring",
+                "buffer",
+                "util",
+                "events",
+                "assert",
+            ],
+        }),
+    ],
+    resolve: {
+        alias: {
+            "@solidr-idl": path.resolve(
+                "../../programs/solidr-program/target/idl/solidr.json"
+            ),
+            "@solidr": path.resolve("../../programs/solidr-program/client"),
+            "@": fileURLToPath(new URL("./src", import.meta.url))
+        },
+        preserveSymlinks: true,
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".mjs", ".mts"],
     },
-    preserveSymlinks: true,
-    extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".mjs", ".mts"],
-  },
+    build: {
+        rollupOptions: {
+            onwarn(warning, warn) {
+                // Suppress "Module level directives cause errors when bundled" warnings
+                if (warning.code === "MODULE_LEVEL_DIRECTIVE") {
+                    return;
+                }
+                warn(warning);
+            },
+        },
+    },
 });

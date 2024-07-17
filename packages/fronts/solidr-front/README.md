@@ -1,1 +1,0 @@
-# Solidr Front
