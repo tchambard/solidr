@@ -317,17 +317,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return sessionMemberAccountPubkey;
     }
 
-    public async addExpense(
-        member: Wallet,
-        sessionId: BN,
-        name: string,
-        amount: number,
-        participants?: PublicKey[],
-    ): Promise<
-        ITransactionResult<{
-            expenseId: BN;
-        }>
-    > {
+    public async addExpense(member: Wallet, sessionId: BN, name: string, amount: number, participants?: PublicKey[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
@@ -351,16 +341,11 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 )
                 .transaction();
 
-            return this.signAndSendTransaction(
-                member,
-                tx,
-                {
-                    sessionAccountPubkey,
-                    memberAccountPubkey,
-                    expenseAccountPubkey,
-                },
-                { expenseId },
-            );
+            return this.signAndSendTransaction(member, tx, {
+                sessionAccountPubkey,
+                memberAccountPubkey,
+                expenseAccountPubkey,
+            });
         });
     }
 

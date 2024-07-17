@@ -385,10 +385,9 @@ describe('solidr', () => {
                 beforeEach(async () => {
                     const {
                         accounts: { expenseAccountPubkey },
-                        events: { expenseParticipantAdded },
-                        data: { expenseId },
+                        events: { expenseAdded },
                     } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
-                    currentExpenseId = expenseId;
+                    currentExpenseId = new BN(expenseAdded[0].expenseId);
                     currentExpenseAccountPubkey = expenseAccountPubkey;
                 });
 
@@ -429,10 +428,9 @@ describe('solidr', () => {
                 beforeEach(async () => {
                     const {
                         accounts: { expenseAccountPubkey },
-                        events: { expenseParticipantAdded },
-                        data: { expenseId },
+                        events: { expenseAdded },
                     } = await client.addExpense(alice, sessionId, 'exp 3', 200, [charlie.publicKey]);
-                    currentExpenseId = expenseId;
+                    currentExpenseId = new BN(expenseAdded[0].expenseId);
                     currentExpenseAccountPubkey = expenseAccountPubkey;
                 });
 
