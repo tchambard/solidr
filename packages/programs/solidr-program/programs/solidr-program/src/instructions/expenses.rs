@@ -88,9 +88,6 @@ pub struct UpdateExpenseContextData<'info> {
     pub session: Account<'info, SessionAccount>,
 
     #[account(mut)]
-    pub member: Account<'info, MemberAccount>,
-
-    #[account(mut)]
     pub expense: Account<'info, ExpenseAccount>,
 }
 
@@ -133,9 +130,6 @@ pub struct DeleteExpenseContextData<'info> {
     #[account(mut)]
     pub session: Account<'info, SessionAccount>,
 
-    #[account(mut)]
-    pub member: Account<'info, MemberAccount>,
-
     #[account(mut, close=owner)]
     pub expense: Account<'info, ExpenseAccount>,
 }
@@ -145,7 +139,6 @@ pub fn delete_expense(
 ) -> Result<()> {
     let owner = &mut ctx.accounts.owner;
     let session = &mut ctx.accounts.session;
-    let member = &mut ctx.accounts.member;
     let expense = &mut ctx.accounts.expense;
 
     require!(

@@ -359,7 +359,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .updateExpense(name, amount)
                 .accountsPartial({
                     owner: member.publicKey,
-                    member: memberAccountPubkey,
                     session: sessionAccountPubkey,
                     expense: expenseAccountPubkey,
                 })
@@ -383,7 +382,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .deleteExpense()
                 .accountsPartial({
                     owner: member.publicKey,
-                    member: memberAccountPubkey,
                     session: sessionAccountPubkey,
                     expense: expenseAccountPubkey,
                 })
