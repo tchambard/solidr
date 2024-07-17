@@ -22,6 +22,12 @@ describe('solidr', () => {
     // keep zoe for listing tests
     const zoe = new Wallet(anchor.web3.Keypair.generate());
 
+    console.log('Alice:', alice.publicKey.toString());
+    console.log('Bob:', bob.publicKey.toString());
+    console.log('Charlie:', charlie.publicKey.toString());
+    console.log('Paul:', paul.publicKey.toString());
+    console.log('Zoe:', zoe.publicKey.toString());
+
     const client = new SolidrClient(program, { skipPreflight: false, preflightCommitment: 'confirmed' });
 
     before(async () => {
@@ -1001,18 +1007,37 @@ describe('solidr', () => {
             await client.addExpense(bob, sessionId, 'exp 2', 20, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 10, [alice.publicKey, bob.publicKey]);
 
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 1);
-            assert.includeDeepMembers(transfers, [{ from: charlie.publicKey, to: alice.publicKey, amount: 10 }]);
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.sameDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: 10 },
+                { owner: bob.publicKey, balance: 0 },
+                { owner: charlie.publicKey, balance: -10 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 1);
+            assert.includeDeepMembers(memberTransfers, [{ from: charlie.publicKey, to: alice.publicKey, amount: 10 }]);
         });
 
         it('> Should handle partial participation', async () => {
             await client.addExpense(alice, sessionId, 'exp 1', 90, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 50, [alice.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 200, [alice.publicKey]);
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 2);
-            assert.includeDeepMembers(transfers, [
+
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.includeDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: -65 },
+                { owner: bob.publicKey, balance: -5 },
+                { owner: charlie.publicKey, balance: 70 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 2);
+            assert.includeDeepMembers(memberTransfers, [
                 { from: bob.publicKey, to: charlie.publicKey, amount: 5 },
                 { from: alice.publicKey, to: charlie.publicKey, amount: 65 },
             ]);
@@ -1023,9 +1048,19 @@ describe('solidr', () => {
             await client.addExpense(bob, sessionId, 'exp 2', 60, [alice.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 30, [alice.publicKey]);
             await client.addRefund(bob, sessionId, 20, alice.publicKey);
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 2);
-            assert.includeDeepMembers(transfers, [
+
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.includeDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: 1.67 },
+                { owner: bob.publicKey, balance: 16.67 },
+                { owner: charlie.publicKey, balance: -18.33 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 2);
+            assert.includeDeepMembers(memberTransfers, [
                 { from: charlie.publicKey, to: alice.publicKey, amount: 1.67 },
                 { from: charlie.publicKey, to: bob.publicKey, amount: 16.66 },
             ]);
@@ -1035,9 +1070,19 @@ describe('solidr', () => {
             await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(alice, sessionId, 'exp 2', 50, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(alice, sessionId, 'exp 3', 30, [bob.publicKey, charlie.publicKey]);
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 2);
-            assert.includeDeepMembers(transfers, [
+
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.includeDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: 120 },
+                { owner: bob.publicKey, balance: -60 },
+                { owner: charlie.publicKey, balance: -60 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 2);
+            assert.includeDeepMembers(memberTransfers, [
                 { from: bob.publicKey, to: alice.publicKey, amount: 60 },
                 { from: charlie.publicKey, to: alice.publicKey, amount: 60 },
             ]);
@@ -1047,17 +1092,37 @@ describe('solidr', () => {
             await client.addExpense(alice, sessionId, 'exp 1', 33.33, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 66.67, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 100, [bob.publicKey, alice.publicKey]);
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 1);
-            assert.includeDeepMembers(transfers, [{ from: alice.publicKey, to: charlie.publicKey, amount: 33.33 }]);
+
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.includeDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: -33.34 },
+                { owner: bob.publicKey, balance: 0 },
+                { owner: charlie.publicKey, balance: 33.33 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 1);
+            assert.includeDeepMembers(memberTransfers, [{ from: alice.publicKey, to: charlie.publicKey, amount: 33.33 }]);
         });
 
         it('> Should handle when no transfers are needed (already balanced)', async () => {
             await client.addExpense(alice, sessionId, 'exp 1', 30, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 30, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 30, [bob.publicKey, alice.publicKey]);
-            const transfers = await client.computeBalance(sessionId);
-            assert.lengthOf(transfers, 0);
+
+            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
+            //balances
+            assert.lengthOf(memberBalances, 4);
+            assert.includeDeepMembers(memberBalances, [
+                { owner: alice.publicKey, balance: 0 },
+                { owner: bob.publicKey, balance: 0 },
+                { owner: charlie.publicKey, balance: 0 },
+                { owner: zoe.publicKey, balance: 0 },
+            ]);
+            //transfers
+            assert.lengthOf(memberTransfers, 0);
         });
     });
 });

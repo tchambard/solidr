@@ -93,7 +93,7 @@ export type MemberBalance = {
     balance: number;
 };
 
-export type MemberBalanceTransfer = {
+export type MemberTransfer = {
     from: PublicKey;
     to: PublicKey;
     amount: number;
@@ -175,23 +175,25 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async computeBalance(sessionId: BN): Promise<MemberBalanceTransfer[]> {
+    public async computeBalance(sessionId: BN): Promise<{ memberBalances: MemberBalance[]; memberTransfers: MemberTransfer[] }> {
         return this.wrapFn(async () => {
-            const members: { [key: string]: MemberBalance } = {};
+            const sessionMembers = await this.listSessionMembers(sessionId);
+
+            const members = sessionMembers.reduce(
+                (members, member) => {
+                    members[member.addr.toString()] = { owner: member.addr, balance: 0 };
+                    return members;
+                },
+                {} as { [key: string]: MemberBalance },
+            );
 
             // 1. compute total of expenses for each members
             const expenses = await this.listSessionExpenses(sessionId);
             for (const expense of expenses) {
-                const shareAmount = expense.amount / expense.participants.length;
-                if (!members[expense.owner.toString()]) {
-                    members[expense.owner.toString()] = { owner: expense.owner, balance: 0 };
-                }
                 members[expense.owner.toString()].balance += expense.amount;
 
+                const shareAmount = expense.amount / expense.participants.length;
                 for (const participant of expense.participants) {
-                    if (!members[participant.toString()]) {
-                        members[participant.toString()] = { owner: participant, balance: 0 };
-                    }
                     members[participant.toString()].balance -= shareAmount;
                 }
             }
@@ -199,32 +201,28 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             // 2. compute total of expenses for each members
             const refunds = await this.listSessionRefunds(sessionId);
             for (const refund of refunds) {
-                if (!members[refund.from.toString()]) {
-                    members[refund.from.toString()] = { owner: refund.from, balance: 0 };
-                }
                 members[refund.from.toString()].balance += refund.amount;
-
-                if (!members[refund.to.toString()]) {
-                    members[refund.to.toString()] = { owner: refund.to, balance: 0 };
-                }
                 members[refund.to.toString()].balance -= refund.amount;
             }
+
+            const memberBalances = [...Object.values(members)];
 
             // 3. separate debtors and creditors
             const debtors: MemberBalance[] = [];
             const creditors: MemberBalance[] = [];
 
-            for (const member of Object.values(members)) {
-                member.balance = Math.round(member.balance * 100) / 100;
+            for (const member of memberBalances) {
+                const roundedBalance = Math.round(member.balance * 100) / 100;
+                member.balance = roundedBalance === 0 ? 0 : roundedBalance; // hack to remove "-0"
                 if (member.balance < 0) {
-                    debtors.push(member);
+                    debtors.push({ ...member });
                 } else if (member.balance > 0) {
-                    creditors.push(member);
+                    creditors.push({ ...member });
                 }
             }
 
             // 4. balance
-            const transfers: MemberBalanceTransfer[] = [];
+            const memberTransfers: MemberTransfer[] = [];
 
             while (debtors.length > 0 && creditors.length > 0) {
                 const debtor = debtors[0];
@@ -232,7 +230,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
                 const transferAmount = Math.min(Math.abs(debtor.balance), creditor.balance);
 
-                transfers.push({
+                memberTransfers.push({
                     from: debtor.owner,
                     to: creditor.owner,
                     amount: transferAmount,
@@ -244,9 +242,13 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 if (debtor.balance === 0) debtors.shift();
                 if (creditor.balance === 0) creditors.shift();
             }
-            return transfers;
+            return { memberBalances, memberTransfers };
         });
     }
+
+    public round2Precision = (amount: number) => {
+        return Math.round(amount * 100) / 100;
+    };
 
     public async generateSessionLink(
         admin: Wallet,
