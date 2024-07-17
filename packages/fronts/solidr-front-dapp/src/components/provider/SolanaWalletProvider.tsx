@@ -4,8 +4,9 @@ import {
     ConnectionProvider,
     WalletProvider,
 } from '@solana/wallet-adapter-react';
-import { WalletError } from '@solana/wallet-adapter-base';
+import { WalletAdapterNetwork, WalletError } from '@solana/wallet-adapter-base';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { createDefaultAddressSelector, createDefaultAuthorizationResultCache, createDefaultWalletNotFoundHandler, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
 import '@/assets/style/WalletAdapter.css';
 import { useSnackbar } from 'notistack';
 import { useRecoilValue } from 'recoil';
@@ -17,7 +18,19 @@ type Props = {
 
 export default function SolanaWalletProvider({ children }: Props) {
     const { network, endpoint } = useRecoilValue(walletState);
-    const wallets = useMemo(() => [], [network]);
+    const wallets = useMemo(() => [
+        new SolanaMobileWalletAdapter({
+            addressSelector: createDefaultAddressSelector(),
+            appIdentity: {
+                name: 'SolidR',
+                uri: 'https://solidr.vercel.app',
+                icon: 'relative/path/to/icon.png',
+            },
+            authorizationResultCache: createDefaultAuthorizationResultCache(),
+            chain: WalletAdapterNetwork.Devnet,
+            onWalletNotFound: createDefaultWalletNotFoundHandler(),
+        })
+    ], [network]);
 
     const { enqueueSnackbar } = useSnackbar();
     const onError = useCallback(

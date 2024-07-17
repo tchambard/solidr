@@ -6,7 +6,7 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("9yRToMqBifuubLRmssBnHW6v3Jv1QZGZ25tRqYgrzttQ");
+declare_id!("En8LUDWsvmGmcdi6zJqbTyfmEjJYkzqR9DUgEyKYKojT");
 
 #[program]
 pub mod solidr {
@@ -148,9 +148,7 @@ pub mod solidr {
      * @param name The name of the expense to be deleted
      * @param amount The amount of the expense to be deleted
      */
-    pub fn delete_expense(
-        ctx: Context<DeleteExpenseContextData>,
-    ) -> Result<()> {
+    pub fn delete_expense(ctx: Context<DeleteExpenseContextData>) -> Result<()> {
         expenses::delete_expense(ctx)
     }
 
