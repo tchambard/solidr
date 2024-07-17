@@ -409,7 +409,7 @@ describe('solidr', () => {
                 it('> should fail when called with non owner of expense', async () => {
                     await assertError(async () => client.updateExpense(bob, sessionId, currentExpenseId, 'exp 3 updated', 100), {
                         code: 'NotExpenseOwner',
-                        message: 'Only expense owner can add participants',
+                        message: 'Only expense owner can update or delete expense',
                     });
                 });
 
@@ -450,7 +450,7 @@ describe('solidr', () => {
                 it('> should fail when called with non owner of expense', async () => {
                     await assertError(async () => client.deleteExpense(bob, sessionId, currentExpenseId), {
                         code: 'NotExpenseOwner',
-                        message: 'Only expense owner can add participants',
+                        message: 'Only expense owner can update or delete expense',
                     });
                 });
 
@@ -480,7 +480,7 @@ describe('solidr', () => {
                     it('> should fail when called with non expense owner', async () => {
                         await assertError(async () => client.addExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
                             code: 'NotExpenseOwner',
-                            message: 'Only expense owner can add participants',
+                            message: 'Only expense owner can update or delete expense',
                         });
                     });
 
@@ -547,7 +547,7 @@ describe('solidr', () => {
                         it('> should fail when called with non expense owner', async () => {
                             await assertError(async () => client.removeExpenseParticipants(bob, sessionId, expenseId, [charlie.publicKey]), {
                                 code: 'NotExpenseOwner',
-                                message: 'Only expense owner can add participants',
+                                message: 'Only expense owner can update or delete expense',
                             });
                         });
 
