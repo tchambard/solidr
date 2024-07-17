@@ -17,6 +17,7 @@ cf [solana-test-validator-docker](https://github.com/tchambard/solana-test-valid
 See all scripts in main package.json file.
 
 ### Install dependencies
+
 ```sh
 yarn install
 ```
@@ -57,5 +58,5 @@ yarn run start-local-test-validator -> solana-docker-shell exec "solana-test-val
 
 ### Devnet deployed program
 
-- program ID: 9yRToMqBifuubLRmssBnHW6v3Jv1QZGZ25tRqYgrzttQ
-- init global tx: 2DSf2PoinWRgYuGZA4EamdyxBoGaYszhNHyvPR4UBBDxfVVB1VKrQEmpociW7EyDpVeKaTSriHK8PYXSqJMmASRq
+-   program ID: En8LUDWsvmGmcdi6zJqbTyfmEjJYkzqR9DUgEyKYKojT
+-   init global tx: 2DSf2PoinWRgYuGZA4EamdyxBoGaYszhNHyvPR4UBBDxfVVB1VKrQEmpociW7EyDpVeKaTSriHK8PYXSqJMmASRq
