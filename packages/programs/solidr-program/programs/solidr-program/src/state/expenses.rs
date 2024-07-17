@@ -8,7 +8,7 @@ pub struct ExpenseAccount {
     pub expense_id: u16, // 2
     pub date: i64,       // 8
     pub owner: Pubkey,   // 32
-    pub amount: u16,     // 2
+    pub amount: f32,     // 4
     #[max_len(20)]
     pub name: String, // 4 + 20
     #[max_len(10)]

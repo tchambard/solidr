@@ -98,7 +98,7 @@ pub mod solidr {
     pub fn add_expense(
         ctx: Context<AddExpenseContextData>,
         name: String,
-        amount: u16,
+        amount: f32,
         participants: Vec<Pubkey>,
     ) -> Result<()> {
         expenses::add_expense(ctx, name, amount, participants)
@@ -137,7 +137,7 @@ pub mod solidr {
     pub fn update_expense(
         ctx: Context<UpdateExpenseContextData>,
         name: String,
-        amount: u16,
+        amount: f32,
     ) -> Result<()> {
         expenses::update_expense(ctx, name, amount)
     }
