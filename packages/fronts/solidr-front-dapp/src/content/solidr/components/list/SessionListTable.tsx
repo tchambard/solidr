@@ -23,8 +23,6 @@ export default () => {
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
     const [sessionList, setSessionList] = useRecoilState(sessionListState);
-    const [sessionCurrent, setSessionCurrent] =
-        useRecoilState(sessionCurrentState);
 
     useEffect(() => {
         if (!solidrClient) return;

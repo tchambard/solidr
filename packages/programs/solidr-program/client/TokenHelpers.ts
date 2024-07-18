@@ -1,4 +1,4 @@
-import { Keypair } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { randomBytes } from '@noble/hashes/utils';
 import { sha256 } from '@noble/hashes/sha256';
 
@@ -13,9 +13,9 @@ export type SessionLinkTokenData = {
     admin: string;
 };
 
-export function generateSessionLinkTokenData(sessionId: string, signer: Keypair): SessionLinkToken {
+export function generateSessionLinkTokenData(sessionId: string, signerPublickey: PublicKey): SessionLinkToken {
     const nonce = Buffer.from(randomBytes(16)).toString('hex');
-    const token = encodeSessionLinkToken([sessionId, nonce, signer.publicKey.toBase58()]);
+    const token = encodeSessionLinkToken([sessionId, nonce, signerPublickey.toBase58()]);
     const hash = hashToken(token);
     return { token, hash };
 }
