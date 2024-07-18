@@ -3,8 +3,6 @@ import { Helmet } from 'react-helmet-async';
 import { Box, Button, Container, Grid, Paper, Typography } from '@mui/material';
 import * as _ from 'lodash';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
-
-import SessionHeader from './SessionHeader';
 import { useParams } from 'react-router';
 
 import SessionMemberList from './SessionMemberList';
@@ -25,6 +23,7 @@ import { Link } from 'react-router-dom';
 import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
+import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
@@ -174,7 +173,7 @@ export default () => {
                 </title>
             </Helmet>
             <PageTitleWrapper>
-                <SessionHeader />
+                <SessionNavigation />
                 <SessionClose />
             </PageTitleWrapper>
             <Container maxWidth={'xl'}>

@@ -1,19 +1,10 @@
 import { useEffect } from 'react';
-import {
-    Card,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-} from '@mui/material';
+import { Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import SessionListItemActions from './SessionListItemActions';
 
-import { sessionCurrentState, sessionListState } from '@/store/sessions';
+import { sessionListState } from '@/store/sessions';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
@@ -67,33 +58,18 @@ export default () => {
                                     <TableRow hover key={session.sessionId.toString()}>
                                         <TableCell>
                                             <Link to={`/sessions/${session.sessionId}`}>
-                                                <Typography
-                                                    variant={'body1'}
-                                                    fontWeight={'bold'}
-                                                    color={'text.primary'}
-                                                    gutterBottom
-                                                    noWrap
-                                                >
+                                                <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
                                                     {session.name}
                                                 </Typography>
                                             </Link>
                                         </TableCell>
                                         <TableCell>
-                                            <Typography
-                                                variant={'body1'}
-                                                fontWeight={'bold'}
-                                                color={'text.primary'}
-                                                gutterBottom
-                                                noWrap
-                                            >
+                                            <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
                                                 {session.description}
                                             </Typography>
                                         </TableCell>
                                         <TableCell align={'right'}>
-                                            <SessionListItemActions
-                                                currentView={'list'}
-                                                sessionId={session.sessionId}
-                                            />
+                                            <SessionListItemActions currentView={'list'} sessionId={session.sessionId} />
                                         </TableCell>
                                     </TableRow>
                                 );
