@@ -85,20 +85,21 @@ export default () => {
                 if (!sessionCurrent.session) {
                     return;
                 }
-                setSessionCurrent({
+                const newSessionCurrent = {
                     ...sessionCurrent,
                     session: {
                         ...sessionCurrent.session,
                         status: SessionStatus.Closed,
                     },
-                });
-                reloadSessionBalance(sessionCurrent, anchorWallet);
+                };
+                setSessionCurrent(newSessionCurrent);
+                reloadSessionBalance(newSessionCurrent, anchorWallet);
             });
             sessionStatusChangesListener && listeners.push(sessionStatusChangesListener);
 
             const memberRegistrationListener = solidrClient.addEventListener('memberAdded', (event) => {
                 solidrClient.listSessionMembers(sessionCurrent.session?.sessionId).then((members) => {
-                    setSessionCurrent({
+                    const newSessionCurrent = {
                         ...sessionCurrent,
                         members: members.reduce(
                             (acc, member) => {
@@ -107,8 +108,9 @@ export default () => {
                             },
                             {} as { [pubkey: string]: SessionMember },
                         ),
-                    });
-                    reloadSessionBalance(sessionCurrent, anchorWallet);
+                    };
+                    setSessionCurrent(newSessionCurrent);
+                    reloadSessionBalance(newSessionCurrent, anchorWallet);
                 });
             });
             memberRegistrationListener && listeners.push(memberRegistrationListener);
@@ -118,15 +120,17 @@ export default () => {
                     if (!sessionCurrent.session) {
                         return;
                     }
-                    setSessionCurrent({
+                    const newSessionCurrent = {
                         ...sessionCurrent,
                         expenses,
                         session: {
                             ...sessionCurrent.session,
                             expensesCount: sessionCurrent.session.expensesCount + 1,
                         },
-                    });
-                    reloadSessionBalance(sessionCurrent, anchorWallet);
+                    };
+
+                    setSessionCurrent(newSessionCurrent);
+                    reloadSessionBalance(newSessionCurrent, anchorWallet);
                 });
             });
             expensesRegistrationListener && listeners.push(expensesRegistrationListener);
