@@ -1,4 +1,4 @@
-import { Program } from '@coral-xyz/anchor';
+import { AnchorError, Program } from '@coral-xyz/anchor';
 import {
     Alert,
     Box,
@@ -41,15 +41,16 @@ export default ({ children }: IWalletContainerWrapperProps) => {
                 { skipPreflight: false },
                 async (fn): Promise<any> => {
                     try {
-                        setTx({ pending: true });
-                        const res = await fn();
-                        setTx({ pending: false });
-                        return res;
+                        return await fn();
                     } catch (e: any) {
-                        console.log('e :>> ', e);
+                        let message = e?.transactionMessage || e?.message;
+                        if (e.logs) {
+                            const err = AnchorError.parse(e.logs);
+                            if (err) message = err.error.errorMessage
+                        }
                         setTx({
                             pending: false,
-                            error: e?.transactionMessage || e?.message || 'Unknown error',
+                            error: message || 'Unknown error',
                         });
                     }
                 },

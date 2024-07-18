@@ -110,7 +110,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
 
     constructor(program: Program<Solidr>, options?: SendOptions, wrapFn?: ProgramInstructionWrapper<Solidr>) {
-        super(program, options);
+        super(program, options, wrapFn);
         this.globalAccountPubkey = PublicKey.findProgramAddressSync([Buffer.from('global')], program.programId)[0];
     }
 

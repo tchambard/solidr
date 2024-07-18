@@ -1,5 +1,5 @@
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { sessionCurrentState } from '@/store/sessions';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { SessionStatus } from '@solidr';
 
 export default () => {
-    const [sessionCurrent, setSessionCurrent] = useRecoilState(sessionCurrentState);
+    const sessionCurrent = useRecoilValue(sessionCurrentState);
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
 
@@ -49,8 +49,9 @@ export default () => {
                     <Button
                         color="primary"
                         onClick={() => {
-                            solidrClient?.closeSession(anchorWallet, sessionCurrent.session?.sessionId);
-                            handleClose();
+                            solidrClient?.closeSession(anchorWallet, sessionCurrent.session?.sessionId).then(() => {
+                                handleClose();
+                            });
                         }}
                         autoFocus
                     >
