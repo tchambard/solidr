@@ -18,6 +18,7 @@ import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { SessionMember, SessionStatus } from '@solidr';
+import SessionClose from '@/content/solidr/components/actions/SessionClose';
 import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
 
@@ -156,6 +157,7 @@ export default () => {
             </Helmet>
             <PageTitleWrapper>
                 <SessionHeader />
+                <SessionClose />
             </PageTitleWrapper>
             <Container maxWidth={'xl'}>
                 <Grid container direction={'row'} justifyContent={'center'} alignItems={'stretch'} spacing={3}>
