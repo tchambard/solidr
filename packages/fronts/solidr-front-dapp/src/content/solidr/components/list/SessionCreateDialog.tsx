@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
-import { useAnchorWallet, useWallet } from '@solana/wallet-adapter-react';
-import { solidrClientState } from '@/store/wallet';
+import { useAnchorWallet } from '@solana/wallet-adapter-react';
+import { solidrClientState, txState } from '@/store/wallet';
 import { useRecoilValue } from 'recoil';
 import { Wallet } from '@coral-xyz/anchor';
 
@@ -33,8 +33,8 @@ export default ({
 }: ISessionCreateDialogProps) => {
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
-    const [pending, setPending] = useState(false);
     const [formData, setFormData] = useState<Partial<ICreateSessionParams>>();
+    const tx = useRecoilValue(txState);
 
     if (!anchorWallet || !solidrClient) return <></>;
     return (
@@ -53,14 +53,12 @@ export default ({
                             return;
                         }
                         setFormData(data);
-                        setPending(true);
                         solidrClient.openSession(
                             anchorWallet,
                             data.name,
                             data.description,
                             data.memberName,
                         ).then(() => {
-                            setPending(false);
                             setDialogVisible(false);
                         });
                     }}
@@ -88,7 +86,7 @@ export default ({
                         />
                         <br />
                         <LoadingButton
-                            loading={pending}
+                            loading={tx.pending}
                             loadingPosition={'end'}
                             variant={'contained'}
                             color={'primary'}
