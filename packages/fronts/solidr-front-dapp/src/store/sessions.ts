@@ -1,11 +1,11 @@
 import { atom } from 'recoil';
 import { Expense, MemberBalance, MemberTransfer, Refund, Session, SessionMember } from '@solidr';
 
-type SessionListState = { items: Session[]; loaded: boolean };
+type SessionListState = { items: Session[] };
 
 export const sessionListState = atom<SessionListState>({
     key: 'sessionListState',
-    default: { items: [], loaded: false },
+    default: { items: [] },
     dangerouslyAllowMutability: true,
 });
 
