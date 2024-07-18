@@ -32,11 +32,11 @@ export default ({
     setDialogVisible,
 }: ISessionCreateDialogProps) => {
     const anchorWallet = useAnchorWallet() as Wallet;
-    const SolidrClient = useRecoilValue(solidrClientState);
+    const solidrClient = useRecoilValue(solidrClientState);
     const [pending, setPending] = useState(false);
     const [formData, setFormData] = useState<Partial<ICreateSessionParams>>();
 
-    if (!anchorWallet || !SolidrClient) return <></>;
+    if (!anchorWallet || !solidrClient) return <></>;
     return (
         <Dialog
             disableEscapeKeyDown
@@ -54,7 +54,7 @@ export default ({
                         }
                         setFormData(data);
                         setPending(true);
-                        SolidrClient.openSession(
+                        solidrClient.openSession(
                             anchorWallet,
                             data.name,
                             data.description,

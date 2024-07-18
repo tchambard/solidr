@@ -10215,6 +10215,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qrcode.react@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "qrcode.react@npm:3.1.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10/71953241f151ca5ad4013c034cb13033e1ebad56a1db77297a7ddd7fd4d5f137f37f3be51133aeef0b54dc52d6c76630429d2269bd72e6858c3209fe42310498
+  languageName: node
+  linkType: hard
+
 "qrcode@npm:1.4.4":
   version: 1.4.4
   resolution: "qrcode@npm:1.4.4"
@@ -11365,6 +11374,7 @@ __metadata:
     i18next-browser-languagedetector: "npm:6.1.8"
     i18next-http-backend: "npm:1.4.5"
     notistack: "npm:2.0.8"
+    qrcode.react: "npm:^3.1.0"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-helmet-async: "npm:^2.0.5"

@@ -6,6 +6,7 @@ type SessionListState = { items: Session[]; loaded: boolean };
 export const sessionListState = atom<SessionListState>({
     key: 'sessionListState',
     default: { items: [], loaded: false },
+    dangerouslyAllowMutability: true,
 });
 
 export type SessionCurrentState = {
@@ -33,4 +34,5 @@ export const sessionCurrentState = atom<SessionCurrentState>({
         totalExpenses: 0,
         isAdmin: false,
     },
+    dangerouslyAllowMutability: true,
 });

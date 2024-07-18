@@ -35,6 +35,7 @@
         "i18next-browser-languagedetector": "6.1.8",
         "i18next-http-backend": "1.4.5",
         "notistack": "2.0.8",
+        "qrcode.react": "^3.1.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-helmet-async": "^2.0.5",

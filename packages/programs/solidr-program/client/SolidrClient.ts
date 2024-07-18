@@ -275,7 +275,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
 
-            const { token, hash } = generateSessionLinkTokenData(sessionId.toString(), admin.payer);
+            const { token, hash } = generateSessionLinkTokenData(sessionId.toString(), admin.publicKey);
 
             const tx = await this.program.methods
                 .setSessionTokenHash([...hash])

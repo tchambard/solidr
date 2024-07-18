@@ -21,14 +21,14 @@ interface IRegisterExpenseParams {
 
 export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => {
     const anchorWallet = useAnchorWallet() as Wallet;
-    const SolidrClient = useRecoilValue(solidrClientState);
+    const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const [pending, setPending] = useState(false);
 
     const [formData, setFormData] = useState<Partial<IRegisterExpenseParams>>({});
 
-    if (!anchorWallet || !SolidrClient || !sessionCurrent) return <></>;
+    if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-expense-title'} open={dialogVisible}>
@@ -39,7 +39,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                     onSuccess={(data: IRegisterExpenseParams) => {
                         setFormData(data);
                         setPending(true);
-                        SolidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount).then(() => {
+                        solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount).then(() => {
                             setPending(false);
                             setDialogVisible(false);
                         });

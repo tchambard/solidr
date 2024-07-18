@@ -5,6 +5,7 @@ import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import SendIcon from '@mui/icons-material/Send';
 
 import SessionAddMemberDialog from './SessionAddMemberDialog';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
@@ -17,9 +18,11 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import AddressAvatar from '@/components/AddressAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import { SessionStatus } from '@solidr';
+import SessionInviteMemberDialog from './SessionInviteMemberDialog';
 
 export default () => {
     const [addMemberDialogVisible, setAddMemberDialogVisible] = useState(false);
+    const [inviteMemberDialogVisible, setInviteMemberDialogVisible] = useState(false);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     return (
@@ -33,15 +36,22 @@ export default () => {
                     </Grid>
                     <Grid item>
                         {sessionCurrent.isAdmin && sessionCurrent.session?.status === SessionStatus.Opened && (
-                            <Tooltip placement={'bottom'} title={'Register new member'}>
-                                <IconButton color={'primary'} onClick={() => setAddMemberDialogVisible(!addMemberDialogVisible)}>
-                                    <AddCircleIcon />
-                                </IconButton>
-                            </Tooltip>
+                            <>
+                                <Tooltip placement={'bottom'} title={'Register new member'}>
+                                    <IconButton color={'primary'} onClick={() => setAddMemberDialogVisible(!addMemberDialogVisible)}>
+                                        <AddCircleIcon />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip placement={'bottom'} title={'Invite new member'}>
+                                    <IconButton color={'primary'} onClick={() => setInviteMemberDialogVisible(!inviteMemberDialogVisible)}>
+                                        <SendIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
                         )}
                     </Grid>
                 </Grid>
-            </PageTitleWrapper>
+            </PageTitleWrapper >
 
             <Divider variant={'middle'} />
 
@@ -60,6 +70,7 @@ export default () => {
                 })}
             </List>
             {addMemberDialogVisible && <SessionAddMemberDialog dialogVisible={addMemberDialogVisible} setDialogVisible={setAddMemberDialogVisible} />}
+            {inviteMemberDialogVisible && <SessionInviteMemberDialog dialogVisible={inviteMemberDialogVisible} setDialogVisible={setInviteMemberDialogVisible} />}
         </>
     );
 };

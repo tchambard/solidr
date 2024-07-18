@@ -1,7 +1,7 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Container, Grid, Paper } from '@mui/material';
-
+import { Box, Button, Container, Grid, Paper, Typography } from '@mui/material';
+import * as _ from 'lodash';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 
 import SessionHeader from './SessionHeader';
@@ -21,16 +21,23 @@ import { SessionMember, SessionStatus } from '@solidr';
 import SessionClose from '@/content/solidr/components/actions/SessionClose';
 import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
+import { Link } from 'react-router-dom';
+import SessionAccessDenied from './SessionAccessDenied';
+import { useHashParams } from '@/hooks/useHashParams';
+import SessionJoinDialog from './SessionJoinDialog';
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
 }));
 
 export default () => {
+    const [joinSessionDialogVisible, setJoinSessionDialogVisible] = useState(true);
+
     const { sessionId } = useParams();
     const [sessionCurrent, setSessionCurrent] = useRecoilState(sessionCurrentState);
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
+    const params = useHashParams();
 
     useEffect(() => {
         if (solidrClient == null || sessionId == null) return;
@@ -45,7 +52,7 @@ export default () => {
                         ...sessionCurrent,
                         balances: members,
                         transfers,
-                        myTotalCost: members[anchorWallet.publicKey.toString()].totalCost,
+                        myTotalCost: members[anchorWallet.publicKey.toString()]?.totalCost,
                         totalExpenses,
                     });
                 });
@@ -146,6 +153,17 @@ export default () => {
 
     if (!sessionCurrent.session) {
         return <Suspense fallback={<AppLoading />} />;
+    }
+
+    if (!_.keys(sessionCurrent.members).includes(anchorWallet.publicKey.toString())) {
+        if (params.token) {
+            return <SessionJoinDialog
+                dialogVisible={joinSessionDialogVisible}
+                setDialogVisible={setJoinSessionDialogVisible}
+                token={params.token}
+            />;
+        }
+        return <SessionAccessDenied />;
     }
 
     return (

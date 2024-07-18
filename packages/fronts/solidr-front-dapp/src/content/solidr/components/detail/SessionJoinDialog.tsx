@@ -1,54 +1,61 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FormContainer, TextFieldElement } from 'react-hook-form-mui';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
-import { solidrClientState } from '@/store/wallet';
-import { useRecoilValue } from 'recoil';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import { Wallet } from '@coral-xyz/anchor';
+import { useRecoilValue } from 'recoil';
+import { solidrClientState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
-import { PublicKey } from '@solana/web3.js';
+import { Wallet } from '@coral-xyz/anchor';
+import { Link } from 'react-router-dom';
 
-interface IAddMemberDialogProps {
+interface IJoinSessionDialogProps {
     dialogVisible: boolean;
     setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    token: string;
 }
 
-interface IRegisterMemberParams {
-    address: string;
+interface IJoinSessionParams {
     name: string;
 }
 
-export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
+export default ({ dialogVisible, setDialogVisible, token }: IJoinSessionDialogProps) => {
+    const navigate = useNavigate();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const [pending, setPending] = useState(false);
 
-    const [formData, setFormData] = useState<Partial<IRegisterMemberParams>>({});
+    const [formData, setFormData] = useState<Partial<IJoinSessionParams>>({});
 
-    if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
+    if (!anchorWallet || !solidrClient || !sessionCurrent || !token) return <></>;
+
+    function removeTokenHashFromUrl() {
+        const newHash = window.location.hash.replace(`token=${token}`, '');
+        navigate({ hash: newHash }, { replace: true });
+    }
 
     return (
-        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-member-title'} open={dialogVisible}>
-            <DialogTitle id={'register-member-title'}>{'Add a new member'}</DialogTitle>
+        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'join-session-title'} open={dialogVisible}>
+            <DialogTitle id={'join-session-title'}>{`Join session ${sessionCurrent.session.name}`}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer
                     defaultValues={formData}
-                    onSuccess={(data: IRegisterMemberParams) => {
+                    onSuccess={(data: IJoinSessionParams) => {
                         setFormData(data);
                         setPending(true);
-                        solidrClient?.addSessionMember(anchorWallet, sessionCurrent.session?.sessionId, new PublicKey(data.address), data.name).then(() => {
+                        solidrClient?.joinSessionAsMember(anchorWallet, sessionCurrent.session?.sessionId, data.name, token).then(() => {
                             setPending(false);
+                            removeTokenHashFromUrl()
                             setDialogVisible(false);
                         });
                     }}
                 >
                     <Stack direction={'column'}>
-                        <TextFieldElement type={'text'} name={'address'} label={'Address'} required={true} />
-                        <br />
                         <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
                         <br />
                         <LoadingButton loading={pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
@@ -58,9 +65,11 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
                 </FormContainer>
             </DialogContent>
             <DialogActions>
-                <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Cancel
-                </Button>
+                <Link to={`/sessions`}>
+                    <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
+                        Close
+                    </Button>
+                </Link>
             </DialogActions>
         </Dialog>
     );
