@@ -989,7 +989,7 @@ describe('solidr', () => {
         });
     });
 
-    describe.only('> calculateBalance', () => {
+    describe('> calculateBalance', () => {
         let sessionId: BN;
         let sessionMembers: SessionMember[];
 
