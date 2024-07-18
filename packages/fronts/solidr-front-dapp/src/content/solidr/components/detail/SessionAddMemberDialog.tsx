@@ -3,7 +3,7 @@ import { FormContainer, TextFieldElement } from 'react-hook-form-mui';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
-import { solidrClientState } from '@/store/wallet';
+import { solidrClientState, txState } from '@/store/wallet';
 import { useRecoilValue } from 'recoil';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
@@ -25,7 +25,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
-    const [pending, setPending] = useState(false);
+    const tx = useRecoilValue(txState);
 
     const [formData, setFormData] = useState<Partial<IRegisterMemberParams>>({});
 
@@ -39,9 +39,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
                     defaultValues={formData}
                     onSuccess={(data: IRegisterMemberParams) => {
                         setFormData(data);
-                        setPending(true);
                         solidrClient?.addSessionMember(anchorWallet, sessionCurrent.session?.sessionId, new PublicKey(data.address), data.name).then(() => {
-                            setPending(false);
                             setDialogVisible(false);
                         });
                     }}
@@ -51,7 +49,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
                         <br />
                         <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
                         <br />
-                        <LoadingButton loading={pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
+                        <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
                             Submit
                         </LoadingButton>
                     </Stack>

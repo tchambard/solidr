@@ -5,7 +5,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useRecoilValue } from 'recoil';
-import { solidrClientState } from '@/store/wallet';
+import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
 
@@ -24,7 +24,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
-    const [pending, setPending] = useState(false);
+    const tx = useRecoilValue(txState);
 
     const [formData, setFormData] = useState<Partial<IRegisterExpenseParams>>({});
 
@@ -38,9 +38,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                     defaultValues={formData}
                     onSuccess={(data: IRegisterExpenseParams) => {
                         setFormData(data);
-                        setPending(true);
                         solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount).then(() => {
-                            setPending(false);
                             setDialogVisible(false);
                         });
                     }}
@@ -50,7 +48,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                         <br />
                         <TextFieldElement type={'text'} name={'amount'} label={'Amount'} required={true} />
                         <br />
-                        <LoadingButton loading={pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
+                        <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
                             Submit
                         </LoadingButton>
                     </Stack>
