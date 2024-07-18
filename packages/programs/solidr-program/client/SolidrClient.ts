@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { AccountMeta, PublicKey, SendOptions, Transaction } from '@solana/web3.js';
+import { PublicKey, SendOptions } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -12,7 +12,11 @@ export type Global = {
     sessionCount: BN;
 };
 
-type InternalSessionStatus = ({ closed?: never } & { opened: Record<string, never> }) | ({ opened?: never } & { closed: Record<string, never> });
+type InternalSessionStatus =
+    | ({ closed?: never } & { opened: Record<string, never> })
+    | ({ opened?: never } & {
+          closed: Record<string, never>;
+      });
 
 type InternalSession = {
     sessionId: BN;
@@ -91,6 +95,7 @@ export type Refund = {
 export type MemberBalance = {
     owner: PublicKey;
     balance: number;
+    totalCost: number;
 };
 
 export type MemberTransfer = {
@@ -175,45 +180,53 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async computeBalance(sessionId: BN): Promise<{ memberBalances: MemberBalance[]; memberTransfers: MemberTransfer[] }> {
+    public async computeBalance(
+        sessionMembers: SessionMember[],
+        expenses: Expense[],
+        refunds: Refund[],
+    ): Promise<{
+        totalExpenses: number;
+        members: { [key: string]: MemberBalance };
+        transfers: MemberTransfer[];
+    }> {
         return this.wrapFn(async () => {
-            const sessionMembers = await this.listSessionMembers(sessionId);
-
             const members = sessionMembers.reduce(
                 (members, member) => {
-                    members[member.addr.toString()] = { owner: member.addr, balance: 0 };
+                    members[member.addr.toString()] = { owner: member.addr, balance: 0, totalCost: 0 };
                     return members;
                 },
                 {} as { [key: string]: MemberBalance },
             );
 
-            // 1. compute total of expenses for each members
-            const expenses = await this.listSessionExpenses(sessionId);
+            let totalExpenses = 0;
+
+            // 1. Compute total of expenses and individual costs for each member
             for (const expense of expenses) {
                 members[expense.owner.toString()].balance += expense.amount;
+                totalExpenses += expense.amount;
 
                 const shareAmount = expense.amount / expense.participants.length;
                 for (const participant of expense.participants) {
-                    members[participant.toString()].balance -= shareAmount;
+                    const participantKey = participant.toString();
+                    members[participantKey].balance -= shareAmount;
+                    members[participantKey].totalCost += shareAmount;
                 }
             }
 
-            // 2. compute total of expenses for each members
-            const refunds = await this.listSessionRefunds(sessionId);
+            // 2. Apply refunds
             for (const refund of refunds) {
                 members[refund.from.toString()].balance += refund.amount;
                 members[refund.to.toString()].balance -= refund.amount;
             }
 
-            const memberBalances = [...Object.values(members)];
-
-            // 3. separate debtors and creditors
+            // 3. Separate debtors and creditors, and round balances
             const debtors: MemberBalance[] = [];
             const creditors: MemberBalance[] = [];
 
-            for (const member of memberBalances) {
-                const roundedBalance = Math.round(member.balance * 100) / 100;
+            for (const member of Object.values(members)) {
+                const roundedBalance = this.round2Precision(member.balance);
                 member.balance = roundedBalance === 0 ? 0 : roundedBalance; // hack to remove "-0"
+                member.totalCost = this.round2Precision(member.totalCost);
                 if (member.balance < 0) {
                     debtors.push({ ...member });
                 } else if (member.balance > 0) {
@@ -221,28 +234,28 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 }
             }
 
-            // 4. balance
-            const memberTransfers: MemberTransfer[] = [];
+            // 4. Calculate transfers
+            const transfers: MemberTransfer[] = [];
 
             while (debtors.length > 0 && creditors.length > 0) {
                 const debtor = debtors[0];
                 const creditor = creditors[0];
 
-                const transferAmount = Math.min(Math.abs(debtor.balance), creditor.balance);
+                const transferAmount = this.round2Precision(Math.min(Math.abs(debtor.balance), creditor.balance));
 
-                memberTransfers.push({
+                transfers.push({
                     from: debtor.owner,
                     to: creditor.owner,
                     amount: transferAmount,
                 });
 
-                debtor.balance = Math.round((debtor.balance + transferAmount) * 100) / 100;
-                creditor.balance = Math.round((creditor.balance - transferAmount) * 100) / 100;
+                debtor.balance = this.round2Precision(debtor.balance + transferAmount);
+                creditor.balance = this.round2Precision(creditor.balance - transferAmount);
 
                 if (debtor.balance === 0) debtors.shift();
                 if (creditor.balance === 0) creditors.shift();
             }
-            return { memberBalances, memberTransfers };
+            return { totalExpenses, members, transfers };
         });
     }
 

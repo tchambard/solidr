@@ -1,14 +1,6 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FormContainer, TextFieldElement } from 'react-hook-form-mui';
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Stack,
-} from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
 import { solidrClientState } from '@/store/wallet';
@@ -40,12 +32,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
     if (!anchorWallet || !SolidrClient || !sessionCurrent) return <></>;
 
     return (
-        <Dialog
-            disableEscapeKeyDown
-            maxWidth={'sm'}
-            aria-labelledby={'register-member-title'}
-            open={dialogVisible}
-        >
+        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-member-title'} open={dialogVisible}>
             <DialogTitle id={'register-member-title'}>{'Add a new member'}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer
@@ -53,40 +40,18 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
                     onSuccess={(data: IRegisterMemberParams) => {
                         setFormData(data);
                         setPending(true);
-                        SolidrClient?.addSessionMember(
-                            anchorWallet,
-                            sessionCurrent.session.sessionId,
-                            new PublicKey(data.address),
-                            data.name,
-                        ).then(() => {
+                        SolidrClient?.addSessionMember(anchorWallet, sessionCurrent.session?.sessionId, new PublicKey(data.address), data.name).then(() => {
                             setPending(false);
                             setDialogVisible(false);
                         });
                     }}
                 >
                     <Stack direction={'column'}>
-                        <TextFieldElement
-                            type={'text'}
-                            name={'address'}
-                            label={'Address'}
-                            required={true}
-                        />
+                        <TextFieldElement type={'text'} name={'address'} label={'Address'} required={true} />
                         <br />
-                        <TextFieldElement
-                            type={'text'}
-                            name={'name'}
-                            label={'Name'}
-                            required={true}
-                        />
+                        <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
                         <br />
-                        <LoadingButton
-                            loading={pending}
-                            loadingPosition={'end'}
-                            variant={'contained'}
-                            color={'primary'}
-                            endIcon={<SendIcon />}
-                            type={'submit'}
-                        >
+                        <LoadingButton loading={pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
                             Submit
                         </LoadingButton>
                     </Stack>

@@ -1,6 +1,4 @@
-import React from 'react';
-import * as _ from 'lodash';
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 
 import { useRecoilValue } from 'recoil';
@@ -10,7 +8,7 @@ import AppLoading from '@/components/loading/AppLoading';
 export default () => {
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
-    if (!sessionCurrent?.session) {
+    if (!sessionCurrent.session) {
         return <Suspense fallback={<AppLoading />} />;
     }
 

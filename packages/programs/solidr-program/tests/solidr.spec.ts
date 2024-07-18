@@ -3,7 +3,7 @@ import * as anchor from '@coral-xyz/anchor';
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
 import { assert } from 'chai';
 
-import { MISSING_INVITATION_HASH, SessionStatus, Solidr, SolidrClient } from '../client';
+import { MemberBalance, MISSING_INVITATION_HASH, SessionMember, SessionStatus, Solidr, SolidrClient } from '../client';
 import { ACCOUNT_NOT_FOUND, ACCOUNT_NOT_FOUND as ACCOUNT_NOT_FOUND_ERROR, ACCOUNT_NOT_INITIALIZED, assertError } from './test.helpers';
 import { hashToken } from '../client/TokenHelpers';
 import { PublicKey } from '@solana/web3.js';
@@ -991,6 +991,7 @@ describe('solidr', () => {
 
     describe('> calculateBalance', () => {
         let sessionId: BN;
+        let sessionMembers: SessionMember[];
 
         beforeEach(async () => {
             // Alice create a session
@@ -1000,44 +1001,50 @@ describe('solidr', () => {
             await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
             await client.addSessionMember(alice, sessionId, charlie.publicKey, 'Charlie');
             await client.addSessionMember(alice, sessionId, zoe.publicKey, 'Zoé');
+
+            sessionMembers = await client.listSessionMembers(sessionId);
         });
+
+        const assertBalance = (members: { [key: string]: MemberBalance }, member: Wallet, value: any) => {
+            assert.deepPropertyVal(members, member.publicKey.toString(), value);
+        };
 
         it('> Should handle a simple case with three people', async () => {
             await client.addExpense(alice, sessionId, 'exp 1', 30, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 20, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 10, [alice.publicKey, bob.publicKey]);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.sameDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: 10 },
-                { owner: bob.publicKey, balance: 0 },
-                { owner: charlie.publicKey, balance: -10 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: 10, totalCost: 20 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: 0, totalCost: 20 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: -10, totalCost: 20 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 60);
             //transfers
-            assert.lengthOf(memberTransfers, 1);
-            assert.includeDeepMembers(memberTransfers, [{ from: charlie.publicKey, to: alice.publicKey, amount: 10 }]);
+            assert.lengthOf(transfers, 1);
+            assert.includeDeepMembers(transfers, [{ from: charlie.publicKey, to: alice.publicKey, amount: 10 }]);
         });
 
         it('> Should handle partial participation', async () => {
             await client.addExpense(alice, sessionId, 'exp 1', 90, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 50, [alice.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 200, [alice.publicKey]);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.includeDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: -65 },
-                { owner: bob.publicKey, balance: -5 },
-                { owner: charlie.publicKey, balance: 70 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: -65, totalCost: 155 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: -5, totalCost: 55 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: 70, totalCost: 130 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 340);
             //transfers
-            assert.lengthOf(memberTransfers, 2);
-            assert.includeDeepMembers(memberTransfers, [
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
                 { from: bob.publicKey, to: charlie.publicKey, amount: 5 },
                 { from: alice.publicKey, to: charlie.publicKey, amount: 65 },
             ]);
@@ -1048,19 +1055,19 @@ describe('solidr', () => {
             await client.addExpense(bob, sessionId, 'exp 2', 60, [alice.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 30, [alice.publicKey]);
             await client.addRefund(bob, sessionId, 20, alice.publicKey);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.includeDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: 1.67 },
-                { owner: bob.publicKey, balance: 16.67 },
-                { owner: charlie.publicKey, balance: -18.33 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: 1.67, totalCost: 78.33 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: 16.67, totalCost: 63.33 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: -18.33, totalCost: 48.33 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 190);
             //transfers
-            assert.lengthOf(memberTransfers, 2);
-            assert.includeDeepMembers(memberTransfers, [
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
                 { from: charlie.publicKey, to: alice.publicKey, amount: 1.67 },
                 { from: charlie.publicKey, to: bob.publicKey, amount: 16.66 },
             ]);
@@ -1070,19 +1077,19 @@ describe('solidr', () => {
             await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(alice, sessionId, 'exp 2', 50, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(alice, sessionId, 'exp 3', 30, [bob.publicKey, charlie.publicKey]);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.includeDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: 120 },
-                { owner: bob.publicKey, balance: -60 },
-                { owner: charlie.publicKey, balance: -60 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: 120, totalCost: 60 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: -60, totalCost: 60 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: -60, totalCost: 60 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 180);
             //transfers
-            assert.lengthOf(memberTransfers, 2);
-            assert.includeDeepMembers(memberTransfers, [
+            assert.lengthOf(transfers, 2);
+            assert.includeDeepMembers(transfers, [
                 { from: bob.publicKey, to: alice.publicKey, amount: 60 },
                 { from: charlie.publicKey, to: alice.publicKey, amount: 60 },
             ]);
@@ -1092,37 +1099,37 @@ describe('solidr', () => {
             await client.addExpense(alice, sessionId, 'exp 1', 33.33, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 66.67, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 100, [bob.publicKey, alice.publicKey]);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.includeDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: -33.34 },
-                { owner: bob.publicKey, balance: 0 },
-                { owner: charlie.publicKey, balance: 33.33 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: -33.34, totalCost: 66.67 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: 0, totalCost: 66.67 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: 33.33, totalCost: 66.67 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 200);
             //transfers
-            assert.lengthOf(memberTransfers, 1);
-            assert.includeDeepMembers(memberTransfers, [{ from: alice.publicKey, to: charlie.publicKey, amount: 33.33 }]);
+            assert.lengthOf(transfers, 1);
+            assert.includeDeepMembers(transfers, [{ from: alice.publicKey, to: charlie.publicKey, amount: 33.33 }]);
         });
 
         it('> Should handle when no transfers are needed (already balanced)', async () => {
             await client.addExpense(alice, sessionId, 'exp 1', 30, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 30, [alice.publicKey, charlie.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 30, [bob.publicKey, alice.publicKey]);
+            const expenses = await client.listSessionExpenses(sessionId);
+            const refunds = await client.listSessionRefunds(sessionId);
+            const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);
 
-            const { memberBalances, memberTransfers } = await client.computeBalance(sessionId);
             //balances
-            assert.lengthOf(memberBalances, 4);
-            assert.includeDeepMembers(memberBalances, [
-                { owner: alice.publicKey, balance: 0 },
-                { owner: bob.publicKey, balance: 0 },
-                { owner: charlie.publicKey, balance: 0 },
-                { owner: zoe.publicKey, balance: 0 },
-            ]);
+            assertBalance(members, alice, { owner: alice.publicKey, balance: 0, totalCost: 30 });
+            assertBalance(members, bob, { owner: bob.publicKey, balance: 0, totalCost: 30 });
+            assertBalance(members, charlie, { owner: charlie.publicKey, balance: 0, totalCost: 30 });
+            assertBalance(members, zoe, { owner: zoe.publicKey, balance: 0, totalCost: 0 });
+            assert.equal(totalExpenses, 90);
             //transfers
-            assert.lengthOf(memberTransfers, 0);
+            assert.lengthOf(transfers, 0);
         });
     });
 });

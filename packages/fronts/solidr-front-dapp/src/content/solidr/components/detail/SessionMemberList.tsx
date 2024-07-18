@@ -16,7 +16,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import AddressAvatar from '@/components/AddressAvatar';
 import ListItemText from '@mui/material/ListItemText';
-import Chip from '@mui/material/Chip';
 import { SessionStatus } from '@solidr';
 
 export default () => {
@@ -33,7 +32,7 @@ export default () => {
                         </Typography>
                     </Grid>
                     <Grid item>
-                        {sessionCurrent?.isAdmin && sessionCurrent.session.status === SessionStatus.Opened && (
+                        {sessionCurrent.isAdmin && sessionCurrent.session?.status === SessionStatus.Opened && (
                             <Tooltip placement={'bottom'} title={'Register new member'}>
                                 <IconButton color={'primary'} onClick={() => setAddMemberDialogVisible(!addMemberDialogVisible)}>
                                     <AddCircleIcon />
@@ -47,7 +46,7 @@ export default () => {
             <Divider variant={'middle'} />
 
             <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                {_.map(sessionCurrent?.members, (member, address) => {
+                {_.map(sessionCurrent.members, (member, address) => {
                     return (
                         <ListItem key={`voter_${address}`}>
                             <Tooltip title={address}>
