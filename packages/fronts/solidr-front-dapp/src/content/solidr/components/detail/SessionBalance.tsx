@@ -13,54 +13,28 @@ ChartJS.register(ArcElement, ChartTooltip, Legend);
 export default () => {
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
-    const data = {
-        labels: Object.keys(sessionCurrent.balances)
-            .map((address) => sessionCurrent.members[sessionCurrent.balances[address].owner.toString()].name)
-            .sort((a, b) => {
-                const balanceA =
-                    sessionCurrent.balances[Object.keys(sessionCurrent.balances).find((key) => sessionCurrent.members[sessionCurrent.balances[key].owner.toString()].name === a)]
-                        .balance;
-                const balanceB =
-                    sessionCurrent.balances[Object.keys(sessionCurrent.balances).find((key) => sessionCurrent.members[sessionCurrent.balances[key].owner.toString()].name === b)]
-                        .balance;
+    const sortedBalances = Object.values(sessionCurrent.balances).sort((a, b) => {
+        // Sort in descending order, with positive balances first, then negative balances
+        if (a.balance >= 0 && b.balance >= 0) {
+            return b.balance - a.balance;
+        } else if (a.balance < 0 && b.balance < 0) {
+            return a.balance - b.balance;
+        } else {
+            return b.balance >= 0 ? -1 : 1;
+        }
+    });
 
-                // Sort in descending order, with positive balances first, then negative balances
-                if (balanceA >= 0 && balanceB >= 0) {
-                    return balanceB - balanceA;
-                } else if (balanceA < 0 && balanceB < 0) {
-                    return balanceA - balanceB;
-                } else {
-                    return balanceB >= 0 ? -1 : 1;
-                }
-            }),
+    const data = {
+        labels: sortedBalances.map((balance) => sessionCurrent.members[balance.owner.toString()].name),
         datasets: [
             {
-                data: Object.values(sessionCurrent.balances)
-                    .sort((a, b) => {
-                        // Sort in descending order, with positive balances first, then negative balances
-                        if (a.balance >= 0 && b.balance >= 0) {
-                            return b.balance - a.balance;
-                        } else if (a.balance < 0 && b.balance < 0) {
-                            return a.balance - b.balance;
-                        } else {
-                            return b.balance >= 0 ? -1 : 1;
-                        }
-                    })
-                    .map((owner) => owner.balance),
-                backgroundColor: Object.values(sessionCurrent.balances)
-                    .sort((a, b) => b.balance - a.balance)
-                    .map((balance) =>
-                        balance.balance >= 0
-                            ? `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})`
-                            : `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})`,
-                    ),
-                hoverBackgroundColor: Object.values(sessionCurrent.balances)
-                    .sort((a, b) => b.balance - a.balance)
-                    .map((balance) =>
-                        balance.balance >= 0
-                            ? `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 200)})`
-                            : `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 200)})`,
-                    ),
+                data: sortedBalances.map((balance) => balance.balance),
+                backgroundColor: sortedBalances.map((balance) =>
+                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})`,
+                ),
+                hoverBackgroundColor: sortedBalances.map((balance) =>
+                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 50)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 50)})`,
+                ),
             },
         ],
     };
