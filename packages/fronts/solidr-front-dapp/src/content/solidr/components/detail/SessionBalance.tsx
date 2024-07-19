@@ -71,7 +71,7 @@ export default () => {
             },
             legend: {
                 display: true,
-                position: 'right',
+                position: 'left' as const,
                 labels: {
                     generateLabels: (chart) => {
                         const data = chart.data;
