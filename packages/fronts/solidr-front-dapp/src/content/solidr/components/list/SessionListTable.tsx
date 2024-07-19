@@ -17,27 +17,35 @@ export default () => {
 
     useEffect(() => {
         if (!solidrClient) return;
-        if (sessionList.loaded) return;
 
-        solidrClient.listUserSessions(anchorWallet.publicKey).then((sessions) => {
-            setSessionList({
-                items: sessions,
-                loaded: true,
+        const refreshUserSessions = () => {
+            solidrClient.listUserSessions(anchorWallet.publicKey).then((sessions) => {
+                setSessionList({
+                    items: sessions,
+                });
             });
-        });
-
-        const listener = solidrClient.addEventListener('sessionOpened', (event) => {
-            setSessionList({
-                items: sessionList.items,
-                loaded: false,
-            });
-        });
-        return () => {
-            if (listener) {
-                solidrClient.program.removeEventListener(listener);
-            }
         };
-    }, [solidrClient, sessionList.loaded]);
+
+        refreshUserSessions();
+
+        const listeners: number[] = [];
+
+        const sessionOpenedListener = solidrClient.addEventListener('sessionOpened', (event) => {
+            refreshUserSessions();
+        });
+        sessionOpenedListener && listeners.push(sessionOpenedListener);
+
+        const sessionClosedListener = solidrClient.addEventListener('sessionClosed', (event) => {
+            refreshUserSessions();
+        });
+        sessionClosedListener && listeners.push(sessionClosedListener);
+
+        return () => {
+            listeners.forEach((listener) => {
+                solidrClient.program.removeEventListener(listener);
+            });
+        };
+    }, [solidrClient]);
 
     return (
         <>
@@ -69,7 +77,7 @@ export default () => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell align={'right'}>
-                                            <SessionListItemActions currentView={'list'} sessionId={session.sessionId} />
+                                            <SessionListItemActions currentView={'list'} session={session} />
                                         </TableCell>
                                     </TableRow>
                                 );

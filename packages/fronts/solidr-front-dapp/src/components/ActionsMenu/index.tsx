@@ -1,20 +1,12 @@
-import React from 'react';
-import { Fragment, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as _ from 'lodash';
-import {
-    IconButton,
-    ListItemIcon,
-    Menu,
-    MenuItem,
-    Tooltip,
-    useMediaQuery,
-} from '@mui/material';
+import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 export interface IActionMenuItem {
     title: string;
-    url: string;
+    url?: string;
     color: string;
     icon: any;
     hidden?: boolean;
@@ -43,11 +35,7 @@ export default ({ items }: IProps) => {
                 _.map(items, (item) => {
                     if (!item.hidden) {
                         return (
-                            <Tooltip
-                                key={item.title}
-                                placement={'bottom'}
-                                title={item.description || item.title}
-                            >
+                            <Tooltip key={item.title} placement={'bottom'} title={item.description || item.title}>
                                 <Link to={item.url} onClick={item.onClick}>
                                     <IconButton
                                         // sx={{
