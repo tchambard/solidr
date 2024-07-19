@@ -54,12 +54,12 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
         setParticipants(participants);
     }, [sessionCurrent]);
 
-    const handleParticipantOnClick = (partitipant: IParticipant) => {
+    const handleParticipantOnClick = (participant: IParticipant) => {
         setParticipants({
             ...participants,
-            [partitipant.address.toString()]: {
-                ...partitipant,
-                checked: !partitipant.checked,
+            [participant.address.toString()]: {
+                ...participant,
+                checked: !participant.checked,
             },
         });
     };
@@ -85,10 +85,17 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                         <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
                             <FormLabel component="legend">Pick two</FormLabel>
                             <FormGroup>
-                                {_.map(participants, (participant, address) => (
+                                {_.map(participants, (member, address) => (
                                     <FormControlLabel
-                                        control={<Checkbox checked={participant.checked} onChange={(e) => handleParticipantOnClick(participant)} name={participant.name} />}
-                                        label={participant.name}
+                                        control={
+                                            <Checkbox
+                                                checked={member.checked}
+                                                disabled={anchorWallet.publicKey.toString() == member.address.toString()}
+                                                onChange={(e) => handleParticipantOnClick(member)}
+                                                name={member.name}
+                                            />
+                                        }
+                                        label={member.name}
                                     />
                                 ))}
                             </FormGroup>
