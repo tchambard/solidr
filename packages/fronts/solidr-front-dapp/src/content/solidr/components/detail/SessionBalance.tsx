@@ -30,10 +30,10 @@ export default () => {
             {
                 data: sortedBalances.map((balance) => balance.balance),
                 backgroundColor: sortedBalances.map((balance) =>
-                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 80)})`,
+                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 5)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 5)})`,
                 ),
                 hoverBackgroundColor: sortedBalances.map((balance) =>
-                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 50)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 50)})`,
+                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 100)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 100)})`,
                 ),
             },
         ],
