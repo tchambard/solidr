@@ -39,6 +39,11 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
 
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
+    const [currentUser, setCurrentUser] = useState<IParticipant>({
+        name: '',
+        address: anchorWallet.publicKey,
+        checked: true,
+    });
     const [participants, setParticipants] = React.useState<{ [address: string]: IParticipant }>({});
 
     useEffect(() => {
@@ -48,8 +53,11 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
 
         const participants = {};
         _.forEach(sessionCurrent.members, (member, address) => {
-            const checked = anchorWallet.publicKey.toString() == member.addr.toString();
-            participants[address] = { name: member.name, address: member.addr, checked: checked };
+            if (anchorWallet.publicKey.toString() == member.addr.toString()) {
+                setCurrentUser({ name: member.name, address: member.addr, checked: true });
+                return;
+            }
+            participants[address] = { name: member.name, address: member.addr, checked: false };
         });
         setParticipants(participants);
     }, [sessionCurrent]);
@@ -72,7 +80,9 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                     defaultValues={formData}
                     onSuccess={(data: IRegisterExpenseParams) => {
                         setFormData(data);
-                        solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount).then(() => {
+
+                        const participantList = _.map(participants, (participant) => participant.address);
+                        solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount, participantList).then(() => {
                             setDialogVisible(false);
                         });
                     }}
@@ -85,13 +95,14 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                         <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
                             <FormLabel component="legend">Pick two</FormLabel>
                             <FormGroup>
-                                {_.map(participants, (member, address) => (
+                                <FormControlLabel control={<Checkbox checked={currentUser.checked} disabled={true} name={currentUser.name} />} label={currentUser.name} />
+                                {_.map(participants, (member) => (
                                     <FormControlLabel
                                         control={
                                             <Checkbox
                                                 checked={member.checked}
                                                 disabled={anchorWallet.publicKey.toString() == member.address.toString()}
-                                                onChange={(e) => handleParticipantOnClick(member)}
+                                                onChange={() => handleParticipantOnClick(member)}
                                                 name={member.name}
                                             />
                                         }
