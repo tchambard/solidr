@@ -54,13 +54,12 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
         setParticipants(participants);
     }, [sessionCurrent]);
 
-    const handleParticipantOnClick = (addr: PublicKey, checked: boolean) => {
-        participants[addr.toString()].checked = checked;
+    const handleParticipantOnClick = (partitipant: IParticipant) => {
         setParticipants({
             ...participants,
-            [addr.toString()]: {
-                ...participants[addr.toString()],
-                checked,
+            [partitipant.address.toString()]: {
+                ...partitipant,
+                checked: !partitipant.checked,
             },
         });
     };
@@ -86,12 +85,10 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                         <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
                             <FormLabel component="legend">Pick two</FormLabel>
                             <FormGroup>
-                                {_.map(participants, (member, address) => (
+                                {_.map(participants, (participant, address) => (
                                     <FormControlLabel
-                                        control={
-                                            <Checkbox checked={member.checked} onChange={(e) => handleParticipantOnClick(member.address, !member.checked)} name={member.name} />
-                                        }
-                                        label={member.name}
+                                        control={<Checkbox checked={participant.checked} onChange={(e) => handleParticipantOnClick(participant)} name={participant.name} />}
+                                        label={participant.name}
                                     />
                                 ))}
                             </FormGroup>
