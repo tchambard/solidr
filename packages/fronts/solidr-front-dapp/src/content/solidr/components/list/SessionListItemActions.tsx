@@ -3,8 +3,9 @@ import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import ActionsMenu, { IActionMenuItem } from '@/components/ActionsMenu';
 import React, { useState } from 'react';
 import SessionCloseDialog from '@/content/solidr/components/detail/SessionCloseDialog';
-import { DoDisturbOn } from '@mui/icons-material';
+import { DeleteForever, DoDisturbOn } from '@mui/icons-material';
 import { Session, SessionStatus } from '@solidr';
+import SessionDeleteDialog from '@/content/solidr/components/detail/SessionDeleteDialog';
 
 interface IProps {
     currentView: 'list' | 'edit' | 'detail';
@@ -12,7 +13,8 @@ interface IProps {
 }
 
 export default ({ session, currentView }: IProps) => {
-    const [confirmVisibility, setConfirmVisibility] = useState<boolean>(false);
+    const [confirmClose, setConfirmClose] = useState<boolean>(false);
+    const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 
     const menuItems: IActionMenuItem[] = [
         {
@@ -29,16 +31,27 @@ export default ({ session, currentView }: IProps) => {
         menuItems.push({
             title: 'Close',
             description: 'Close session',
-            onClick: () => setConfirmVisibility(true),
+            onClick: () => setConfirmClose(true),
             color: 'primary',
             icon: <DoDisturbOn fontSize={'small'} />,
+            hidden: currentView === 'detail',
+        });
+    }
+    if (session.status == SessionStatus.Closed) {
+        menuItems.push({
+            title: 'Delete',
+            description: 'Delete session',
+            onClick: () => setConfirmDelete(true),
+            color: 'primary',
+            icon: <DeleteForever fontSize={'small'} />,
             hidden: currentView === 'detail',
         });
     }
     return (
         <>
             <ActionsMenu items={menuItems} />
-            {confirmVisibility && <SessionCloseDialog sessionId={session.sessionId} dialogVisible={confirmVisibility} setDialogVisible={setConfirmVisibility} />}
+            {confirmClose && <SessionCloseDialog sessionId={session.sessionId} dialogVisible={confirmClose} setDialogVisible={setConfirmClose} />}
+            {confirmDelete && <SessionDeleteDialog sessionId={session.sessionId} dialogVisible={confirmDelete} setDialogVisible={setConfirmDelete} />}
         </>
     );
 };

@@ -1,9 +1,10 @@
+use anchor_lang::prelude::*;
+use anchor_lang::solana_program::clock;
+
+use crate::{errors::*, state::sessions::*};
 use crate::is_session_member;
 use crate::state::expenses::*;
 use crate::state::members::MemberAccount;
-use crate::{errors::*, state::sessions::*};
-use anchor_lang::prelude::*;
-use anchor_lang::solana_program::clock;
 
 #[derive(Accounts)]
 pub struct AddExpenseContextData<'info> {
@@ -21,9 +22,9 @@ pub struct AddExpenseContextData<'info> {
         payer = owner,
         space = 8 + ExpenseAccount::INIT_SPACE,
         seeds = [
-            ExpenseAccount::SEED_PREFIX.as_ref(),
-            session.session_id.to_le_bytes().as_ref(),
-            session.expenses_count.to_le_bytes().as_ref()
+        ExpenseAccount::SEED_PREFIX.as_ref(),
+        session.session_id.to_le_bytes().as_ref(),
+        session.expenses_count.to_le_bytes().as_ref()
         ],
         bump
     )]
@@ -130,7 +131,7 @@ pub struct DeleteExpenseContextData<'info> {
     #[account(mut)]
     pub session: Account<'info, SessionAccount>,
 
-    #[account(mut, close=owner)]
+    #[account(mut, close = owner)]
     pub expense: Account<'info, ExpenseAccount>,
 }
 
@@ -141,14 +142,18 @@ pub fn delete_expense(
     let session = &mut ctx.accounts.session;
     let expense = &mut ctx.accounts.expense;
 
-    require!(
-        session.status == SessionStatus::Opened,
-        SolidrError::SessionClosed
-    );
-    require!(
-        owner.key() == expense.owner.key() && session.session_id == expense.session_id,
-        SolidrError::NotExpenseOwner
-    );
+    if session.status == SessionStatus::Opened {
+        require!(
+            owner.key() == expense.owner.key() && session.session_id == expense.session_id,
+            SolidrError::NotExpenseOwner
+        );
+    }
+    if session.status == SessionStatus::Closed {
+        require!(
+            session.admin.key() == ctx.accounts.owner.key(),
+            SolidrError::ForbiddenAsNonAdmin
+        );
+    }
 
     emit!(ExpenseDeleted {
         session_id: session.session_id,

@@ -14,6 +14,8 @@ pub enum SolidrError {
     ForbiddenAsNonAdmin,
     #[msg("Session is closed")]
     SessionClosed,
+    #[msg("Session is not closed")]
+    SessionNotClosed,
     #[msg("Member already exists")]
     MemberAlreadyExists,
     #[msg("Missing invitation link hash")]

@@ -19,9 +19,9 @@ pub struct AddSessionMemberContextData<'info> {
         payer = admin,
         space = 8 + MemberAccount::INIT_SPACE,
         seeds = [
-            MemberAccount::SEED_PREFIX,
-            session.session_id.to_le_bytes().as_ref(),
-            addr.key().as_ref(),
+        MemberAccount::SEED_PREFIX,
+        session.session_id.to_le_bytes().as_ref(),
+        addr.key().as_ref(),
         ],
         bump
     )]
@@ -47,6 +47,43 @@ pub fn add_session_member(
 }
 
 #[derive(Accounts)]
+pub struct DeleteSessionMemberContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(mut, close = admin)]
+    pub member: Account<'info, MemberAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn delete_session_member(
+    ctx: Context<DeleteSessionMemberContextData>,
+) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+    let member: &mut Account<MemberAccount> = &mut ctx.accounts.member;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+    require!(
+        session.status == SessionStatus::Closed,
+        SolidrError::SessionNotClosed
+    );
+
+    emit!(MemberDeleted {
+        session_id: member.session_id,
+        addr: member.addr,
+        name: member.name.clone(),
+    });
+    Ok(())
+}
+
+#[derive(Accounts)]
 pub struct JoinSessionAsMemberContextData<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -59,9 +96,9 @@ pub struct JoinSessionAsMemberContextData<'info> {
         payer = signer,
         space = 8 + MemberAccount::INIT_SPACE,
         seeds = [
-            MemberAccount::SEED_PREFIX,
-            session.session_id.to_le_bytes().as_ref(),
-            signer.key().as_ref(),
+        MemberAccount::SEED_PREFIX,
+        session.session_id.to_le_bytes().as_ref(),
+        signer.key().as_ref(),
         ],
         bump
     )]

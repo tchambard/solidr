@@ -17,11 +17,11 @@ export async function assertError(fn: () => Promise<any>, expected: IExpectedErr
         if (_err.logs) {
             assert.isArray(_err.logs);
             const err = AnchorError.parse(_err.logs);
-            // console.log('err :>> ', err);
+            //console.log('err :>> ', err);
             expected.code && assert.strictEqual(err.error.errorCode.code, expected.code);
             assert.strictEqual(err.error.errorMessage, expected.message);
         } else {
-            // console.log("_err", _err)
+            //console.log('_err', _err);
             const message = _err.toString();
             if (message.match(/NO_ERROR/)) throw new Error('No error thrown');
             assert.include(message, expected.message);

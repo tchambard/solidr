@@ -142,6 +142,89 @@ describe('solidr', () => {
         });
     });
 
+    describe('> deleteSession', () => {
+        it('> should failed when called with on open session', async () => {
+            const {
+                events: { sessionOpened },
+                accounts: { sessionAccountPubkey },
+            } = await client.openSession(administrator, 'name', 'description', 'Admin');
+            const sessionId = sessionOpened[0].sessionId;
+            await assertError(async () => client.deleteSession(administrator, sessionId), {
+                code: 'SessionNotClosed',
+                message: 'Session is not closed',
+            });
+        });
+        it('> should failed when called by non admin', async () => {
+            const {
+                events: { sessionOpened },
+                accounts: { sessionAccountPubkey },
+            } = await client.openSession(administrator, 'name', 'description', 'Admin');
+            const sessionId = sessionOpened[0].sessionId;
+            await client.closeSession(administrator, sessionId);
+            await assertError(async () => client.deleteSession(bob, sessionId), {
+                code: 'ForbiddenAsNonAdmin',
+                message: 'Only session administrator is granted',
+            });
+        });
+        it('> should succeed when called with admin on closed session', async () => {
+            const {
+                events: { sessionOpened },
+                accounts: { sessionAccountPubkey },
+            } = await client.openSession(administrator, 'name', 'description', 'Admin');
+            const sessionId = sessionOpened[0].sessionId;
+
+            const {
+                accounts: { memberAccountPubkey: aliceAccountPubkey },
+            } = await client.addSessionMember(administrator, sessionId, alice.publicKey, 'alice');
+            const {
+                accounts: { memberAccountPubkey: bobAccountPubkey },
+            } = await client.addSessionMember(administrator, sessionId, bob.publicKey, 'bob');
+            const {
+                accounts: { memberAccountPubkey: charlieAccountPubkey },
+            } = await client.addSessionMember(administrator, sessionId, charlie.publicKey, 'charlie');
+
+            const {
+                accounts: { refundAccountPubkey },
+            } = await client.addRefund(bob, sessionId, 50, alice.publicKey);
+
+            const {
+                accounts: { expenseAccountPubkey: exp1AccountPubkey },
+            } = await client.addExpense(alice, sessionId, 'exp1', 100, [bob.publicKey, charlie.publicKey]);
+            const {
+                accounts: { expenseAccountPubkey: exp2AccountPubkey },
+            } = await client.addExpense(alice, sessionId, 'exp2', 60, [bob.publicKey, charlie.publicKey]);
+
+            await client.closeSession(administrator, sessionId);
+
+            const {
+                events: { sessionDeleted },
+            } = await client.deleteSession(administrator, sessionId);
+
+            await assertError(async () => client.getSession(sessionAccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            assert.equal(sessionDeleted[0].sessionId.toNumber(), sessionId);
+            await assertError(async () => client.getExpense(exp1AccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            await assertError(async () => client.getExpense(exp2AccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            await assertError(async () => client.getRefund(refundAccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            await assertError(async () => client.getSessionMember(aliceAccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            await assertError(async () => client.getSessionMember(bobAccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+            await assertError(async () => client.getSessionMember(charlieAccountPubkey), {
+                message: ACCOUNT_NOT_FOUND,
+            });
+        });
+    });
+
     context('> session is opened', () => {
         let sessionId: BN;
 
@@ -156,11 +239,11 @@ describe('solidr', () => {
         describe('> add session member', () => {
             it('> should create member pda', async () => {
                 const {
-                    accounts: { memberAccountAddress },
+                    accounts: { memberAccountPubkey },
                     events: { memberAdded },
                 } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
 
-                const member = await client.getSessionMember(memberAccountAddress);
+                const member = await client.getSessionMember(memberAccountPubkey);
                 assert.equal(member.name, 'Bob');
                 assert.equal(member.addr.toString(), bob.publicKey.toString());
                 assert.isFalse(member.isAdmin);
@@ -183,6 +266,40 @@ describe('solidr', () => {
                 await assertError(async () => client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob'), {
                     code: 'MemberAlreadyExists',
                     message: `Member already exists`,
+                });
+            });
+        });
+
+        describe('> delete session member', () => {
+            it('> should failed when called with on open session', async () => {
+                const {
+                    accounts: { memberAccountPubkey },
+                } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+
+                await assertError(async () => client.deleteSessionMember(alice, sessionId, bob.publicKey), {
+                    code: 'SessionNotClosed',
+                    message: 'Session is not closed',
+                });
+            });
+            it('> should failed when called by non admin', async () => {
+                const {
+                    accounts: { memberAccountPubkey },
+                } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+                await client.closeSession(alice, sessionId);
+                await assertError(async () => client.deleteSessionMember(bob, sessionId, bob.publicKey), {
+                    code: 'ForbiddenAsNonAdmin',
+                    message: 'Only session administrator is granted',
+                });
+            });
+            it('> should close member pda', async () => {
+                const {
+                    accounts: { memberAccountPubkey },
+                } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+
+                await client.closeSession(alice, sessionId);
+                await client.deleteSessionMember(alice, sessionId, bob.publicKey);
+                await assertError(async () => client.getSessionMember(memberAccountPubkey), {
+                    message: ACCOUNT_NOT_FOUND,
                 });
             });
         });
@@ -698,6 +815,43 @@ describe('solidr', () => {
 
                     assert.equal(receiverBalanceAfter, receiverBalanceBefore + transferedLamports);
                     assert.equal(senderBalanceAfter, senderBalanceBefore - fees - refundAccountBalance - transferedLamports);
+                });
+            });
+
+            describe('> delete Refund', () => {
+                it('> should failed when called with on open session', async () => {
+                    const {
+                        events: { refundAdded },
+                        accounts: { refundAccountPubkey },
+                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+
+                    await assertError(async () => client.deleteRefund(alice, sessionId, new BN(refundAdded[0].refundId)), {
+                        code: 'SessionNotClosed',
+                        message: 'Session is not closed',
+                    });
+                });
+                it('> should failed when called by non admin', async () => {
+                    const {
+                        events: { refundAdded },
+                        accounts: { refundAccountPubkey },
+                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+                    await client.closeSession(alice, sessionId);
+                    await assertError(async () => client.deleteSessionMember(bob, sessionId, bob.publicKey), {
+                        code: 'ForbiddenAsNonAdmin',
+                        message: 'Only session administrator is granted',
+                    });
+                });
+                it('> should close refund pda', async () => {
+                    const {
+                        events: { refundAdded },
+                        accounts: { refundAccountPubkey },
+                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+
+                    await client.closeSession(alice, sessionId);
+                    await client.deleteSession(alice, sessionId);
+                    await assertError(async () => client.getRefund(refundAccountPubkey), {
+                        message: ACCOUNT_NOT_FOUND,
+                    });
                 });
             });
         });
