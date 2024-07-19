@@ -26,7 +26,7 @@ function stringAvatar(name: string, size?: number) {
             bgcolor: stringToColor(name),
             fontSize: size ? (size / 2) + 'px' : '20px',
         },
-        children: name.substring(2, 4),
+        children: name.substring(0, 2),
     };
 }
 
