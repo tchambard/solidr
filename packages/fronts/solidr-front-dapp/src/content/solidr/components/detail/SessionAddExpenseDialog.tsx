@@ -9,6 +9,7 @@ import { useRecoilValue } from 'recoil';
 import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 interface IAddExpenseDialogProps {
     dialogVisible: boolean;
@@ -23,7 +24,7 @@ interface IRegisterExpenseParams {
 
 interface IParticipant {
     name: string;
-    address: string;
+    address: PublicKey;
     checked: boolean;
 }
 
@@ -53,6 +54,17 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
         setParticipants(participants);
     }, [sessionCurrent]);
 
+    const handleParticipantOnClick = (addr: PublicKey, checked: boolean) => {
+        participants[addr.toString()].checked = checked;
+        setParticipants({
+            ...participants,
+            [addr.toString()]: {
+                ...participants[addr.toString()],
+                checked,
+            },
+        });
+    };
+
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-expense-title'} open={dialogVisible}>
             <DialogTitle id={'register-expense-title'}>{'Add a new expense'}</DialogTitle>
@@ -75,7 +87,12 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                             <FormLabel component="legend">Pick two</FormLabel>
                             <FormGroup>
                                 {_.map(participants, (member, address) => (
-                                    <FormControlLabel control={<Checkbox checked={member.checked} name={member.name} />} label={member.name} />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox checked={member.checked} onChange={(e) => handleParticipantOnClick(member.address, !member.checked)} name={member.name} />
+                                        }
+                                        label={member.name}
+                                    />
                                 ))}
                             </FormGroup>
                         </FormControl>
