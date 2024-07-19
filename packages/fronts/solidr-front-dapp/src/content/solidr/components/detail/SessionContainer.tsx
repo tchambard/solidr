@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Button, Container, Grid, Paper, Typography } from '@mui/material';
+import { Container, Grid, Paper } from '@mui/material';
 import * as _ from 'lodash';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { useParams } from 'react-router';
@@ -16,14 +16,13 @@ import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { SessionMember, SessionStatus } from '@solidr';
-import SessionClose from '@/content/solidr/components/actions/SessionClose';
-import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
+import SessionCloseButton from '@/content/solidr/components/detail/SessionCloseButton';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
-import { Link } from 'react-router-dom';
 import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
+import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
@@ -156,11 +155,7 @@ export default () => {
 
     if (!_.keys(sessionCurrent.members).includes(anchorWallet.publicKey.toString())) {
         if (params.token) {
-            return <SessionJoinDialog
-                dialogVisible={joinSessionDialogVisible}
-                setDialogVisible={setJoinSessionDialogVisible}
-                token={params.token}
-            />;
+            return <SessionJoinDialog dialogVisible={joinSessionDialogVisible} setDialogVisible={setJoinSessionDialogVisible} token={params.token} />;
         }
         return <SessionAccessDenied />;
     }
@@ -174,28 +169,32 @@ export default () => {
             </Helmet>
             <PageTitleWrapper>
                 <SessionNavigation />
-                <SessionClose />
+                <SessionCloseButton />
             </PageTitleWrapper>
             <Container maxWidth={'xl'}>
-                <Grid container direction={'row'} justifyContent={'center'} alignItems={'stretch'} spacing={3}>
-                    <Grid item xs={12} md={6}>
-                        <Item>
-                            <SessionMemberList />
-                        </Item>
+                <Grid container alignItems={'stretch'} spacing={3} columns={{ xs: 1, sm: 2 }}>
+                    <Grid item xs={1}>
+                        <Grid container spacing={2} direction={'column'}>
+                            <Grid item xs={1}>
+                                <Item>
+                                    <SessionMemberList />
+                                </Item>
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Item>
+                                    <SessionBalance />
+                                </Item>
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Item>
+                                    <SessionTransfers />
+                                </Item>
+                            </Grid>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={1}>
                         <Item>
                             <SessionExpenseList />
-                        </Item>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Item>
-                            <SessionBalance />
-                        </Item>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Item>
-                            <SessionTransfers />
                         </Item>
                     </Grid>
                 </Grid>

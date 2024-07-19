@@ -1484,6 +1484,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.2
+  resolution: "@kurkle/color@npm:0.3.2"
+  checksum: 10/079c4b7688061070f1d570cee4cf0e7c4085867b940688ff80356a56825a5ace7077257c9ec5863eb344a8eae78379388ab57cdf9d75c491389fad56f411cd43
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/devices@npm:6.27.1, @ledgerhq/devices@npm:^6.27.1":
   version: 6.27.1
   resolution: "@ledgerhq/devices@npm:6.27.1"
@@ -5831,6 +5838,15 @@ __metadata:
     ansi-styles: "npm:^4.1.0"
     supports-color: "npm:^7.1.0"
   checksum: 10/cb3f3e594913d63b1814d7ca7c9bafbf895f75fbf93b92991980610dfd7b48500af4e3a5d4e3a8f337990a96b168d7eb84ee55efdce965e2ee8efc20f8c8f139
+  languageName: node
+  linkType: hard
+
+"chart.js@npm:4.4.3":
+  version: 4.4.3
+  resolution: "chart.js@npm:4.4.3"
+  dependencies:
+    "@kurkle/color": "npm:^0.3.0"
+  checksum: 10/89bc1f86844679d7f195ed077cfcf12182aecb7f23f9a34bba27c5934d6cfe2c0b7d521109a8e770df940a3668b01fcea992302f28093dfa2c8e71b835f8f37d
   languageName: node
   linkType: hard
 
@@ -10329,6 +10345,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-chartjs-2@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "react-chartjs-2@npm:5.2.0"
+  peerDependencies:
+    chart.js: ^4.1.1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: 10/0a70b60e1a0d1f0cecdd69d70d9ac1c191618c1033d8f942d4728f5eb84c893c82c9e3318be8a3158eb3a7186c0251a8fe0356c9610ea0f0f3f2d4a9c4a0b388
+  languageName: node
+  linkType: hard
+
 "react-devtools-core@npm:^4.19.1":
   version: 4.28.5
   resolution: "react-devtools-core@npm:4.28.5"
@@ -11369,6 +11395,7 @@ __metadata:
     "@types/react-lazy-load-image-component": "npm:^1.6.4"
     "@vitejs/plugin-react": "npm:^3.0.0"
     bn.js: "npm:5.2.1"
+    chart.js: "npm:4.4.3"
     date-fns: "npm:2.30.0"
     i18next: "npm:21.10.0"
     i18next-browser-languagedetector: "npm:6.1.8"
@@ -11376,6 +11403,7 @@ __metadata:
     notistack: "npm:2.0.8"
     qrcode.react: "npm:^3.1.0"
     react: "npm:^18.2.0"
+    react-chartjs-2: "npm:^5.2.0"
     react-dom: "npm:^18.2.0"
     react-helmet-async: "npm:^2.0.5"
     react-hook-form: "npm:7.51.4"
