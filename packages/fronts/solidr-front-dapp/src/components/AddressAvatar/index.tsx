@@ -24,9 +24,9 @@ function stringAvatar(name: string, size?: number) {
             width: size,
             height: size,
             bgcolor: stringToColor(name),
-            fontSize: size ? (size / 2) + 'px' : '20px',
+            fontSize: size ? size / 2 + 'px' : '20px',
         },
-        children: name.substring(2, 4),
+        children: name.substring(0, 2),
     };
 }
 

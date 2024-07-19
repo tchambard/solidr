@@ -1,9 +1,10 @@
+use anchor_lang::{prelude::*, system_program};
+use anchor_lang::solana_program::clock;
+
+use crate::{errors::*, state::sessions::*};
 use crate::instructions::prices::*;
 use crate::state::members::MemberAccount;
 use crate::state::refunds::*;
-use crate::{errors::*, state::sessions::*};
-use anchor_lang::solana_program::clock;
-use anchor_lang::{prelude::*, system_program};
 
 #[derive(Accounts)]
 pub struct RefundContextData<'info> {
@@ -29,9 +30,9 @@ pub struct RefundContextData<'info> {
         payer = from_addr,
         space = 8 + RefundAccount::INIT_SPACE,
         seeds = [
-            RefundAccount::SEED_PREFIX.as_ref(),
-            session.session_id.to_le_bytes().as_ref(),
-            session.refunds_count.to_le_bytes().as_ref()
+        RefundAccount::SEED_PREFIX.as_ref(),
+        session.session_id.to_le_bytes().as_ref(),
+        session.refunds_count.to_le_bytes().as_ref()
         ],
         bump
     )]
@@ -90,6 +91,41 @@ pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
     session.refunds_count += 1;
 
     emit!(RefundAdded {
+        session_id: session.session_id,
+        refund_id: refund.refund_id,
+    });
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DeleteRefundContextData<'info> {
+    /// CHECK: safe as used only for transfer and ensured belonging to session member
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(mut, close = admin)]
+    pub refund: Account<'info, RefundAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn delete_refund(ctx: Context<DeleteRefundContextData>) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+    let refund = &mut ctx.accounts.refund;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+    require!(
+        session.status == SessionStatus::Closed,
+        SolidrError::SessionNotClosed
+    );
+
+    emit!(RefundDeleted {
         session_id: session.session_id,
         refund_id: refund.refund_id,
     });

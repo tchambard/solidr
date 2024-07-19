@@ -349,6 +349,107 @@ export type Solidr = {
       "args": []
     },
     {
+      "name": "deleteRefund",
+      "discriminator": [
+        225,
+        116,
+        74,
+        229,
+        247,
+        76,
+        14,
+        6
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "refund",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteSession",
+      "docs": [
+        "* Session's administrator can delete the session.\n     *\n     * @dev An event SessionDeleted is emitted"
+      ],
+      "discriminator": [
+        145,
+        247,
+        92,
+        192,
+        209,
+        128,
+        187,
+        189
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteSessionMember",
+      "docs": [
+        "* Session administrator can remove a member from the session.\n     *\n     * @dev Members can be removed only by session administrator when session is opened\n     * An event MemberRemoved is emitted"
+      ],
+      "discriminator": [
+        87,
+        38,
+        145,
+        255,
+        242,
+        94,
+        180,
+        202
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "member",
+          "writable": true
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initGlobal",
       "discriminator": [
         44,
@@ -833,6 +934,19 @@ export type Solidr = {
       ]
     },
     {
+      "name": "memberDeleted",
+      "discriminator": [
+        197,
+        176,
+        249,
+        151,
+        163,
+        55,
+        70,
+        154
+      ]
+    },
+    {
       "name": "refundAdded",
       "discriminator": [
         97,
@@ -846,6 +960,19 @@ export type Solidr = {
       ]
     },
     {
+      "name": "refundDeleted",
+      "discriminator": [
+        171,
+        242,
+        116,
+        20,
+        107,
+        251,
+        175,
+        16
+      ]
+    },
+    {
       "name": "sessionClosed",
       "discriminator": [
         57,
@@ -856,6 +983,19 @@ export type Solidr = {
         34,
         120,
         27
+      ]
+    },
+    {
+      "name": "sessionDeleted",
+      "discriminator": [
+        198,
+        203,
+        193,
+        19,
+        12,
+        170,
+        11,
+        113
       ]
     },
     {
@@ -905,56 +1045,61 @@ export type Solidr = {
     },
     {
       "code": 6006,
+      "name": "sessionNotClosed",
+      "msg": "Session is not closed"
+    },
+    {
+      "code": 6007,
       "name": "memberAlreadyExists",
       "msg": "Member already exists"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "missingInvitationHash",
       "msg": "Missing invitation link hash"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "invalidInvitationHash",
       "msg": "Invalid invitation link hash"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "expenseAmountMustBeGreaterThanZero",
       "msg": "Expense amount must be greater than zero"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "refundAmountMustBeGreaterThanZero",
       "msg": "Refund amount must be greater than zero"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "expenseNameTooLong",
       "msg": "Expense's name can't exceed 20 characters"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "maxParticipantsReached",
       "msg": "Expense cannot have more than 20 participants"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "notSessionMember",
       "msg": "Only session member can add an expense"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "notExpenseOwner",
       "msg": "Only expense owner can update or delete expense"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "participantNotMember",
       "msg": "Only members can be added as participants"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "cannotRemoveExpenseOwner",
       "msg": "Expense owner cannot be removed from participants"
     }
@@ -1147,6 +1292,26 @@ export type Solidr = {
       }
     },
     {
+      "name": "memberDeleted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sessionId",
+            "type": "u64"
+          },
+          {
+            "name": "addr",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "refundAccount",
       "type": {
         "kind": "struct",
@@ -1184,6 +1349,22 @@ export type Solidr = {
     },
     {
       "name": "refundAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sessionId",
+            "type": "u64"
+          },
+          {
+            "name": "refundId",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "refundDeleted",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1249,6 +1430,18 @@ export type Solidr = {
     },
     {
       "name": "sessionClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sessionId",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sessionDeleted",
       "type": {
         "kind": "struct",
         "fields": [

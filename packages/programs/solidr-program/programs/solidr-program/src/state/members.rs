@@ -21,3 +21,9 @@ pub struct MemberAdded {
     pub name: String,
     pub is_admin: bool,
 }
+#[event]
+pub struct MemberDeleted {
+    pub session_id: u64,
+    pub addr: Pubkey,
+    pub name: String,
+}

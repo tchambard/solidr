@@ -22,3 +22,8 @@ pub struct RefundAdded {
     pub session_id: u64,
     pub refund_id: u16,
 }
+#[event]
+pub struct RefundDeleted {
+    pub session_id: u64,
+    pub refund_id: u16,
+}

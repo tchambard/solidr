@@ -35,3 +35,8 @@ pub struct SessionClosed {
 pub struct SessionOpened {
     pub session_id: u64,
 }
+
+#[event]
+pub struct SessionDeleted {
+    pub session_id: u64,
+}
