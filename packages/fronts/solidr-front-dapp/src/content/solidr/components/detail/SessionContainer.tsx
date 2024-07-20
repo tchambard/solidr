@@ -22,7 +22,6 @@ import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
-import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
@@ -141,6 +140,26 @@ export default () => {
                 });
             });
             expensesRegistrationListener && listeners.push(expensesRegistrationListener);
+
+            const refundRegistrationListener = solidrClient.addEventListener('refundAdded', (event) => {
+                solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refund) => {
+                    if (!sessionCurrent.session) {
+                        return;
+                    }
+                    const newSessionCurrent = {
+                        ...sessionCurrent,
+                        refund,
+                        session: {
+                            ...sessionCurrent.session,
+                            refundsCount: sessionCurrent.session.refundsCount + 1,
+                        },
+                    };
+
+                    setSessionCurrent(newSessionCurrent);
+                    reloadSessionBalance(newSessionCurrent, anchorWallet);
+                });
+            });
+            refundRegistrationListener && listeners.push(refundRegistrationListener);
         }
 
         return () => {
@@ -179,11 +198,6 @@ export default () => {
                             <Grid item xs={1}>
                                 <Item>
                                     <SessionMemberList />
-                                </Item>
-                            </Grid>
-                            <Grid item xs={1}>
-                                <Item>
-                                    <SessionBalance />
                                 </Item>
                             </Grid>
                             <Grid item xs={1}>

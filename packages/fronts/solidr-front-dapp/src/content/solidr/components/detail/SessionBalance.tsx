@@ -1,16 +1,11 @@
 import { useRecoilValue } from 'recoil';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { sessionCurrentState } from '@/store/sessions';
-import { Doughnut } from 'react-chartjs-2';
-import { ArcElement, Chart as ChartJS, Legend, Tooltip as ChartTooltip } from 'chart.js/auto';
-import { Box } from '@mui/material';
-import { hexToRgb, hexToRgba, stringToColor } from '@/lib/colors';
+import { Bar } from 'react-chartjs-2';
+import { BarElement, CategoryScale, Chart as ChartJS, LinearScale, Tooltip as ChartTooltip } from 'chart.js/auto';
+import { hexToRgba, stringToColor } from '@/lib/colors';
+import React from 'react';
 
-ChartJS.register(ArcElement, ChartTooltip, Legend);
-
+ChartJS.register(BarElement, CategoryScale, LinearScale, ChartTooltip);
 export default () => {
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
@@ -25,17 +20,37 @@ export default () => {
         }
     });
 
+    const customLabelsPlugin = {
+        id: 'customLabels',
+        afterDatasetsDraw(chart, args, pluginOptions) {
+            const { ctx, data, scales } = chart;
+
+            ctx.save();
+            ctx.font = `${pluginOptions.font.weight} ${pluginOptions.font.size}px sans-serif`;
+            ctx.textAlign = 'center';
+
+            data.datasets[0].data.forEach((value, index) => {
+                const x = scales.x.getPixelForValue(index);
+                const y = scales.y.getPixelForValue(value);
+
+                ctx.fillStyle = value >= 0 ? '#71e36f' : '#e36f6f';
+                const yPos = value >= 0 ? y - 10 : y + 20;
+                ctx.fillText(`${value.toFixed(2)}€`, x, yPos);
+            });
+
+            ctx.restore();
+        },
+    };
+
     const data = {
         labels: sortedBalances.map((balance) => sessionCurrent.members[balance.owner.toString()].name),
         datasets: [
             {
                 data: sortedBalances.map((balance) => balance.balance),
-                backgroundColor: sortedBalances.map((balance) =>
-                    stringToColor(balance.owner.toString()),
-                ),
-                hoverBackgroundColor: sortedBalances.map((balance) =>
-                    hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString(),
-                ),
+                backgroundColor: sortedBalances.map((balance) => stringToColor(balance.owner.toString())),
+                hoverBackgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString()),
+                barPercentage: 0.9,
+                borderWidth: 0,
             },
         ],
     };
@@ -43,43 +58,54 @@ export default () => {
         plugins: {
             title: {
                 display: false,
+                text: 'balance of costs',
+                position: 'bottom' as const,
             },
             legend: {
-                display: true,
-                position: 'left' as const,
-                labels: {
-                    generateLabels: (chart) => {
-                        const data = chart.data;
-                        if (data.labels && data.datasets.length) {
-                            return data.labels.map((label, index) => ({
-                                text: `${label} ${data.datasets[0].data[index].toFixed(2)}€`,
-                                fillStyle: data.datasets[0].backgroundColor[index],
-                            }));
-                        }
-                        return [];
-                    },
+                display: false,
+            },
+            customLabels: {
+                font: {
+                    size: 12,
+                    weight: 'bold',
                 },
             },
         },
-        cutout: '70%',
+        scales: {
+            x: {
+                display: false, // Hide x-axis completely
+            },
+            y: {
+                display: true, // Hide y-axis labels and ticks
+                beginAtZero: true,
+                grid: {
+                    drawBorder: false,
+                    color: (context) => {
+                        if (context.tick.value === 0) {
+                            return 'rgba(0, 0, 0, 0.1)'; // Color of the zero line
+                        }
+                        return 'rgba(0, 0, 0, 0)'; // Transparent color for other grid lines
+                    },
+                },
+                ticks: {
+                    display: false,
+                },
+                border: {
+                    display: false,
+                },
+            },
+        },
+        layout: {
+            padding: {
+                top: 40,
+                right: 50,
+                bottom: 40,
+                left: 0,
+            },
+        },
+        maintainAspectRatio: false, // Set this to false to allow the chart to resize freely
+        responsive: true, // Set this to true to make the chart responsive
     };
 
-    return (
-        <>
-            <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
-                    <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
-                            Balances
-                        </Typography>
-                    </Grid>
-                </Grid>
-            </PageTitleWrapper>
-
-            <Divider variant={'middle'} />
-            <Box height={300} display="flex" alignItems="center" px={5}>
-                <Doughnut data={data} options={options} />
-            </Box>
-        </>
-    );
+    return <Bar data={data} options={options} plugins={[customLabelsPlugin]} />;
 };
