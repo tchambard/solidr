@@ -64,7 +64,7 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
                                         startAdornment={<InputAdornment position="start">€</InputAdornment>}
                                         label={`to ${sessionCurrent.members[transfer.to.toString()].name}`}
                                         defaultValue={transfer.amount}
-                                        onChange={() => handleAmountUpdate(transfer.to, transfer.amount)}
+                                        onChange={(e) => handleAmountUpdate(transfer.to, Number(e.currentTarget.value))}
                                         type={'number'}
                                     />
                                 </FormControl>
