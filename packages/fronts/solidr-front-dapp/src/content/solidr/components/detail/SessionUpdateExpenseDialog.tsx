@@ -11,10 +11,12 @@ import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
+import { Expense } from 'solidr-program';
 
 interface IModifyExpenseDialogProps {
     dialogVisible: boolean;
     setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    currentExpense: Expense;
 }
 
 interface IModifyExpenseParams {
@@ -29,7 +31,7 @@ interface IParticipant {
     checked: boolean;
 }
 
-export default ({ dialogVisible, setDialogVisible }: IModifyExpenseDialogProps) => {
+export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpenseDialogProps) => {
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -83,7 +85,7 @@ export default ({ dialogVisible, setDialogVisible }: IModifyExpenseDialogProps) 
                         setFormData(data);
 
                         const participantList = _.map(participants, (participant) => participant.address);
-                        solidrClient?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(0), data.name, data.amount).then(() => {
+                        solidrClient?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, currentExpense.expenseId, data.name, data.amount).then(() => {
                             setDialogVisible(false);
                         });
                     }}

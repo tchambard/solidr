@@ -27,6 +27,7 @@ export default () => {
 
     const [addExpenseDialogVisible, setAddExpenseDialogVisible] = useState(false);
     const [updateExpenseDialogVisible, setUpdatExpenseDialogVisible] = useState(false);
+    const [currentExpense, setCurrentExpense] = useState(undefined);
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
@@ -75,7 +76,10 @@ export default () => {
                     }
                     return (
                         <ListItem key={`expense_${expense.expenseId}`}>
-                            <ListItemText primary={expense.name} secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`} onClick={() => setUpdatExpenseDialogVisible(!updateExpenseDialogVisible)} />
+                            <ListItemText primary={expense.name} secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`} onClick={() => {
+                                setCurrentExpense(expense);
+                                setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
+                            }} />
                             <ListItemText primary={expense.amount + '€'} />
                             <ListItemAvatar>
                                 <AddressAvatar key={`expense_voter_avatar-${expenseOwner.addr.toString()}`} address={expenseOwner.addr.toString()} size={24} />
@@ -91,7 +95,7 @@ export default () => {
             </List>
 
             {addExpenseDialogVisible && <SessionAddExpenseDialog dialogVisible={addExpenseDialogVisible} setDialogVisible={setAddExpenseDialogVisible} />}
-            {updateExpenseDialogVisible && <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} />}
+            {updateExpenseDialogVisible && <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} currentExpense={currentExpense}/>}
         </>
     );
 };
