@@ -42,12 +42,14 @@ export default () => {
                                         <AddressAvatar address={transfer.from.toString()} />
                                     </ListItemAvatar>
                                 </Tooltip>
+                                <ListItemText primary={sessionCurrent.members[transfer.from.toString()].name} />
+                                <ListItemText primary={`owes ${transfer.amount}$ to`} />
                                 <Tooltip title={transfer.to.toString()}>
                                     <ListItemAvatar>
-                                        <AddressAvatar address={transfer.from.toString()} />
+                                        <AddressAvatar address={transfer.to.toString()} />
                                     </ListItemAvatar>
                                 </Tooltip>
-                                <ListItemText primary={transfer.amount} />
+                                <ListItemText primary={sessionCurrent.members[transfer.to.toString()].name} />
                             </ListItem>
                         );
                     })}

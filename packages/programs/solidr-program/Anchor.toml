@@ -6,10 +6,10 @@ skip-lint = false
 seeds = true
 
 [programs.localnet]
-solidr = "7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD"
+solidr = "7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv"
 
 [programs.devnet]
-solidr = "7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD"
+solidr = "7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv"
 
 [registry]
 url = "https://api.apr.dev"

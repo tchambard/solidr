@@ -1,10 +1,10 @@
+use anchor_lang::prelude::*;
+
 use crate::{
     errors::*,
     instructions::members::add_member,
     state::{global::*, members::*, sessions::*},
 };
-
-use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct OpenSessionContextData<'info> {
@@ -19,8 +19,8 @@ pub struct OpenSessionContextData<'info> {
         payer = admin,
         space = 8 + SessionAccount::INIT_SPACE,
         seeds = [
-            SessionAccount::SEED_PREFIX.as_ref(),
-            global.session_count.to_le_bytes().as_ref()
+        SessionAccount::SEED_PREFIX.as_ref(),
+        global.session_count.to_le_bytes().as_ref()
         ],
         bump
     )]
@@ -31,9 +31,9 @@ pub struct OpenSessionContextData<'info> {
         payer = admin,
         space = 8 + MemberAccount::INIT_SPACE,
         seeds = [
-            MemberAccount::SEED_PREFIX,
-            global.session_count.to_le_bytes().as_ref(),
-            admin.key().as_ref(),
+        MemberAccount::SEED_PREFIX,
+        global.session_count.to_le_bytes().as_ref(),
+        admin.key().as_ref(),
         ],
         bump
     )]
@@ -104,6 +104,38 @@ pub fn close_session(ctx: Context<CloseSessionContextData>) -> Result<()> {
     session.invitation_hash = [0; 32];
 
     emit!(SessionClosed {
+        session_id: session.session_id
+    });
+
+    Ok(())
+}
+
+#[derive(Accounts)]
+pub struct DeleteSessionContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut, close = admin)]
+    pub session: Account<'info, SessionAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn delete_session(ctx: Context<crate::instructions::sessions::DeleteSessionContextData>) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+
+    require!(
+        session.status == SessionStatus::Closed,
+        SolidrError::SessionClosed
+    );
+
+
+    emit!(SessionDeleted {
         session_id: session.session_id
     });
 

@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { PublicKey, SendOptions } from '@solana/web3.js';
+import { PublicKey, SendOptions, TransactionInstruction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -141,7 +141,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
     public async openSession(admin: Wallet, name: string, description: string, memberName: string): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
-            const sessionId = await this.getNextSessionId();
+            const sessionId = await this._getNextSessionId();
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, admin.publicKey);
 
@@ -172,6 +172,62 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                     admin: admin.publicKey,
                     session: sessionAccountPubkey,
                 })
+                .transaction();
+
+            return this.signAndSendTransaction(admin, tx, {
+                sessionAccountPubkey,
+            });
+        });
+    }
+
+    public async deleteSession(admin: Wallet, sessionId: BN): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+
+            let instructions: TransactionInstruction[] = [];
+            const expenses = await this.listSessionExpenses(sessionId);
+            for (const expense of expenses) {
+                const instruction = await this.program.methods
+                    .deleteExpense()
+                    .accountsPartial({
+                        owner: admin.publicKey,
+                        session: sessionAccountPubkey,
+                        expense: this.findExpenseAccountAddress(sessionId, new BN(expense.expenseId)),
+                    })
+                    .instruction();
+                instructions.push(instruction);
+            }
+            const refunds = await this.listSessionRefunds(sessionId);
+            for (const refund of refunds) {
+                const instruction = await this.program.methods
+                    .deleteRefund()
+                    .accountsPartial({
+                        admin: admin.publicKey,
+                        session: sessionAccountPubkey,
+                        refund: this.findRefundAccountAddress(sessionId, new BN(refund.refundId)),
+                    })
+                    .instruction();
+                instructions.push(instruction);
+            }
+            const members = await this.listSessionMembers(sessionId);
+            for (const member of members) {
+                const instruction = await this.program.methods
+                    .deleteSessionMember()
+                    .accountsPartial({
+                        admin: admin.publicKey,
+                        session: sessionAccountPubkey,
+                        member: this.findSessionMemberAccountAddress(sessionId, member.addr),
+                    })
+                    .instruction();
+                instructions.push(instruction);
+            }
+            const tx = await this.program.methods
+                .deleteSession()
+                .accountsPartial({
+                    admin: admin.publicKey,
+                    session: sessionAccountPubkey,
+                })
+                .preInstructions(instructions)
                 .transaction();
 
             return this.signAndSendTransaction(admin, tx, {
@@ -224,9 +280,9 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             const creditors: MemberBalance[] = [];
 
             for (const member of Object.values(members)) {
-                const roundedBalance = this.round2Precision(member.balance);
+                const roundedBalance = this._round2Precision(member.balance);
                 member.balance = roundedBalance === 0 ? 0 : roundedBalance; // hack to remove "-0"
-                member.totalCost = this.round2Precision(member.totalCost);
+                member.totalCost = this._round2Precision(member.totalCost);
                 if (member.balance < 0) {
                     debtors.push({ ...member });
                 } else if (member.balance > 0) {
@@ -241,7 +297,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 const debtor = debtors[0];
                 const creditor = creditors[0];
 
-                const transferAmount = this.round2Precision(Math.min(Math.abs(debtor.balance), creditor.balance));
+                const transferAmount = this._round2Precision(Math.min(Math.abs(debtor.balance), creditor.balance));
 
                 transfers.push({
                     from: debtor.owner,
@@ -249,8 +305,8 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                     amount: transferAmount,
                 });
 
-                debtor.balance = this.round2Precision(debtor.balance + transferAmount);
-                creditor.balance = this.round2Precision(creditor.balance - transferAmount);
+                debtor.balance = this._round2Precision(debtor.balance + transferAmount);
+                creditor.balance = this._round2Precision(creditor.balance - transferAmount);
 
                 if (debtor.balance === 0) debtors.shift();
                 if (creditor.balance === 0) creditors.shift();
@@ -259,7 +315,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public round2Precision = (amount: number) => {
+    private _round2Precision = (amount: number) => {
         return Math.round(amount * 100) / 100;
     };
 
@@ -313,10 +369,30 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public async addSessionMember(payer: Wallet, sessionId: BN, addr: PublicKey, name: string): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
-            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, addr);
+            const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, addr);
 
             const tx = await this.program.methods
                 .addSessionMember(addr, name)
+                .accountsPartial({
+                    admin: payer.publicKey,
+                    session: sessionAccountPubkey,
+                    member: memberAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(payer, tx, {
+                memberAccountPubkey,
+            });
+        });
+    }
+
+    public async deleteSessionMember(payer: Wallet, sessionId: BN, addr: PublicKey): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountAddress = this.findSessionMemberAccountAddress(sessionId, addr);
+
+            const tx = await this.program.methods
+                .deleteSessionMember()
                 .accountsPartial({
                     admin: payer.publicKey,
                     session: sessionAccountPubkey,
@@ -333,7 +409,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public async getSession(sessionAccountPubkey: PublicKey): Promise<Session> {
         return this.wrapFn(async () => {
             const internal = await this.program.account.sessionAccount.fetch(sessionAccountPubkey);
-            return this.mapSession(internal);
+            return this._mapSession(internal);
         });
     }
 
@@ -358,7 +434,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .sort((a, b) => a.sessionId.toNumber() - b.sessionId.toNumber())
                 .map((account) => this.findSessionAccountAddress(account.sessionId));
 
-            return (await this.getPage<InternalSession>(this.program.account.sessionAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapSession);
+            return (await this.getPage<InternalSession>(this.program.account.sessionAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this._mapSession);
         });
     }
 
@@ -416,7 +492,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
-            const expenseId = await this.getNextExpenseId(sessionAccountPubkey);
+            const expenseId = await this._getNextExpenseId(sessionAccountPubkey);
             const expenseAccountPubkey = this.findExpenseAccountAddress(sessionId, expenseId);
 
             const tx = await this.program.methods
@@ -518,7 +594,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .sort((a, b) => +(a.date > b.date) || -(a.date < b.date))
                 .map((account) => account.pubkey);
 
-            return (await this.getPage<InternalExpense>(this.program.account.expenseAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapExpense);
+            return (await this.getPage<InternalExpense>(this.program.account.expenseAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this._mapExpense);
         });
     }
 
@@ -530,7 +606,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public async getExpense(expenseAccountPubkey: PublicKey): Promise<Expense> {
         return this.wrapFn(async () => {
             const expense = await this.program.account.expenseAccount.fetch(expenseAccountPubkey);
-            return this.mapExpense(expense);
+            return this._mapExpense(expense);
         });
     }
 
@@ -592,8 +668,11 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             const fromMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
             const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, recipient);
 
-            const refundId = await this.getNextRefundId(sessionAccountPubkey);
+            const refundId = await this._getNextRefundId(sessionAccountPubkey);
             const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
+
+            // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
+            const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
 
             const tx = await this.program.methods
                 .addRefund(amount)
@@ -604,6 +683,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                     receiver: toMemberAccountPubkey,
                     session: sessionAccountPubkey,
                     refund: refundAccountPubkey,
+                    priceUpdate: solPriceAccount,
                 })
                 .transaction();
 
@@ -611,6 +691,27 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 sessionAccountPubkey,
                 fromMemberAccountPubkey,
                 toMemberAccountPubkey,
+                refundAccountPubkey,
+            });
+        });
+    }
+
+    public async deleteRefund(payer: Wallet, sessionId: BN, refundId: BN): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
+
+            const tx = await this.program.methods
+                .deleteRefund()
+                .accountsPartial({
+                    admin: payer.publicKey,
+                    session: sessionAccountPubkey,
+                    refund: refundAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(payer, tx, {
+                sessionAccountPubkey,
                 refundAccountPubkey,
             });
         });
@@ -642,7 +743,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 .sort((a, b) => +(a.date > b.date) || -(a.date < b.date))
                 .map((account) => account.pubkey);
 
-            return (await this.getPage<InternalRefund>(this.program.account.refundAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this.mapRefund);
+            return (await this.getPage<InternalRefund>(this.program.account.refundAccount, addresses, paginationOptions?.page, paginationOptions?.perPage)).map(this._mapRefund);
         });
     }
 
@@ -654,25 +755,25 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public async getRefund(refundAccountPubkey: PublicKey): Promise<Refund> {
         return this.wrapFn(async () => {
             const refund = await this.program.account.refundAccount.fetch(refundAccountPubkey);
-            return this.mapRefund(refund);
+            return this._mapRefund(refund);
         });
     }
 
-    private mapSessionStatus(internalStatus: InternalSessionStatus): SessionStatus {
+    private _mapSessionStatus(internalStatus: InternalSessionStatus): SessionStatus {
         if (internalStatus.opened) return SessionStatus.Opened;
         if (internalStatus.closed) return SessionStatus.Closed;
         throw new Error('Bad session status');
     }
 
-    private mapSession = (internalSession: InternalSession): Session => {
+    private _mapSession = (internalSession: InternalSession): Session => {
         return {
             ...internalSession,
-            status: this.mapSessionStatus(internalSession.status),
+            status: this._mapSessionStatus(internalSession.status),
             invitationHash: internalSession.invitationHash.toString(),
         };
     };
 
-    private mapExpense = (internalExpense: InternalExpense): Expense => {
+    private _mapExpense = (internalExpense: InternalExpense): Expense => {
         return {
             ...internalExpense,
             amount: Math.round(internalExpense.amount * 100) / 100,
@@ -680,28 +781,28 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         };
     };
 
-    private mapRefund = (internalRefund: InternalRefund): Refund => {
+    private _mapRefund = (internalRefund: InternalRefund): Refund => {
         return {
             ...internalRefund,
             date: new Date(internalRefund.date.toNumber() * 1000),
         };
     };
 
-    private async getNextSessionId(): Promise<BN> {
+    private async _getNextSessionId(): Promise<BN> {
         return this.wrapFn(async () => {
             const sessionCount = (await this.program.account.globalAccount.fetch(this.globalAccountPubkey)).sessionCount ?? 0;
             return new BN(sessionCount);
         });
     }
 
-    private async getNextExpenseId(sessionAccountPubkey: PublicKey): Promise<BN> {
+    private async _getNextExpenseId(sessionAccountPubkey: PublicKey): Promise<BN> {
         return this.wrapFn(async () => {
             const expensesCount = (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).expensesCount ?? 0;
             return new BN(expensesCount);
         });
     }
 
-    private async getNextRefundId(sessionAccountPubkey: PublicKey): Promise<BN> {
+    private async _getNextRefundId(sessionAccountPubkey: PublicKey): Promise<BN> {
         return this.wrapFn(async () => {
             const refundsCount = (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).refundsCount ?? 0;
             return new BN(refundsCount);

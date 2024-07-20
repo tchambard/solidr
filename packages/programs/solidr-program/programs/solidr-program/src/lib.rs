@@ -6,12 +6,13 @@ pub mod errors;
 pub mod instructions;
 pub mod state;
 
-declare_id!("7ANWP5NdPzZ2YCJpYqqd8DiQgi8hnmtVNw5vatbDdixD");
+declare_id!("7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv");
 
 #[program]
 pub mod solidr {
-    use super::*;
     use instructions::*;
+
+    use super::*;
 
     pub fn init_global(ctx: Context<InitGlobalContextData>) -> Result<()> {
         global::init_global(ctx)
@@ -45,6 +46,15 @@ pub mod solidr {
     }
 
     /**
+     * Session's administrator can delete the session.
+     *
+     * @dev An event SessionDeleted is emitted
+     */
+    pub fn delete_session(ctx: Context<DeleteSessionContextData>) -> Result<()> {
+        sessions::delete_session(ctx)
+    }
+
+    /**
      * Session's administrator can set invitation token hash
      *
      * @param hash The token hash to store in session
@@ -71,6 +81,18 @@ pub mod solidr {
         name: String,
     ) -> Result<()> {
         members::add_session_member(ctx, addr, name)
+    }
+
+    /**
+     * Session administrator can remove a member from the session.
+     *
+     * @dev Members can be removed only by session administrator when session is opened
+     * An event MemberRemoved is emitted
+     */
+    pub fn delete_session_member(
+        ctx: Context<DeleteSessionMemberContextData>,
+    ) -> Result<()> {
+        members::delete_session_member(ctx)
     }
 
     /**
@@ -159,5 +181,9 @@ pub mod solidr {
      */
     pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
         refunds::add_refund(ctx, amount)
+    }
+
+    pub fn delete_refund(ctx: Context<DeleteRefundContextData>) -> Result<()> {
+        refunds::delete_refund(ctx)
     }
 }

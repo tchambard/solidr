@@ -15,7 +15,9 @@
         "use-devnet": "solana-docker config set --url devnet --keypair /opt/.config/solana/id.json",
         "deploy-devnet": "anchor-docker deploy --provider.cluster devnet",
         "init-devnet": "ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ts-node migrations/initGlobal.ts",
-        "start-local-test-validator": "solana-docker-shell exec \"solana-test-validator --ledger /opt/.config/solana/.ledger -r --bind-address 0.0.0.0 --rpc-port 8899\""
+        "start-local-test-validator": "solana-docker-shell exec \"solana-test-validator --ledger /opt/.config/solana/.ledger -r --bind-address 0.0.0.0 --rpc-port 8899\"",
+        "refund": "solana-docker program close --buffers",
+        "extend-program": "solana-docker program extend 7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv 20000 -u d"
     },
     "dependencies": {
         "@coral-xyz/anchor": "0.30.1",
