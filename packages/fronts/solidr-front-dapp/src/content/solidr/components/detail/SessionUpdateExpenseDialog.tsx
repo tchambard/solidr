@@ -10,7 +10,6 @@ import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
-import BN from 'bn.js';
 import { Expense } from 'solidr-program';
 
 interface IModifyExpenseDialogProps {
@@ -38,7 +37,10 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
 
     const tx = useRecoilValue(txState);
 
-    const [formData, setFormData] = useState<Partial<IModifyExpenseParams>>({name: currentExpense.name, amount: currentExpense.amount});
+    const [formData, setFormData] = useState<Partial<IModifyExpenseParams>>({
+        name: currentExpense.name,
+        amount: currentExpense.amount,
+    });
 
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
@@ -60,7 +62,11 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                 setCurrentUser({ name: member.name, address: member.addr, checked: true });
                 return;
             }
-            participants[address] = { name: member.name, address: member.addr, checked: currentExpense.participants.includes(member.addr) };
+            participants[address] = {
+                name: member.name,
+                address: member.addr,
+                checked: currentExpense.participants.find((participant) => participant.toString() == member.addr.toString()),
+            };
         });
         setParticipants(participants);
     }, [sessionCurrent]);
