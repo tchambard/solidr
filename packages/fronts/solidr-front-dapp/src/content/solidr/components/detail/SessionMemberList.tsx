@@ -19,6 +19,7 @@ import AddressAvatar from '@/components/AddressAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import { SessionStatus } from '@solidr';
 import SessionInviteMemberDialog from './SessionInviteMemberDialog';
+import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 
 export default () => {
     const [addMemberDialogVisible, setAddMemberDialogVisible] = useState(false);
@@ -51,24 +52,32 @@ export default () => {
                         )}
                     </Grid>
                 </Grid>
-            </PageTitleWrapper >
+            </PageTitleWrapper>
 
             <Divider variant={'middle'} />
 
-            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                {_.map(sessionCurrent.members, (member, address) => {
-                    return (
-                        <ListItem key={`voter_${address}`}>
-                            <Tooltip title={address}>
-                                <ListItemAvatar>
-                                    <AddressAvatar address={address} />
-                                </ListItemAvatar>
-                            </Tooltip>
-                            <ListItemText primary={member.name} />
-                        </ListItem>
-                    );
-                })}
-            </List>
+            <Grid container spacing={2}>
+                <Grid item xs={4}>
+                    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                        {_.map(sessionCurrent.members, (member, address) => {
+                            return (
+                                <ListItem key={`voter_${address}`}>
+                                    <Tooltip title={address}>
+                                        <ListItemAvatar>
+                                            <AddressAvatar address={address} />
+                                        </ListItemAvatar>
+                                    </Tooltip>
+                                    <ListItemText primary={member.name} />
+                                </ListItem>
+                            );
+                        })}
+                    </List>
+                </Grid>
+                <Grid item xs={8}>
+                    <SessionBalance />
+                </Grid>
+            </Grid>
+
             {addMemberDialogVisible && <SessionAddMemberDialog dialogVisible={addMemberDialogVisible} setDialogVisible={setAddMemberDialogVisible} />}
             {inviteMemberDialogVisible && <SessionInviteMemberDialog dialogVisible={inviteMemberDialogVisible} setDialogVisible={setInviteMemberDialogVisible} />}
         </>

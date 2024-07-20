@@ -185,7 +185,13 @@ describe('solidr', () => {
 
             const {
                 accounts: { refundAccountPubkey },
-            } = await client.addRefund(bob, sessionId, 50, alice.publicKey);
+            } = await client.sendRefunds(bob, sessionId, [
+                {
+                    amount: 50,
+                    from: bob.publicKey,
+                    to: alice.publicKey,
+                },
+            ]);
 
             const {
                 accounts: { expenseAccountPubkey: exp1AccountPubkey },
@@ -718,33 +724,73 @@ describe('solidr', () => {
                 });
             });
 
-            describe('> addRefund', () => {
+            describe('> sendRefunds', () => {
                 it('> should fail when called with invalid session id', async () => {
                     const invalidSessionId = new BN(666);
-                    await assertError(async () => client.addRefund(alice, invalidSessionId, 10, bob.publicKey), {
-                        message: ACCOUNT_NOT_FOUND_ERROR,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, invalidSessionId, [
+                                {
+                                    amount: 10,
+                                    from: alice.publicKey,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            message: ACCOUNT_NOT_FOUND_ERROR,
+                        },
+                    );
                 });
 
                 it('> should fail when called with amount equals to 0', async () => {
-                    await assertError(async () => client.addRefund(alice, sessionId, 0, bob.publicKey), {
-                        code: 'RefundAmountMustBeGreaterThanZero',
-                        message: `Refund amount must be greater than zero`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 0,
+                                    from: alice.publicKey,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'RefundAmountMustBeGreaterThanZero',
+                            message: `Refund amount must be greater than zero`,
+                        },
+                    );
                 });
 
                 it('> should failed when called by a non member', async () => {
-                    await assertError(async () => client.addRefund(paul, sessionId, 10, bob.publicKey), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(paul, sessionId, [
+                                {
+                                    amount: 10,
+                                    from: paul.publicKey,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should failed when receiver is not a member', async () => {
-                    await assertError(async () => client.addRefund(alice, sessionId, 10, paul.publicKey), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 10,
+                                    from: alice.publicKey,
+                                    to: paul.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should succeed when called by session administrator ', async () => {
@@ -757,7 +803,13 @@ describe('solidr', () => {
                         fees,
                         events,
                         accounts: { refundAccountPubkey },
-                    } = await client.addRefund(alice, sessionId, 10, bob.publicKey);
+                    } = await client.sendRefunds(alice, sessionId, [
+                        {
+                            amount: 10,
+                            from: alice.publicKey,
+                            to: bob.publicKey,
+                        },
+                    ]);
 
                     const refund = await client.getRefund(refundAccountPubkey);
                     const transferedLamports = refund.amountInLamports.toNumber();
@@ -792,7 +844,13 @@ describe('solidr', () => {
                         fees,
                         events,
                         accounts: { refundAccountPubkey },
-                    } = await client.addRefund(bob, sessionId, 10, charlie.publicKey);
+                    } = await client.sendRefunds(bob, sessionId, [
+                        {
+                            amount: 10,
+                            from: bob.publicKey,
+                            to: charlie.publicKey,
+                        },
+                    ]);
 
                     const refund = await client.getRefund(refundAccountPubkey);
                     const transferedLamports = refund.amountInLamports.toNumber();
@@ -823,7 +881,13 @@ describe('solidr', () => {
                     const {
                         events: { refundAdded },
                         accounts: { refundAccountPubkey },
-                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+                    } = await client.sendRefunds(alice, sessionId, [
+                        {
+                            amount: 20,
+                            from: alice.publicKey,
+                            to: bob.publicKey,
+                        },
+                    ]);
 
                     await assertError(async () => client.deleteRefund(alice, sessionId, new BN(refundAdded[0].refundId)), {
                         code: 'SessionNotClosed',
@@ -834,7 +898,13 @@ describe('solidr', () => {
                     const {
                         events: { refundAdded },
                         accounts: { refundAccountPubkey },
-                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+                    } = await client.sendRefunds(alice, sessionId, [
+                        {
+                            amount: 20,
+                            from: alice.publicKey,
+                            to: bob.publicKey,
+                        },
+                    ]);
                     await client.closeSession(alice, sessionId);
                     await assertError(async () => client.deleteSessionMember(bob, sessionId, bob.publicKey), {
                         code: 'ForbiddenAsNonAdmin',
@@ -845,7 +915,13 @@ describe('solidr', () => {
                     const {
                         events: { refundAdded },
                         accounts: { refundAccountPubkey },
-                    } = await client.addRefund(alice, sessionId, 20, bob.publicKey);
+                    } = await client.sendRefunds(alice, sessionId, [
+                        {
+                            amount: 20,
+                            from: alice.publicKey,
+                            to: bob.publicKey,
+                        },
+                    ]);
 
                     await client.closeSession(alice, sessionId);
                     await client.deleteSession(alice, sessionId);
@@ -1111,9 +1187,25 @@ describe('solidr', () => {
         });
 
         it('> should return correct number of expenses dependending on filter', async () => {
-            await client.addRefund(charlie, sessionId, 100, bob.publicKey);
-            await client.addRefund(charlie, sessionId, 50, alice.publicKey);
-            await client.addRefund(alice, sessionId, 50, bob.publicKey);
+            await client.sendRefunds(charlie, sessionId, [
+                {
+                    amount: 100,
+                    from: charlie.publicKey,
+                    to: bob.publicKey,
+                },
+                {
+                    amount: 50,
+                    from: charlie.publicKey,
+                    to: alice.publicKey,
+                },
+            ]);
+            await client.sendRefunds(alice, sessionId, [
+                {
+                    amount: 50,
+                    from: alice.publicKey,
+                    to: bob.publicKey,
+                },
+            ]);
             const pageWithAllExpenses = await client.listSessionRefunds(sessionId);
             assert.lengthOf(pageWithAllExpenses, 3);
 
@@ -1208,7 +1300,13 @@ describe('solidr', () => {
             await client.addExpense(alice, sessionId, 'exp 1', 100, [bob.publicKey, charlie.publicKey]);
             await client.addExpense(bob, sessionId, 'exp 2', 60, [alice.publicKey]);
             await client.addExpense(charlie, sessionId, 'exp 3', 30, [alice.publicKey]);
-            await client.addRefund(bob, sessionId, 20, alice.publicKey);
+            await client.sendRefunds(bob, sessionId, [
+                {
+                    amount: 20,
+                    from: bob.publicKey,
+                    to: alice.publicKey,
+                },
+            ]);
             const expenses = await client.listSessionExpenses(sessionId);
             const refunds = await client.listSessionRefunds(sessionId);
             const { totalExpenses, members, transfers } = await client.computeBalance(sessionMembers, expenses, refunds);

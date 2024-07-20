@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { PublicKey, SendOptions, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -100,6 +100,10 @@ export type MemberBalance = {
 
 export type MemberTransfer = {
     from: PublicKey;
+    to: PublicKey;
+    amount: number;
+};
+export type MemberRefund = {
     to: PublicKey;
     amount: number;
 };
@@ -662,36 +666,45 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async addRefund(payer: Wallet, sessionId: BN, amount: number, recipient: PublicKey): Promise<ITransactionResult> {
+    public async sendRefunds(payer: Wallet, sessionId: BN, refundsToSend: MemberRefund[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const fromMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
-            const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, recipient);
 
-            const refundId = await this._getNextRefundId(sessionAccountPubkey);
-            const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
+            let refundId = await this._getNextRefundId(sessionAccountPubkey);
 
-            // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
-            const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
+            let instructions: TransactionInstruction[] = [];
+            let refundsAccountPubkeys: NodeJS.Dict<PublicKey> = {};
+            for (const transfer of refundsToSend) {
+                const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, transfer.to);
+                const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
+                refundId = new BN(refundId + 1);
 
-            const tx = await this.program.methods
-                .addRefund(amount)
-                .accountsPartial({
-                    fromAddr: payer.publicKey,
-                    sender: fromMemberAccountPubkey,
-                    toAddr: recipient,
-                    receiver: toMemberAccountPubkey,
-                    session: sessionAccountPubkey,
-                    refund: refundAccountPubkey,
-                    priceUpdate: solPriceAccount,
-                })
-                .transaction();
+                // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
+                const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
+
+                const instruction = await this.program.methods
+                    .addRefund(transfer.amount)
+                    .accountsPartial({
+                        fromAddr: payer.publicKey,
+                        sender: fromMemberAccountPubkey,
+                        toAddr: transfer.to,
+                        receiver: toMemberAccountPubkey,
+                        session: sessionAccountPubkey,
+                        refund: refundAccountPubkey,
+                        priceUpdate: solPriceAccount,
+                    })
+                    .instruction();
+                refundsAccountPubkeys = { ...refundsAccountPubkeys, refundAccountPubkey };
+                instructions.push(instruction);
+            }
+
+            const tx = new Transaction().add(...instructions);
 
             return this.signAndSendTransaction(payer, tx, {
                 sessionAccountPubkey,
                 fromMemberAccountPubkey,
-                toMemberAccountPubkey,
-                refundAccountPubkey,
+                ...refundsAccountPubkeys,
             });
         });
     }
