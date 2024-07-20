@@ -65,7 +65,8 @@ export default () => {
                 // TODO: manage pagination for members and expenses
                 solidrClient.listSessionMembers(sid),
                 solidrClient.listSessionExpenses(sid),
-            ]).then(([session, members, expenses]) => {
+                solidrClient.listSessionRefunds(sid),
+            ]).then(([session, members, expenses, refunds]) => {
                 const newSessionState: SessionCurrentState = {
                     session,
                     members: members.reduce(
@@ -76,7 +77,7 @@ export default () => {
                         {} as { [pubkey: string]: SessionMember },
                     ),
                     expenses,
-                    refunds: [],
+                    refunds,
                     balances: {},
                     transfers: [],
                     myTotalCost: 0,
