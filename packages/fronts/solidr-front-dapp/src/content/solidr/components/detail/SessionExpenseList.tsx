@@ -30,7 +30,7 @@ export default () => {
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const itemsList = _.sortBy([...sessionCurrent?.expenses, ...sessionCurrent?.refunds], 'date');
-
+    console.log('itemsList :>> ', JSON.stringify(itemsList, null, 2));
     const renderExpense = (expense: Expense) => {
         const expenseOwner = _.find(sessionCurrent?.members, (member: SessionMember) => {
             return expense.owner.toString() === member.addr.toString();
@@ -61,7 +61,7 @@ export default () => {
             return <></>;
         }
         return (
-            <ListItem key={`expense_${refund.refundId}`}>
+            <ListItem key={`toto_${refund.refundId}`}>
                 <GetAppIcon style={{ color: 'green', paddingRight: '10px' }} />
                 <ListItemText primary={'Refund'} secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                 <ListItemText primary={refund.amount + '$'} />
