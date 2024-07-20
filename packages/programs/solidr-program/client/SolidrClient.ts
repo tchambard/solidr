@@ -103,6 +103,10 @@ export type MemberTransfer = {
     to: PublicKey;
     amount: number;
 };
+export type MemberRefund = {
+    to: PublicKey;
+    amount: number;
+};
 
 export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
 
@@ -662,7 +666,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async sendRefunds(payer: Wallet, sessionId: BN, transfersToSend: MemberTransfer[]): Promise<ITransactionResult> {
+    public async sendRefunds(payer: Wallet, sessionId: BN, refundsToSend: MemberRefund[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const fromMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
@@ -671,7 +675,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
             let instructions: TransactionInstruction[] = [];
             let refundsAccountPubkeys: NodeJS.Dict<PublicKey> = {};
-            for (const transfer of transfersToSend) {
+            for (const transfer of refundsToSend) {
                 const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, transfer.to);
                 const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
                 refundId = new BN(refundId + 1);
@@ -701,40 +705,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 sessionAccountPubkey,
                 fromMemberAccountPubkey,
                 ...refundsAccountPubkeys,
-            });
-        });
-    }
-
-    public async addRefund(payer: Wallet, sessionId: BN, amount: number, recipient: PublicKey): Promise<ITransactionResult> {
-        return this.wrapFn(async () => {
-            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
-            const fromMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
-            const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, recipient);
-
-            const refundId = await this._getNextRefundId(sessionAccountPubkey);
-            const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
-
-            // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
-            const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
-
-            const tx = await this.program.methods
-                .addRefund(amount)
-                .accountsPartial({
-                    fromAddr: payer.publicKey,
-                    sender: fromMemberAccountPubkey,
-                    toAddr: recipient,
-                    receiver: toMemberAccountPubkey,
-                    session: sessionAccountPubkey,
-                    refund: refundAccountPubkey,
-                    priceUpdate: solPriceAccount,
-                })
-                .transaction();
-
-            return this.signAndSendTransaction(payer, tx, {
-                sessionAccountPubkey,
-                fromMemberAccountPubkey,
-                toMemberAccountPubkey,
-                refundAccountPubkey,
             });
         });
     }

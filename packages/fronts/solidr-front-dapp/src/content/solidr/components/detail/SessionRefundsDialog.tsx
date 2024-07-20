@@ -39,8 +39,12 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
     }, [sessionCurrent.transfers]);
 
     const handleTransfersClick = () => {
-        const transfersToSend = transfers.filter((transfer) => transfer.amount > 0);
-        solidrClient?.sendRefunds(anchorWallet, sessionCurrent.session?.sessionId, transfersToSend).then(() => {
+        const refundsToSend = transfers
+            .filter((transfer) => transfer.amount > 0)
+            .map((transfer) => {
+                return { amount: transfer.amount, to: transfer.to };
+            });
+        solidrClient?.sendRefunds(anchorWallet, sessionCurrent.session?.sessionId, refundsToSend).then(() => {
             setDialogVisible(false);
         });
     };
