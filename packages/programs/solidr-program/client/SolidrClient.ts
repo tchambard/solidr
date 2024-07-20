@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { PublicKey, SendOptions, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -659,6 +659,44 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return this.signAndSendTransaction(owner, tx, {
             sessionAccountPubkey,
             expenseAccountPubkey,
+        });
+    }
+
+    public async sendRefunds(payer: Wallet, sessionId: BN, transfersToSend: MemberTransfer[]): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const fromMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, payer.publicKey);
+
+            let refundId = await this._getNextRefundId(sessionAccountPubkey);
+
+            let instructions: TransactionInstruction[] = [];
+            let refundsAccountPubkeys: NodeJS.Dict<PublicKey> = {};
+            for (const transfer of transfersToSend) {
+                const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, transfer.to);
+                const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
+                refundId = new BN(refundId + 1);
+                const instruction = await this.program.methods
+                    .addRefund(transfer.amount)
+                    .accountsPartial({
+                        fromAddr: payer.publicKey,
+                        sender: fromMemberAccountPubkey,
+                        toAddr: transfer.to,
+                        receiver: toMemberAccountPubkey,
+                        session: sessionAccountPubkey,
+                        refund: refundAccountPubkey,
+                    })
+                    .instruction();
+                refundsAccountPubkeys = { ...refundsAccountPubkeys, refundAccountPubkey };
+                instructions.push(instruction);
+            }
+
+            const tx = new Transaction().add(...instructions);
+
+            return this.signAndSendTransaction(payer, tx, {
+                sessionAccountPubkey,
+                fromMemberAccountPubkey,
+                ...refundsAccountPubkeys,
+            });
         });
     }
 
