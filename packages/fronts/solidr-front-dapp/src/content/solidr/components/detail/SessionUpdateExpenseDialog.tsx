@@ -38,7 +38,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
 
     const tx = useRecoilValue(txState);
 
-    const [formData, setFormData] = useState<Partial<IModifyExpenseParams>>({});
+    const [formData, setFormData] = useState<Partial<IModifyExpenseParams>>({name: currentExpense.name, amount: currentExpense.amount});
 
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
@@ -60,7 +60,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                 setCurrentUser({ name: member.name, address: member.addr, checked: true });
                 return;
             }
-            participants[address] = { name: member.name, address: member.addr, checked: false };
+            participants[address] = { name: member.name, address: member.addr, checked: currentExpense.participants.includes(member.addr) };
         });
         setParticipants(participants);
     }, [sessionCurrent]);
