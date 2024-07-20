@@ -28,7 +28,7 @@ export default () => {
                 <Grid container justifyContent={'space-between'} alignItems={'center'}>
                     <Grid item>
                         <Typography variant={'h3'} component={'h3'} gutterBottom>
-                            Transfers
+                            Refunds
                         </Typography>
                     </Grid>
                 </Grid>
@@ -48,8 +48,8 @@ export default () => {
                                         </ListItemAvatar>
                                     </Tooltip>
                                     <ListItemText primary={sessionCurrent.members[transfer.from.toString()].name} />
-                                <ListItemText primary={`owes ${transfer.amount}$ to`} />
-                                <Tooltip title={transfer.to.toString()}>
+                                    <ListItemText primary={`owes ${transfer.amount}$ to`} />
+                                    <Tooltip title={transfer.to.toString()}>
                                         <ListItemAvatar>
                                             <AddressAvatar address={transfer.to.toString()} />
                                         </ListItemAvatar>
