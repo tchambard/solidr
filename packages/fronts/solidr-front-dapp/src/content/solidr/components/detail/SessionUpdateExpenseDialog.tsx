@@ -104,7 +104,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                         <TextFieldElement type={'text'} name={'amount'} label={'Amount'} required={true} />
                         <br />
                         <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
-                            <FormLabel component="legend">Pick two</FormLabel>
+                            <FormLabel component="legend">Choose participants</FormLabel>
                             <FormGroup>
                                 <FormControlLabel control={<Checkbox checked={currentUser.checked} disabled={true} name={currentUser.name} />} label={currentUser.name} />
                                 {_.map(participants, (member) => (
