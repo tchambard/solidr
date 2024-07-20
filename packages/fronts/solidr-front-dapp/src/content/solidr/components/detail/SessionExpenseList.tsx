@@ -19,11 +19,14 @@ import ListItemText from '@mui/material/ListItemText';
 import AddressAvatar from '@/components/AddressAvatar';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import { formatRelative } from 'date-fns';
+import SessionModifyExpenseDialog from './SessionUpdateExpenseDialog';
+import SessionUpdateExpenseDialog from './SessionUpdateExpenseDialog';
 
 export default () => {
     const theme = useTheme();
 
     const [addExpenseDialogVisible, setAddExpenseDialogVisible] = useState(false);
+    const [updateExpenseDialogVisible, setUpdatExpenseDialogVisible] = useState(false);
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
@@ -72,7 +75,7 @@ export default () => {
                     }
                     return (
                         <ListItem key={`expense_${expense.expenseId}`}>
-                            <ListItemText primary={expense.name} secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`} />
+                            <ListItemText primary={expense.name} secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`} onClick={() => setUpdatExpenseDialogVisible(!updateExpenseDialogVisible)} />
                             <ListItemText primary={expense.amount + '€'} />
                             <ListItemAvatar>
                                 <AddressAvatar key={`expense_voter_avatar-${expenseOwner.addr.toString()}`} address={expenseOwner.addr.toString()} size={24} />
@@ -88,6 +91,7 @@ export default () => {
             </List>
 
             {addExpenseDialogVisible && <SessionAddExpenseDialog dialogVisible={addExpenseDialogVisible} setDialogVisible={setAddExpenseDialogVisible} />}
+            {updateExpenseDialogVisible && <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} />}
         </>
     );
 };
