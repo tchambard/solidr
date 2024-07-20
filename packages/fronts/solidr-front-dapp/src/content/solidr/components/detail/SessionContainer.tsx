@@ -22,7 +22,6 @@ import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
-import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
@@ -179,11 +178,6 @@ export default () => {
                             <Grid item xs={1}>
                                 <Item>
                                     <SessionMemberList />
-                                </Item>
-                            </Grid>
-                            <Grid item xs={1}>
-                                <Item>
-                                    <SessionBalance />
                                 </Item>
                             </Grid>
                             <Grid item xs={1}>
