@@ -675,6 +675,10 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 const toMemberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, transfer.to);
                 const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
                 refundId = new BN(refundId + 1);
+
+                // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
+                const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
+
                 const instruction = await this.program.methods
                     .addRefund(transfer.amount)
                     .accountsPartial({
@@ -684,6 +688,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                         receiver: toMemberAccountPubkey,
                         session: sessionAccountPubkey,
                         refund: refundAccountPubkey,
+                        priceUpdate: solPriceAccount,
                     })
                     .instruction();
                 refundsAccountPubkeys = { ...refundsAccountPubkeys, refundAccountPubkey };
