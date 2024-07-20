@@ -1,13 +1,8 @@
 import { useRecoilValue } from 'recoil';
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { sessionCurrentState } from '@/store/sessions';
 import { Doughnut } from 'react-chartjs-2';
 import { ArcElement, Chart as ChartJS, Legend, Tooltip as ChartTooltip } from 'chart.js/auto';
-import { Box } from '@mui/material';
-import { hexToRgb, hexToRgba, stringToColor } from '@/lib/colors';
+import { hexToRgba, stringToColor } from '@/lib/colors';
 
 ChartJS.register(ArcElement, ChartTooltip, Legend);
 
@@ -30,22 +25,20 @@ export default () => {
         datasets: [
             {
                 data: sortedBalances.map((balance) => balance.balance),
-                backgroundColor: sortedBalances.map((balance) =>
-                    stringToColor(balance.owner.toString()),
-                ),
-                hoverBackgroundColor: sortedBalances.map((balance) =>
-                    hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString(),
-                ),
+                backgroundColor: sortedBalances.map((balance) => stringToColor(balance.owner.toString())),
+                hoverBackgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString()),
             },
         ],
     };
     const options = {
         plugins: {
             title: {
-                display: false,
+                display: true,
+                text: 'Costs balance',
+                position: 'bottom' as const,
             },
             legend: {
-                display: true,
+                display: false,
                 position: 'left' as const,
                 labels: {
                     generateLabels: (chart) => {
@@ -62,24 +55,17 @@ export default () => {
             },
         },
         cutout: '70%',
+        layout: {
+            padding: {
+                top: 20,
+                right: 50,
+                bottom: 20,
+                left: 0,
+            },
+        },
+        maintainAspectRatio: false, // Set this to false to allow the chart to resize freely
+        responsive: true, // Set this to true to make the chart responsive
     };
 
-    return (
-        <>
-            <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
-                    <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
-                            Balances
-                        </Typography>
-                    </Grid>
-                </Grid>
-            </PageTitleWrapper>
-
-            <Divider variant={'middle'} />
-            <Box height={300} display="flex" alignItems="center" px={5}>
-                <Doughnut data={data} options={options} />
-            </Box>
-        </>
-    );
+    return <Doughnut data={data} options={options} />;
 };

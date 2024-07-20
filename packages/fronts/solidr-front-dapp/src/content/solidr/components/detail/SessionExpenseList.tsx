@@ -48,7 +48,7 @@ export default () => {
                 </ListItemAvatar>
             </ListItem>
         );
-    }
+    };
 
     const renderRefund = (refund: Refund) => {
         const refundFrom = _.find(sessionCurrent?.members, (member: SessionMember) => {
@@ -65,15 +65,15 @@ export default () => {
                 <GetAppIcon style={{ color: 'green', paddingRight: '10px' }} />
                 <ListItemText primary={'Refund'} secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                 <ListItemText primary={refund.amount + '$'} />
-                <ListItemAvatar >
+                <ListItemAvatar>
                     <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
                 </ListItemAvatar>
-                <ListItemAvatar >
+                <ListItemAvatar>
                     <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} />
                 </ListItemAvatar>
             </ListItem>
         );
-    }
+    };
 
     return (
         <>
@@ -81,7 +81,7 @@ export default () => {
                 <Grid container justifyContent={'space-between'} alignItems={'center'}>
                     <Grid item>
                         <Typography variant={'h3'} component={'h3'} gutterBottom>
-                            List of expenses
+                            List of operations
                         </Typography>
                     </Grid>
                     <Grid item>
@@ -105,9 +105,9 @@ export default () => {
                     '& .MuiListItem-root:hover':
                         sessionCurrent.session?.status === SessionStatus.Opened
                             ? {
-                                bgcolor: theme.palette.action.hover,
-                                cursor: 'pointer',
-                            }
+                                  bgcolor: theme.palette.action.hover,
+                                  cursor: 'pointer',
+                              }
                             : undefined,
                 }}
             >
