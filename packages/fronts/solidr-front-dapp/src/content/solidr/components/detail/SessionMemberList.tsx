@@ -57,9 +57,9 @@ export default () => {
             <Divider variant={'middle'} />
 
             <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid item xs={4}>
                     <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                        {_.map(sessionCurrent.balances, (member, address) => {
+                        {_.map(sessionCurrent.members, (member, address) => {
                             return (
                                 <ListItem key={`voter_${address}`}>
                                     <Tooltip title={address}>
@@ -67,14 +67,13 @@ export default () => {
                                             <AddressAvatar address={address} />
                                         </ListItemAvatar>
                                     </Tooltip>
-                                    <ListItemText primary={sessionCurrent.members[member.owner.toString()].name} />
-                                    <ListItemText primary={`${member.balance}$`} />
+                                    <ListItemText primary={member.name} />
                                 </ListItem>
                             );
                         })}
                     </List>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={8}>
                     <SessionBalance />
                 </Grid>
             </Grid>
