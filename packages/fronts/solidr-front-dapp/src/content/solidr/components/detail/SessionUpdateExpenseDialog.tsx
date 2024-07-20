@@ -8,7 +8,7 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useRecoilValue } from 'recoil';
 import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
-import { Wallet } from '@coral-xyz/anchor';
+import { BN, Wallet } from '@coral-xyz/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { Expense } from 'solidr-program';
 
@@ -91,9 +91,11 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                         setFormData(data);
 
                         const participantList = _.map(participants, (participant) => participant.address);
-                        solidrClient?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, currentExpense.expenseId, data.name, data.amount).then(() => {
-                            setDialogVisible(false);
-                        });
+                        solidrClient
+                            ?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(currentExpense.expenseId), data.name, data.amount, participantList)
+                            .then(() => {
+                                setDialogVisible(false);
+                            });
                     }}
                 >
                     <Stack direction={'column'}>
