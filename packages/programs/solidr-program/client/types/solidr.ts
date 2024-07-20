@@ -204,6 +204,9 @@ export type Solidr = {
           }
         },
         {
+          "name": "priceUpdate"
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }

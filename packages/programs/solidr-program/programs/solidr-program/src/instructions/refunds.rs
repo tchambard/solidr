@@ -1,10 +1,10 @@
-use anchor_lang::{prelude::*, system_program};
 use anchor_lang::solana_program::clock;
+use anchor_lang::{prelude::*, system_program};
 
-use crate::{errors::*, state::sessions::*};
 use crate::instructions::prices::*;
 use crate::state::members::MemberAccount;
 use crate::state::refunds::*;
+use crate::{errors::*, state::sessions::*};
 
 #[derive(Accounts)]
 pub struct RefundContextData<'info> {
@@ -38,15 +38,16 @@ pub struct RefundContextData<'info> {
     )]
     pub refund: Account<'info, RefundAccount>,
 
-    // https://github.com/pyth-network/pyth-crosschain/issues/1759
-    // pub price_update: Account<'info, PriceUpdateV2>,
+    /// CHECK: safe
+    pub price_update: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
 pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
     let session = &mut ctx.accounts.session;
     let refund = &mut ctx.accounts.refund;
-    // let price_update = &mut ctx.accounts.price_update;
+    let price_update = &mut ctx.accounts.price_update;
 
     let from_addr = &ctx.accounts.from_addr;
     let sender = &ctx.accounts.sender;
@@ -68,7 +69,8 @@ pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
     );
     require!(amount > 0, SolidrError::RefundAmountMustBeGreaterThanZero);
 
-    let price = get_price(); // TODO: pas price_update account
+    let price = get_price(&price_update)?;
+    msg!("price {} ; expo {}", price.price, price.exponent);
     let amount_in_lamports = convert_to_lamports(amount.into(), price)?;
 
     let cpi_context = CpiContext::new(
