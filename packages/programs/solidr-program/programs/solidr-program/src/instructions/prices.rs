@@ -1,34 +1,51 @@
 use anchor_lang::{prelude::*, solana_program::native_token::LAMPORTS_PER_SOL};
+use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, Price, PriceUpdateV2};
 
 use crate::errors::SolidrError;
-// use pyth_solana_receiver_sdk::price_update::{get_feed_id_from_hex, Price, PriceUpdateV2};
 
 // See https://pyth.network/developers/price-feed-ids for all available IDs.
 pub const MAXIMUM_AGE: u64 = 60; // 1 minute
 pub const FEED_ID: &str = "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
 
-pub struct Price {
-    pub price: i64,
-    pub conf: u64,
-    pub exponent: i32,
-    pub publish_time: i64,
+pub fn get_price(price_update: &UncheckedAccount) -> Result<Price> {
+    if price_update.data_len() != PriceUpdateV2::LEN {
+        msg!("Warning: Invalid Pyth price account size. Using default value.");
+        return Ok(get_default_price());
+    }
+
+    let price_data = price_update.try_borrow_data()?;
+    let price_update: PriceUpdateV2 = match PriceUpdateV2::try_deserialize(&mut price_data.as_ref())
+    {
+        Ok(data) => data,
+        Err(_) => {
+            msg!("Warning: Unable to deserialize Pyth price account. Using default value.");
+            return Ok(get_default_price());
+        }
+    };
+
+    let feed_id = get_feed_id_from_hex(FEED_ID).map_err(|_| error!(SolidrError::Overflow))?;
+
+    match price_update.get_price_no_older_than(&Clock::get()?, MAXIMUM_AGE, &feed_id) {
+        Ok(pyth_price) => Ok(Price {
+            price: pyth_price.price,
+            conf: pyth_price.conf,
+            exponent: pyth_price.exponent,
+            publish_time: pyth_price.publish_time,
+        }),
+        Err(_) => {
+            msg!("Warning: Unable to get valid price. Using default value.");
+            Ok(get_default_price())
+        }
+    }
 }
 
-pub fn get_price(// price_update: &mut Account<PriceUpdateV2>
-) -> Price {
-    // TODO: WAIT FOR FIX: https://github.com/pyth-network/pyth-crosschain/issues/1759
-    // let price = price_update.get_price_no_older_than(
-    //     &Clock::get()?,
-    //     MAXIMUM_AGE,
-    //     &get_feed_id_from_hex(FEED_ID)?,
-    // )?;
-    let price = Price {
+fn get_default_price() -> Price {
+    Price {
         price: 69,
         exponent: 4,
         conf: 0,
         publish_time: 0,
-    };
-    return price;
+    }
 }
 
 pub fn convert_to_lamports(amount: f64, price: Price) -> Result<u64> {

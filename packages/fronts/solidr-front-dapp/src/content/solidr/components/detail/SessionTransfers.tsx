@@ -48,7 +48,7 @@ export default () => {
                                         </ListItemAvatar>
                                     </Tooltip>
                                     <ListItemText primary={sessionCurrent.members[transfer.from.toString()].name} />
-                                <ListItemText primary={`owes ${transfer.amount}€ to`} />
+                                <ListItemText primary={`owes ${transfer.amount}$ to`} />
                                 <Tooltip title={transfer.to.toString()}>
                                         <ListItemAvatar>
                                             <AddressAvatar address={transfer.to.toString()} />
