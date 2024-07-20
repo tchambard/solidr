@@ -140,6 +140,26 @@ export default () => {
                 });
             });
             expensesRegistrationListener && listeners.push(expensesRegistrationListener);
+
+            const refundRegistrationListener = solidrClient.addEventListener('refundAdded', (event) => {
+                solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refund) => {
+                    if (!sessionCurrent.session) {
+                        return;
+                    }
+                    const newSessionCurrent = {
+                        ...sessionCurrent,
+                        refund,
+                        session: {
+                            ...sessionCurrent.session,
+                            refundsCount: sessionCurrent.session.refundsCount + 1,
+                        },
+                    };
+
+                    setSessionCurrent(newSessionCurrent);
+                    reloadSessionBalance(newSessionCurrent, anchorWallet);
+                });
+            });
+            refundRegistrationListener && listeners.push(refundRegistrationListener);
         }
 
         return () => {
