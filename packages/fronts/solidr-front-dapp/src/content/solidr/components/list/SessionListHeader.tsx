@@ -12,7 +12,7 @@ export default () => {
         <>
             <Grid container justifyContent={'space-between'} alignItems={'center'}>
                 <Grid item>
-                    <Typography variant={'h3'} component={'h3'} gutterBottom>
+                    <Typography variant={'h5'} component={'h5'} gutterBottom>
                         My solidr sessions
                     </Typography>
                 </Grid>

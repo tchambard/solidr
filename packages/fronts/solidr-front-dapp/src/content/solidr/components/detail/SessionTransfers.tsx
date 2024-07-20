@@ -36,7 +36,7 @@ export default () => {
             <PageTitleWrapper>
                 <Grid container justifyContent={'space-between'} alignItems={'center'}>
                     <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
+                        <Typography variant={'h5'} component={'h5'} gutterBottom>
                             Refunds
                         </Typography>
                     </Grid>
@@ -54,7 +54,7 @@ export default () => {
 
             {sessionCurrent.transfers.length > 0 ? (
                 <>
-                    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                    <List sx={{ width: '100%' }}>
                         {sessionCurrent?.transfers.map((transfer) => {
                             return (
                                 <ListItem key={`transfer_${transfer.from.toString()}_${transfer.to.toString()}`}>

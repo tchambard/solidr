@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 
 import SessionListItemActions from './SessionListItemActions';
 
-import { sessionListState } from '@/store/sessions';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { defaultSessionState, sessionCurrentState, sessionListState } from '@/store/sessions';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
@@ -14,9 +14,12 @@ export default () => {
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
     const [sessionList, setSessionList] = useRecoilState(sessionListState);
+    const setSessionCurrentState = useSetRecoilState(sessionCurrentState);
 
     useEffect(() => {
         if (!solidrClient) return;
+
+        setSessionCurrentState(defaultSessionState);
 
         const refreshUserSessions = () => {
             solidrClient.listUserSessions(anchorWallet.publicKey).then((sessions) => {
