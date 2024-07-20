@@ -7,6 +7,7 @@ import { sessionCurrentState } from '@/store/sessions';
 import { Doughnut } from 'react-chartjs-2';
 import { ArcElement, Chart as ChartJS, Legend, Tooltip as ChartTooltip } from 'chart.js/auto';
 import { Box } from '@mui/material';
+import { hexToRgb, hexToRgba, stringToColor } from '@/lib/colors';
 
 ChartJS.register(ArcElement, ChartTooltip, Legend);
 
@@ -30,10 +31,10 @@ export default () => {
             {
                 data: sortedBalances.map((balance) => balance.balance),
                 backgroundColor: sortedBalances.map((balance) =>
-                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 5)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 5)})`,
+                    stringToColor(balance.owner.toString()),
                 ),
                 hoverBackgroundColor: sortedBalances.map((balance) =>
-                    balance.balance >= 0 ? `rgba(0, 255, 0, ${Math.min(1, Math.abs(balance.balance) / 100)})` : `rgba(255, 0, 0, ${Math.min(1, Math.abs(balance.balance) / 100)})`,
+                    hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString(),
                 ),
             },
         ],
