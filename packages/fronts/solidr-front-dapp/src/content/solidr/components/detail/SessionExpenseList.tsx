@@ -111,14 +111,23 @@ export default () => {
                             : undefined,
                 }}
             >
-                {itemsList.map((expenseOrRefund) => {
-                    return (expenseOrRefund as Expense).expenseId != null ? renderExpense(expenseOrRefund as Expense) : renderRefund(expenseOrRefund as Refund);
-                })}
-                <Divider variant={'middle'} />
-                <ListItem key={`expense_total`}>
-                    <MyTotalCost totalCost={sessionCurrent?.myTotalCost} />
-                    <TotalExpenses totalExpenses={sessionCurrent?.totalExpenses} />
-                </ListItem>
+                {itemsList.length > 0 ? (
+                    <>
+                        {itemsList.map((expenseOrRefund) => {
+                            return (expenseOrRefund as Expense).expenseId != null ? renderExpense(expenseOrRefund as Expense) : renderRefund(expenseOrRefund as Refund);
+                        })}
+
+                        <Divider variant={'middle'} />
+                        <ListItem key={`expense_total`}>
+                            <MyTotalCost totalCost={sessionCurrent?.myTotalCost} />
+                            <TotalExpenses totalExpenses={sessionCurrent?.totalExpenses} />
+                        </ListItem>
+                    </>
+                ) : (
+                    <Typography variant="body1" align="center" mt={2} pb={2}>
+                        Start by adding an expense
+                    </Typography>
+                )}
             </List>
 
             {addExpenseDialogVisible && <SessionAddExpenseDialog dialogVisible={addExpenseDialogVisible} setDialogVisible={setAddExpenseDialogVisible} />}

@@ -3,6 +3,7 @@ import { sessionCurrentState } from '@/store/sessions';
 import { Bar } from 'react-chartjs-2';
 import { BarElement, CategoryScale, Chart as ChartJS, LinearScale, Tooltip as ChartTooltip } from 'chart.js/auto';
 import { hexToRgba, stringToColor } from '@/lib/colors';
+import React from 'react';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, ChartTooltip);
 export default () => {
