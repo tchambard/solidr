@@ -56,10 +56,6 @@ pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
     let receiver = &ctx.accounts.receiver;
 
     require!(
-        session.status == SessionStatus::Opened,
-        SolidrError::SessionClosed
-    );
-    require!(
         from_addr.key() == sender.addr.key() && sender.session_id == session.session_id,
         SolidrError::NotSessionMember
     );
@@ -83,7 +79,7 @@ pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
     system_program::transfer(cpi_context, amount_in_lamports)?;
 
     refund.session_id = session.session_id;
-    refund.refund_id = session.expenses_count;
+    refund.refund_id = session.refunds_count;
     refund.date = clock::Clock::get().unwrap().unix_timestamp;
     refund.from = from_addr.key();
     refund.to = to_addr.key();
