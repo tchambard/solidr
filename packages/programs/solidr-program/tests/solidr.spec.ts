@@ -520,11 +520,13 @@ describe('solidr', () => {
                     const updatedAmount = 100.37;
                     const {
                         events: { expenseUpdated },
-                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
+                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount, [bob.publicKey]);
                     const expense = await client.getExpense(currentExpenseAccountPubkey);
 
                     assert.equal(expense.name, updatedName);
                     assert.equal(expense.amount, updatedAmount);
+                    assert.lengthOf(expense.participants, 2);
+                    assert.sameDeepMembers(expense.participants, [alice.publicKey, bob.publicKey]);
 
                     assert.equal(expenseUpdated[0].sessionId.toNumber(), sessionId);
                     assert.equal(expenseUpdated[0].expenseId, currentExpenseId);
@@ -721,30 +723,66 @@ describe('solidr', () => {
             describe('> sendRefunds', () => {
                 it('> should fail when called with invalid session id', async () => {
                     const invalidSessionId = new BN(666);
-                    await assertError(async () => client.sendRefunds(alice, invalidSessionId, [{ amount: 10, to: bob.publicKey }]), {
-                        message: ACCOUNT_NOT_FOUND_ERROR,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, invalidSessionId, [
+                                {
+                                    amount: 10,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            message: ACCOUNT_NOT_FOUND_ERROR,
+                        },
+                    );
                 });
 
                 it('> should fail when called with amount equals to 0', async () => {
-                    await assertError(async () => client.sendRefunds(alice, sessionId, [{ amount: 0, to: bob.publicKey }]), {
-                        code: 'RefundAmountMustBeGreaterThanZero',
-                        message: `Refund amount must be greater than zero`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 0,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'RefundAmountMustBeGreaterThanZero',
+                            message: `Refund amount must be greater than zero`,
+                        },
+                    );
                 });
 
                 it('> should failed when called by a non member', async () => {
-                    await assertError(async () => client.sendRefunds(paul, sessionId, [{ amount: 10, to: bob.publicKey }]), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(paul, sessionId, [
+                                {
+                                    amount: 10,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should failed when receiver is not a member', async () => {
-                    await assertError(async () => client.sendRefunds(alice, sessionId, [{ amount: 10, to: paul.publicKey }]), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 10,
+                                    to: paul.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should succeed when called by session administrator ', async () => {
