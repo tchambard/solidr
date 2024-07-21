@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Container, Grid, Paper, Tab, Tabs, Theme, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Grid, Tab, Tabs, Theme, useMediaQuery, useTheme } from '@mui/material';
 import * as _ from 'lodash';
 import { useParams } from 'react-router';
 import { styled } from '@mui/material/styles';
@@ -14,13 +14,12 @@ import { SessionMember, SessionStatus } from '@solidr';
 import AppLoading from '@/components/loading/AppLoading';
 import SessionJoinDialog from '@/content/solidr/components/detail/SessionJoinDialog';
 import SessionAccessDenied from '@/content/solidr/components/detail/SessionAccessDenied';
-import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
-import SessionCloseButton from '@/content/solidr/components/detail/SessionCloseButton';
 import SessionMemberList from '@/content/solidr/components/detail/SessionMemberList';
 import SessionExpenseSummary from '@/content/solidr/components/detail/SessionExpenseSummary';
 import SessionExpenseList from '@/content/solidr/components/detail/SessionExpenseList';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
 import { useTranslation } from 'react-i18next';
+import SessionInfo from '@/content/solidr/components/detail/SessionInfo';
 
 const StyledTabs = styled(Tabs)(({ theme }: { theme: Theme }) => ({
     minHeight: 48,
@@ -242,25 +241,18 @@ export default () => {
 
             <Grid container spacing={2} direction={'column'}>
                 <Grid item xs={1}>
-                    <Box>
-                        <SessionNavigation />
-                    </Box>
+                    <SessionInfo />
                 </Grid>
                 <Grid item xs={1}>
                     <StyledTabs value={value} onChange={handleChange} variant={isMobile ? 'fullWidth' : 'standard'} centered={!isMobile}>
-                        <StyledTab label={t("session.tabs.title.members")} />
-                        <StyledTab label={t("session.tabs.title.expenses")} />
-                        <StyledTab label={t("session.tabs.title.balance")} />
+                        <StyledTab label={t('session.tabs.title.members')} />
+                        <StyledTab label={t('session.tabs.title.expenses')} />
+                        <StyledTab label={t('session.tabs.title.balance')} />
                     </StyledTabs>
                     <TabPanel value={value} index={0}>
-                        <Grid container spacing={2}>
-                            <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                                {anchorWallet.publicKey.toString() === sessionCurrent.session?.admin.toString() && <SessionCloseButton />}
-                            </Container>
-                            <Grid container spacing={2} direction={'column'}>
-                                <Grid item xs={1}>
-                                    <SessionMemberList />
-                                </Grid>
+                        <Grid container spacing={2} direction={'column'}>
+                            <Grid item xs={1}>
+                                <SessionMemberList />
                             </Grid>
                         </Grid>
                     </TabPanel>
@@ -275,7 +267,11 @@ export default () => {
                         </Grid>
                     </TabPanel>
                     <TabPanel value={value} index={2}>
-                        <SessionTransfers />
+                        <Grid container spacing={2} direction={'column'}>
+                            <Grid item xs={1}>
+                                <SessionTransfers />
+                            </Grid>
+                        </Grid>
                     </TabPanel>
                 </Grid>
             </Grid>

@@ -1,5 +1,3 @@
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
-
 import ActionsMenu, { IActionMenuItem } from '@/components/ActionsMenu';
 import { useEffect, useState } from 'react';
 import SessionCloseDialog from '@/content/solidr/components/detail/SessionCloseDialog';
@@ -12,11 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 interface IProps {
-    currentView: 'list' | 'edit' | 'detail';
     session: Session;
 }
 
-export default ({ session, currentView }: IProps) => {
+export default ({ session }: IProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -27,16 +24,7 @@ export default ({ session, currentView }: IProps) => {
     const [menuItems, setMenuItems] = useState<IActionMenuItem[]>([]);
 
     useEffect(() => {
-        const _menuItems: IActionMenuItem[] = [
-            {
-                title: t('sessions.item.action.details.title'),
-                description: t('sessions.item.action.details.description'),
-                onClick: () => navigate(`/sessions/${session.sessionId}`),
-                color: 'primary',
-                icon: <AutoGraphIcon fontSize={'small'} />,
-                hidden: currentView === 'detail',
-            },
-        ];
+        const _menuItems: IActionMenuItem[] = [];
 
         if (session.admin.toString() === anchorWallet.publicKey.toString()) {
             if (session.status == SessionStatus.Opened) {
@@ -71,10 +59,14 @@ export default ({ session, currentView }: IProps) => {
 
     return (
         <>
-            <ActionsMenu items={menuItems} />
-            {confirmClose && <SessionCloseDialog sessionId={session.sessionId} dialogVisible={confirmClose} setDialogVisible={setConfirmClose} />}
-            {confirmDelete && <SessionDeleteDialog sessionId={session.sessionId} dialogVisible={confirmDelete} setDialogVisible={setConfirmDelete} />}
-            {updateSessionVisibility && <SessionUpdateDialog session={session} dialogVisible={updateSessionVisibility} setDialogVisible={setUpdateSessionVisibility} />}
+            {menuItems.length > 0 && (
+                <>
+                    <ActionsMenu items={menuItems} />
+                    {confirmClose && <SessionCloseDialog sessionId={session.sessionId} dialogVisible={confirmClose} setDialogVisible={setConfirmClose} />}
+                    {confirmDelete && <SessionDeleteDialog sessionId={session.sessionId} dialogVisible={confirmDelete} setDialogVisible={setConfirmDelete} />}
+                    {updateSessionVisibility && <SessionUpdateDialog session={session} dialogVisible={updateSessionVisibility} setDialogVisible={setUpdateSessionVisibility} />}
+                </>
+            )}
         </>
     );
 };

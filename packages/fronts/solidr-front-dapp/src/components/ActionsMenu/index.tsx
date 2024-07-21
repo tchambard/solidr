@@ -2,8 +2,8 @@ import React, { Fragment, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as _ from 'lodash';
 import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip, useMediaQuery } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import ListItemText from '@mui/material/ListItemText';
+import { MoreHoriz } from '@mui/icons-material';
 
 export interface IActionMenuItem {
     title: string;
@@ -65,7 +65,7 @@ export default ({ items }: IProps) => {
                         aria-haspopup={'true'}
                         aria-expanded={open ? 'true' : undefined}
                     >
-                        <MenuIcon />
+                        <MoreHoriz />
                     </IconButton>
                     <Menu
                         anchorEl={anchorEl}
