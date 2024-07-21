@@ -17,6 +17,7 @@ import { RecoilRoot, useRecoilValue } from 'recoil';
 import { colorModeState } from '@/store/colorMode';
 import SolanaWalletProvider from '@/components/provider/SolanaWalletProvider';
 import { HelmetProvider } from 'react-helmet-async';
+import { useLocalStorage } from '@solana/wallet-adapter-react';
 
 function InnerApp() {
     const { i18n } = useTranslation();
