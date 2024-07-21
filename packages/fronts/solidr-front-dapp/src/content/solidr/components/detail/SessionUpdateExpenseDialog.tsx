@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FormContainer, TextFieldElement } from 'react-hook-form-mui';
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, FormLabel, Stack } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { LoadingButton } from '@mui/lab';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
@@ -9,8 +9,8 @@ import { useRecoilValue } from 'recoil';
 import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { BN, Wallet } from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
 import { Expense } from 'solidr-program';
+import SessionExpenseParticipantsList, { IParticipant } from '@/content/solidr/components/detail/SessionExpenseParticipantsList';
 
 interface IModifyExpenseDialogProps {
     dialogVisible: boolean;
@@ -22,12 +22,6 @@ interface IModifyExpenseParams {
     name: string;
     amount: number;
     members: IParticipant[];
-}
-
-interface IParticipant {
-    name: string;
-    address: PublicKey;
-    checked: boolean;
 }
 
 export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpenseDialogProps) => {
@@ -72,54 +66,26 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
         });
     };
 
-    const participantsList = (participants: { [address: string]: IParticipant }) => {
-        if (_.isEmpty(participants)) return;
+    const formSuccessHandler = (data: IModifyExpenseParams) => {
+        setFormData(data);
 
-        const current = _.find(participants, (part) => part.address.toString() == anchorWallet.publicKey.toString());
-        const others = _.sortBy(
-            _.filter(participants, (part) => part.address.toString() != anchorWallet.publicKey.toString()),
-            ['name'],
-        );
-
-        return (
-            <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
-                <FormLabel component="legend">Choose participants</FormLabel>
-                <FormGroup>
-                    <FormControlLabel control={<Checkbox checked={true} disabled={true} name={current.name} />} label={current.name} />
-                    {_.map(others, (member) => (
-                        <FormControlLabel
-                            control={<Checkbox checked={member.checked} name={member.name} onChange={() => handleParticipantOnClick(member)} />}
-                            label={member.name}
-                        />
-                    ))}
-                </FormGroup>
-            </FormControl>
-        );
+        const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
+        solidrClient?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(currentExpense.expenseId), data.name, data.amount, participantList).then(() => {
+            setDialogVisible(false);
+        });
     };
 
     return (
-        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'modify-expense-title'} open={dialogVisible}>
-            <DialogTitle id={'modify-expense-title'}>{'Modify an expense'}</DialogTitle>
+        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'dialog-expense-title'} open={dialogVisible}>
+            <DialogTitle id={'dialog-expense-title'}>{'Modify an expense'}</DialogTitle>
             <DialogContent dividers>
-                <FormContainer
-                    defaultValues={formData}
-                    onSuccess={(data: IModifyExpenseParams) => {
-                        setFormData(data);
-
-                        const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
-                        solidrClient
-                            ?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(currentExpense.expenseId), data.name, data.amount, participantList)
-                            .then(() => {
-                                setDialogVisible(false);
-                            });
-                    }}
-                >
+                <FormContainer defaultValues={formData} onSuccess={formSuccessHandler}>
                     <Stack direction={'column'}>
                         <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
                         <br />
                         <TextFieldElement type={'text'} name={'amount'} label={'Amount'} required={true} />
                         <br />
-                        {participantsList(participants)}
+                        <SessionExpenseParticipantsList participants={participants} handleParticipantOnClick={handleParticipantOnClick} />
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
                             Submit
                         </LoadingButton>
