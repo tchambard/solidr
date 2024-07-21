@@ -79,8 +79,8 @@ export default () => {
             <List sx={{ width: '100%' }}>
                 {sessionList.items.map((session) => {
                     return (
-                        <>
-                            <ListItem key={`session_${session.sessionId}`}>
+                        <div key={`session_${session.sessionId}`}>
+                            <ListItem >
                                 <ListItemText secondary={session.description}>
                                     <Link to={`/sessions/${session.sessionId}`}>
                                         <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
@@ -94,7 +94,7 @@ export default () => {
                             </ListItem>
 
                             <Divider variant={'middle'} />
-                        </>
+                        </div>
                     );
                 })}
             </List>

@@ -1,4 +1,4 @@
-import { Card, CardContent, Grid, Typography } from '@mui/material';
+import { Card, CardContent, Grid, Hidden, Typography } from '@mui/material';
 
 import { sessionCurrentState } from '@/store/sessions';
 import { useRecoilValue } from 'recoil';
@@ -35,18 +35,20 @@ export default () => {
                     </CardContent>
                 </Card>
             </Grid>
-            {/*<Grid item xs={12} sm={4}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                            {t('session.expense.summary.totalRefunds')}
-                        </Typography>
-                        <Typography variant="h4" color="primary">
-                            {sessionCurrent.totalRefunds}$
-                        </Typography>
-                    </CardContent>
-                </Card>
-            </Grid>*/}
+            <Hidden smDown>
+                <Grid item xs={12} sm={4}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h6" gutterBottom>
+                                {t('session.expense.summary.totalRefunds')}
+                            </Typography>
+                            <Typography variant="h4" color="primary">
+                                {sessionCurrent.totalRefunds}$
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Hidden>
         </Grid>
     );
 };

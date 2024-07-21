@@ -57,8 +57,8 @@ export default () => {
                     <List sx={{ width: '100%' }}>
                         {sessionCurrent?.transfers.map((transfer, idx) => {
                             return (
-                                <>
-                                    <ListItem key={`transfer_${idx}`}>
+                                <div key={`transfer_${idx}`}>
+                                    <ListItem>
                                         <Grid container alignItems="center" justifyContent={'space-between'} columns={5}>
                                             <Grid item xs={1} alignItems="flex-end">
                                                 <Tooltip title={transfer.from.toString()}>
@@ -109,7 +109,7 @@ export default () => {
                                         </Grid>
                                     </ListItem>
                                     <Divider variant={'middle'} />
-                                </>
+                                </div>
                             );
                         })}
                     </List>
