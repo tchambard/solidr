@@ -1,16 +1,14 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Container, Divider, Grid, IconButton, Paper, Tab, Tabs, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Container, Grid, Paper, Tab, Tabs, useMediaQuery, useTheme } from '@mui/material';
 import * as _ from 'lodash';
-import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { useParams } from 'react-router';
-import EditIcon from '@mui/icons-material/Edit';
 
 import SessionMemberList from './SessionMemberList';
 import SessionExpenseList from './SessionExpenseList';
 import styled from '@mui/styles/styled';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { SessionCurrentState, defaultSessionState, sessionCurrentState } from '@/store/sessions';
+import { defaultSessionState, SessionCurrentState, sessionCurrentState } from '@/store/sessions';
 import BN from 'bn.js';
 import AppLoading from '@/components/loading/AppLoading';
 import { solidrClientState } from '@/store/wallet';
@@ -23,7 +21,6 @@ import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
-import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 import { Theme } from '@mui/material/styles';
 
 const StyledTabs = styled(Tabs)(({ theme }: { theme: Theme }) => ({
@@ -67,18 +64,8 @@ function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
     return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ py: { xs: 1, sm: 2 } }}>
-                    {children}
-                </Box>
-            )}
+        <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
+            {value === index && <Box sx={{ py: { xs: 1, sm: 2 } }}>{children}</Box>}
         </div>
     );
 }
@@ -252,12 +239,7 @@ export default () => {
                 <Box>
                     <SessionNavigation />
                 </Box>
-                <StyledTabs
-                    value={value}
-                    onChange={handleChange}
-                    variant={isMobile ? "fullWidth" : "standard"}
-                    centered={!isMobile}
-                >
+                <StyledTabs value={value} onChange={handleChange} variant={isMobile ? 'fullWidth' : 'standard'} centered={!isMobile}>
                     <StyledTab label="Settings" />
                     <StyledTab label="Expenses" />
                     <StyledTab label="Balance" />
@@ -265,7 +247,7 @@ export default () => {
                 <TabPanel value={value} index={0}>
                     <Grid container spacing={2}>
                         <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                            <SessionCloseButton />
+                            {anchorWallet.publicKey.toString() === sessionCurrent.session?.admin.toString() && <SessionCloseButton />}
                         </Container>
                         <Grid container spacing={2} direction={'column'}>
                             <Grid item xs={1}>
