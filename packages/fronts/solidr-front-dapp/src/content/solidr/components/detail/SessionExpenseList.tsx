@@ -21,8 +21,8 @@ import ListItemText from '@mui/material/ListItemText';
 import AddressAvatar from '@/components/AddressAvatar';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import { formatRelative } from 'date-fns';
-import SessionModifyExpenseDialog from './SessionUpdateExpenseDialog';
 import SessionUpdateExpenseDialog from './SessionUpdateExpenseDialog';
+import AddressAvatarGroup from '@/components/AddressAvatarGroup';
 
 export default () => {
     const theme = useTheme();
@@ -45,13 +45,17 @@ export default () => {
         return (
             <ListItem key={`expense_${expense.expenseId}`}>
                 <UploadIcon style={{ color: 'red', paddingRight: '10px' }} />
-                <ListItemText primary={expense.name} secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`} onClick={() => {
-                    setCurrentExpense(expense);
-                    setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
-                }} />
+                <ListItemText
+                    primary={expense.name}
+                    secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
+                    onClick={() => {
+                        setCurrentExpense(expense);
+                        setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
+                    }}
+                />
                 <ListItemText primary={expense.amount + '$'} />
                 <ListItemAvatar>
-                    <AddressAvatar key={`expense_owner_avatar-${expenseOwner.addr.toString()}`} address={expenseOwner.addr.toString()} size={24} />
+                    <AddressAvatarGroup addresses={expense.participants.map((part) => part.toString())} size={24} />
                 </ListItemAvatar>
             </ListItem>
         );
@@ -138,7 +142,9 @@ export default () => {
             </List>
 
             {addExpenseDialogVisible && <SessionAddExpenseDialog dialogVisible={addExpenseDialogVisible} setDialogVisible={setAddExpenseDialogVisible} />}
-            {updateExpenseDialogVisible && <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} currentExpense={currentExpense}/>}
+            {updateExpenseDialogVisible && (
+                <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} currentExpense={currentExpense} />
+            )}
         </>
     );
 };
