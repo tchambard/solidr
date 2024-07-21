@@ -18,6 +18,7 @@ export type SessionCurrentState = {
     transfers: MemberTransfer[];
     myTotalCost: number;
     totalExpenses: number;
+    totalRefunds: number;
     isAdmin: boolean;
 };
 
@@ -30,6 +31,7 @@ export const defaultSessionState: SessionCurrentState = {
     transfers: [],
     myTotalCost: 0,
     totalExpenses: 0,
+    totalRefunds: 0,
     isAdmin: false,
 };
 

@@ -103,9 +103,17 @@ export type MemberTransfer = {
     to: PublicKey;
     amount: number;
 };
+
 export type MemberRefund = {
     to: PublicKey;
     amount: number;
+};
+
+export type Balance = {
+    totalExpenses: number;
+    totalRefunds: number;
+    members: { [key: string]: MemberBalance };
+    transfers: MemberTransfer[];
 };
 
 export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
@@ -240,15 +248,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async computeBalance(
-        sessionMembers: SessionMember[],
-        expenses: Expense[],
-        refunds: Refund[],
-    ): Promise<{
-        totalExpenses: number;
-        members: { [key: string]: MemberBalance };
-        transfers: MemberTransfer[];
-    }> {
+    public async computeBalance(sessionMembers: SessionMember[], expenses: Expense[], refunds: Refund[]): Promise<Balance> {
         return this.wrapFn(async () => {
             const members = sessionMembers.reduce(
                 (members, member) => {
@@ -259,6 +259,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             );
 
             let totalExpenses = 0;
+            let totalRefunds = 0;
 
             // 1. Compute total of expenses and individual costs for each member
             for (const expense of expenses) {
@@ -275,6 +276,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
             // 2. Apply refunds
             for (const refund of refunds) {
+                totalRefunds += refund.amount;
                 members[refund.from.toString()].balance += refund.amount;
                 members[refund.to.toString()].balance -= refund.amount;
             }
@@ -315,7 +317,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 if (debtor.balance === 0) debtors.shift();
                 if (creditor.balance === 0) creditors.shift();
             }
-            return { totalExpenses, members, transfers };
+            return { totalExpenses, totalRefunds, members, transfers };
         });
     }
 

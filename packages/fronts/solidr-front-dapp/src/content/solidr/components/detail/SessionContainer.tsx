@@ -1,30 +1,28 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Container, Divider, Grid, IconButton, Paper, Tab, Tabs, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Container, Grid, Paper, Tab, Tabs, useMediaQuery, useTheme } from '@mui/material';
 import * as _ from 'lodash';
-import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { useParams } from 'react-router';
-import EditIcon from '@mui/icons-material/Edit';
-
-import SessionMemberList from './SessionMemberList';
-import SessionExpenseList from './SessionExpenseList';
-import styled from '@mui/styles/styled';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { SessionCurrentState, defaultSessionState, sessionCurrentState } from '@/store/sessions';
 import BN from 'bn.js';
-import AppLoading from '@/components/loading/AppLoading';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import styled from '@mui/styles/styled';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
+import { Theme } from '@mui/material/styles';
 import { SessionMember, SessionStatus } from '@solidr';
+
+import { SessionCurrentState, defaultSessionState, sessionCurrentState } from '@/store/sessions';
+import AppLoading from '@/components/loading/AppLoading';
 import SessionCloseButton from '@/content/solidr/components/detail/SessionCloseButton';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
-import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
-import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
-import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
-import { Theme } from '@mui/material/styles';
+import SessionAccessDenied from '@/content/solidr/components/detail/SessionAccessDenied';
+import SessionExpenseList from '@/content/solidr/components/detail/SessionExpenseList';
+import SessionJoinDialog from '@/content/solidr/components/detail/SessionJoinDialog';
+import SessionMemberList from '@/content/solidr/components/detail/SessionMemberList';
+import SessionExpenseSummary from './SessionExpenseSummary';
 
 const StyledTabs = styled(Tabs)(({ theme }: { theme: Theme }) => ({
     minHeight: 48,
@@ -106,16 +104,17 @@ export default () => {
 
         const reloadSessionBalance = (sessionCurrent: SessionCurrentState, anchorWallet: Wallet) => {
             if (sessionCurrent.session) {
-                solidrClient.computeBalance(Object.values(sessionCurrent.members), sessionCurrent.expenses, sessionCurrent.refunds).then((data) => {
-                    const { totalExpenses, members, transfers } = data;
-                    setSessionCurrent({
-                        ...sessionCurrent,
-                        balances: members,
-                        transfers,
-                        myTotalCost: members[anchorWallet.publicKey.toString()]?.totalCost,
-                        totalExpenses,
+                solidrClient.computeBalance(Object.values(sessionCurrent.members), sessionCurrent.expenses, sessionCurrent.refunds)
+                    .then(({ totalExpenses, totalRefunds, members, transfers }) => {
+                        setSessionCurrent({
+                            ...sessionCurrent,
+                            balances: members,
+                            transfers,
+                            myTotalCost: members[anchorWallet.publicKey.toString()]?.totalCost,
+                            totalExpenses,
+                            totalRefunds,
+                        });
                     });
-                });
             }
         };
 
@@ -202,19 +201,18 @@ export default () => {
             expensesRegistrationListener && listeners.push(expensesRegistrationListener);
 
             const refundRegistrationListener = solidrClient.addEventListener('refundAdded', (event) => {
-                solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refund) => {
+                solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refunds) => {
                     if (!sessionCurrent.session) {
                         return;
                     }
                     const newSessionCurrent = {
                         ...sessionCurrent,
-                        refund,
+                        refunds,
                         session: {
                             ...sessionCurrent.session,
                             refundsCount: sessionCurrent.session.refundsCount + 1,
                         },
                     };
-
                     setSessionCurrent(newSessionCurrent);
                     reloadSessionBalance(newSessionCurrent, anchorWallet);
                 });
@@ -248,45 +246,58 @@ export default () => {
                 </title>
             </Helmet>
 
-            <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2 } }}>
-                <Box>
-                    <SessionNavigation />
-                </Box>
-                <StyledTabs
-                    value={value}
-                    onChange={handleChange}
-                    variant={isMobile ? "fullWidth" : "standard"}
-                    centered={!isMobile}
-                >
-                    <StyledTab label="Settings" />
-                    <StyledTab label="Expenses" />
-                    <StyledTab label="Balance" />
-                </StyledTabs>
-                <TabPanel value={value} index={0}>
-                    <Grid container spacing={2}>
-                        <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                            <SessionCloseButton />
-                        </Container>
+            <Grid container spacing={2} direction={'column'}>
+                <Grid item xs={1}>
+                    <Box>
+                        <SessionNavigation />
+                    </Box>
+                </Grid>
+                <Grid item xs={1}>
+                    <StyledTabs
+                        value={value}
+                        onChange={handleChange}
+                        variant={isMobile ? "fullWidth" : "standard"}
+                        centered={!isMobile}
+                    >
+                        <StyledTab label="Settings" />
+                        <StyledTab label="Expenses" />
+                        <StyledTab label="Balance" />
+                    </StyledTabs>
+                    <TabPanel value={value} index={0}>
+                        <Grid container spacing={2}>
+                            <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                                <SessionCloseButton />
+                            </Container>
+                            <Grid container spacing={2} direction={'column'}>
+                                <Grid item xs={1}>
+                                    <Item>
+                                        <SessionMemberList />
+                                    </Item>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </TabPanel>
+                    <TabPanel value={value} index={1}>
                         <Grid container spacing={2} direction={'column'}>
                             <Grid item xs={1}>
                                 <Item>
-                                    <SessionMemberList />
+                                    <SessionExpenseSummary />
+                                </Item>
+                            </Grid>
+                            <Grid item xs={1}>
+                                <Item>
+                                    <SessionExpenseList />
                                 </Item>
                             </Grid>
                         </Grid>
-                    </Grid>
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                    <Item>
-                        <SessionExpenseList />
-                    </Item>
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                    <Item>
-                        <SessionTransfers />
-                    </Item>
-                </TabPanel>
-            </Container>
+                    </TabPanel>
+                    <TabPanel value={value} index={2}>
+                        <Item>
+                            <SessionTransfers />
+                        </Item>
+                    </TabPanel>
+                </Grid>
+            </Grid>
         </>
     );
 };
