@@ -14,9 +14,9 @@ export default () => {
 
     return (
         <>
-            <Grid container justifyContent={'space-between'} alignItems={'center'}>
+            <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                 <Grid item>
-                    <Typography variant={'h3'} component={'h3'} gutterBottom>
+                    <Typography variant={'h5'} component={'h5'} gutterBottom>
                         {sessionCurrent.session.name} - {sessionCurrent.session.description}
                     </Typography>
                 </Grid>

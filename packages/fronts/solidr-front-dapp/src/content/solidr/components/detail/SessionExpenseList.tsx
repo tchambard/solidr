@@ -38,68 +38,88 @@ export default () => {
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const itemsList = _.sortBy([...sessionCurrent?.expenses, ...sessionCurrent?.refunds], 'date');
-    console.log('itemsList :>> ', JSON.stringify(itemsList, null, 2));
+
     const renderExpense = (expense: Expense) => {
-        const expenseOwner = _.find(sessionCurrent?.members, (member: SessionMember) => {
-            return expense.owner.toString() === member.addr.toString();
-        });
-        if (!expenseOwner) {
-            return <></>;
-        }
+        const expenseOwner = _.find(sessionCurrent?.members, member => expense.owner.toString() === member.addr.toString());
+        if (!expenseOwner) return null;
+
         return (
             <ListItem key={`expense_${expense.expenseId}`}>
-                <UploadIcon style={{ color: 'red', paddingRight: '10px' }} />
-                <ListItemText
-                    primary={expense.name}
-                    secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
-                    onClick={() => {
-                        if (expense?.owner.toString() === anchorWallet.publicKey.toString()) {
-                            setCurrentExpense(expense);
-                            setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
-                        }
-                    }}
-                />
-                <ListItemText primary={expense.amount + '$'} />
-                <ListItemAvatar>
-                    <AddressAvatarGroup addresses={expense.participants.map((part) => part.toString())} size={24} />
-                </ListItemAvatar>
+                <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs={1} sm={1}>
+                        <UploadIcon style={{ color: 'red' }} />
+                    </Grid>
+                    <Grid item xs={6} sm={6}>
+                        <ListItemText
+                            primary={expense.name}
+                            secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
+                            onClick={() => {
+                                if (expense?.owner.toString() === anchorWallet.publicKey.toString()) {
+                                    setCurrentExpense(expense);
+                                    setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
+                                }
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={3} sm={3}>
+                        <ListItemText primary={`${expense.amount}$`} />
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                        <ListItemAvatar>
+                            <AddressAvatarGroup addresses={expense.participants.map((part) => part.toString())} size={24} />
+                        </ListItemAvatar>
+                    </Grid>
+                </Grid>
             </ListItem>
         );
     };
 
     const renderRefund = (refund: Refund) => {
-        const refundFrom = _.find(sessionCurrent?.members, (member: SessionMember) => {
-            return refund.from.toString() === member.addr.toString();
-        });
-        const refundTo = _.find(sessionCurrent?.members, (member: SessionMember) => {
-            return refund.to.toString() === member.addr.toString();
-        });
-        if (!refundFrom || !refundTo) {
-            return <></>;
-        }
+        const refundFrom = _.find(sessionCurrent?.members, member => refund.from.toString() === member.addr.toString());
+        const refundTo = _.find(sessionCurrent?.members, member => refund.to.toString() === member.addr.toString());
+        if (!refundFrom || !refundTo) return null;
+
         return (
-            <ListItem key={`toto_${refund.refundId}`}>
-                <GetAppIcon style={{ color: 'green', paddingRight: '10px' }} />
-                <ListItemText primary={'Refund'} secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
-                <ListItemText primary={refund.amount + '$'} />
-                <ListItemAvatar>
-                    <AvatarGroup>
-                        <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
-                        <Avatar
-                            sx={{
-                                width: 24,
-                                height: 24,
-                                bgcolor: '#ffffff',
-                                color: 'rgb(66, 66, 66)',
-                                fontSize: '12px',
-                                marginLeft: '6px !important',
-                            }}
-                        >
-                            <KeyboardDoubleArrowRight />
-                        </Avatar>
-                        <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} marginLeft={'6px !important'} />
-                    </AvatarGroup>
-                </ListItemAvatar>
+            <ListItem key={`refund_${refund.refundId}`}>
+                <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs={1} sm={1}>
+                        <GetAppIcon style={{ color: 'green' }} />
+                    </Grid>
+                    <Grid item xs={5} sm={5}>
+                        <ListItemText
+                            primary="Refund"
+                            secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`}
+                        />
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                        <ListItemText primary={`${refund.amount}$`} />
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                        <ListItemAvatar>
+                            <AvatarGroup>
+                                <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
+                                <Avatar
+                                    sx={{
+                                        width: 24,
+                                        height: 24,
+                                        bgcolor: '#ffffff',
+                                        color: 'rgb(66, 66, 66)',
+                                        fontSize: '12px',
+                                        marginLeft: '6px !important',
+                                    }}
+                                >
+                                    <KeyboardDoubleArrowRight />
+                                </Avatar>
+                                <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} marginLeft={'6px !important'} />
+                            </AvatarGroup>
+                        </ListItemAvatar>
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                        <ListItemAvatar>
+                            <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} />
+                        </ListItemAvatar>
+                    </Grid>
+                </Grid>
             </ListItem>
         );
     };
@@ -107,9 +127,9 @@ export default () => {
     return (
         <>
             <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
+                        <Typography variant={'h5'} component={'h5'} gutterBottom>
                             List of operations
                         </Typography>
                     </Grid>
@@ -130,27 +150,20 @@ export default () => {
             <List
                 sx={{
                     width: '100%',
-                    // hover states
-                    '& .MuiListItem-root:hover':
-                        sessionCurrent.session?.status === SessionStatus.Opened
-                            ? {
-                                  bgcolor: theme.palette.action.hover,
-                                  cursor: 'pointer',
-                              }
-                            : undefined,
+                    '& .MuiListItem-root:hover': sessionCurrent.session?.status === SessionStatus.Opened ? {
+                        bgcolor: theme.palette.action.hover,
+                        cursor: 'pointer',
+                    } : undefined,
                 }}
             >
                 {itemsList.length > 0 ? (
                     <>
-                        {itemsList.map((expenseOrRefund) => {
-                            return (expenseOrRefund as Expense).expenseId != null ? renderExpense(expenseOrRefund as Expense) : renderRefund(expenseOrRefund as Refund);
-                        })}
+                        {itemsList.map(expenseOrRefund => (
+                            ((expenseOrRefund as Expense).expenseId != null)
+                                ? renderExpense(expenseOrRefund as Expense)
+                                : renderRefund(expenseOrRefund as Refund)
+                        ))}
 
-                        <Divider variant={'middle'} />
-                        <ListItem key={`expense_total`}>
-                            <MyTotalCost totalCost={sessionCurrent?.myTotalCost} />
-                            <TotalExpenses totalExpenses={sessionCurrent?.totalExpenses} />
-                        </ListItem>
                     </>
                 ) : (
                     <Typography variant="body1" align="center" mt={2} pb={2}>

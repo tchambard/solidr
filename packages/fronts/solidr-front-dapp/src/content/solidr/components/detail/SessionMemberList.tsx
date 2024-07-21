@@ -29,9 +29,9 @@ export default () => {
     return (
         <>
             <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
+                        <Typography variant={'h5'} component={'h5'} gutterBottom>
                             List of members
                         </Typography>
                     </Grid>
@@ -57,11 +57,11 @@ export default () => {
             <Divider variant={'middle'} />
 
             <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid item xs={12} md={4}>
                     <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
                         {_.map(sessionCurrent.members, (member, address) => {
                             return (
-                                <ListItem key={`voter_${address}`}>
+                                <ListItem key={`member_${address}`}>
                                     <Tooltip title={address}>
                                         <ListItemAvatar>
                                             <AddressAvatar address={address} />
@@ -73,7 +73,7 @@ export default () => {
                         })}
                     </List>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={12} md={8}>
                     <SessionBalance />
                 </Grid>
             </Grid>

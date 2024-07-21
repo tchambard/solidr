@@ -397,7 +397,7 @@ describe('solidr', () => {
                 it('> should succeed when called by alice ', async () => {
                     const expectedExpenseId = 0;
                     const name = 'expense1';
-                    const amount = 10;
+                    const amount = 10.3;
                     const timestampBefore = Math.floor(Date.now()) - 10000; // sometimes, this timestamp is bigger than that set in expense !?
 
                     const {
@@ -795,7 +795,7 @@ describe('solidr', () => {
                         fees,
                         events,
                         accounts: { refundAccountPubkey },
-                    } = await client.sendRefunds(alice, sessionId, [{ amount: 10, to: bob.publicKey }]);
+                    } = await client.sendRefunds(alice, sessionId, [{ amount: 10.2, to: bob.publicKey }]);
 
                     const refund = await client.getRefund(refundAccountPubkey);
                     const transferedLamports = refund.amountInLamports.toNumber();
@@ -805,7 +805,7 @@ describe('solidr', () => {
                     assert.equal(refund.to.toString(), bob.publicKey.toString());
                     assert.isAtLeast(refund.date.getTime(), timestampBefore);
                     assert.isAtMost(refund.date.getTime(), Math.floor(Date.now()));
-                    assert.equal(refund.amount, 10);
+                    assert.equal(refund.amount.toPrecision(4), '10.20');
                     assert.isAtLeast(transferedLamports, 1);
 
                     const { refundAdded } = events;
@@ -830,7 +830,7 @@ describe('solidr', () => {
                         fees,
                         events,
                         accounts: { refundAccountPubkey },
-                    } = await client.sendRefunds(bob, sessionId, [{ amount: 10, to: charlie.publicKey }]);
+                    } = await client.sendRefunds(bob, sessionId, [{ amount: 10.8, to: charlie.publicKey }]);
 
                     const refund = await client.getRefund(refundAccountPubkey);
                     const transferedLamports = refund.amountInLamports.toNumber();
@@ -840,7 +840,7 @@ describe('solidr', () => {
                     assert.equal(refund.to.toString(), charlie.publicKey.toString());
                     assert.isAtLeast(refund.date.getTime(), timestampBefore);
                     assert.isAtMost(refund.date.getTime(), Math.floor(Date.now()));
-                    assert.equal(refund.amount, 10);
+                    assert.equal(refund.amount.toPrecision(4), '10.80');
                     assert.isAtLeast(transferedLamports, 1);
 
                     const { refundAdded } = events;

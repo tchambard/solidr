@@ -18,21 +18,25 @@ export type SessionCurrentState = {
     transfers: MemberTransfer[];
     myTotalCost: number;
     totalExpenses: number;
+    totalRefunds: number;
     isAdmin: boolean;
+};
+
+export const defaultSessionState: SessionCurrentState = {
+    session: undefined,
+    members: {},
+    expenses: [],
+    refunds: [],
+    balances: {},
+    transfers: [],
+    myTotalCost: 0,
+    totalExpenses: 0,
+    totalRefunds: 0,
+    isAdmin: false,
 };
 
 export const sessionCurrentState = atom<SessionCurrentState>({
     key: 'sessionCurrentState',
-    default: {
-        session: undefined,
-        members: {},
-        expenses: [],
-        refunds: [],
-        balances: {},
-        transfers: [],
-        myTotalCost: 0,
-        totalExpenses: 0,
-        isAdmin: false,
-    },
+    default: defaultSessionState,
     dangerouslyAllowMutability: true,
 });

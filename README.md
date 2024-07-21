@@ -6,6 +6,22 @@ The decentralized application for simple sharing expenses.
 
 Developped on Solana.
 
+## The authors
+
+- Chambard Teddy
+- Coquelet Nicolat
+- Vardon Adrien
+
+## Useful linkk
+
+- website: https://solidr.vercel.app
+- program: https://explorer.solana.com/address/7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv?cluster=devnet
+
+## Technical stack
+
+- Solana / Anchor
+- React.js / Typescript
+
 # How to contribute
 
 ## How to develop with docker
@@ -60,15 +76,3 @@ yarn run start-local-test-validator -> solana-docker-shell exec "solana-test-val
 
 -   program ID: 7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv
 -   init global tx: Cww3SNfRfJEAaKgBeRGp1Jy16m3LVe3djfJB9kzwQ2wAFHBHMQ5T8sqAh1p5a6ShHxrtbJt6VQb1w5dGFzcGrgZ
-
-# Commands to launch the dApp
-
-cd solidr
-yarn install
-
-cd packages/programs/solidr-program
-anchor build
-anchor deploy
-
-cd packages/fronts/solidr-front-dapp
-yarn compile && yarn preview

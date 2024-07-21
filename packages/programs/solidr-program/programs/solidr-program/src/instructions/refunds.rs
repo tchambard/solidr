@@ -44,7 +44,7 @@ pub struct RefundContextData<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
+pub fn add_refund(ctx: Context<RefundContextData>, amount: f32) -> Result<()> {
     let session = &mut ctx.accounts.session;
     let refund = &mut ctx.accounts.refund;
     let price_update = &mut ctx.accounts.price_update;
@@ -63,7 +63,7 @@ pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
         to_addr.key() == receiver.addr.key() && receiver.session_id == session.session_id,
         SolidrError::NotSessionMember
     );
-    require!(amount > 0, SolidrError::RefundAmountMustBeGreaterThanZero);
+    require!(amount > 0.0, SolidrError::RefundAmountMustBeGreaterThanZero);
 
     let price = get_price(&price_update)?;
     msg!("price {} ; expo {}", price.price, price.exponent);

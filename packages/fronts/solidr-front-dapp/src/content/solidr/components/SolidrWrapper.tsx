@@ -99,12 +99,6 @@ export default ({ children }: IWalletContainerWrapperProps) => {
                     </Alert>
                 </Snackbar>
 
-                <Snackbar open={tx.pending}>
-                    <Alert severity={'info'} sx={{ width: '100%' }}>
-                        <CircularProgress size={16} disableShrink thickness={3} />
-                        Transaction pending
-                    </Alert>
-                </Snackbar>
             </Container>
         </>
     );

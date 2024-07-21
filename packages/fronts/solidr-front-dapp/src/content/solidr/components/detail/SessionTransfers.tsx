@@ -34,9 +34,9 @@ export default () => {
     return (
         <>
             <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
-                        <Typography variant={'h3'} component={'h3'} gutterBottom>
+                        <Typography variant={'h5'} component={'h5'} gutterBottom>
                             Refunds
                         </Typography>
                     </Grid>
@@ -54,23 +54,31 @@ export default () => {
 
             {sessionCurrent.transfers.length > 0 ? (
                 <>
-                    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                        {sessionCurrent?.transfers.map((transfer) => {
+                    <List sx={{ width: '100%' }}>
+                        {sessionCurrent?.transfers.map((transfer, idx) => {
                             return (
-                                <ListItem key={`transfer_${transfer.from.toString()}_${transfer.to.toString()}`}>
-                                    <Tooltip title={transfer.from.toString()}>
-                                        <ListItemAvatar>
-                                            <AddressAvatar address={transfer.from.toString()} />
-                                        </ListItemAvatar>
-                                    </Tooltip>
-                                    <ListItemText primary={sessionCurrent.members[transfer.from.toString()].name} />
-                                    <ListItemText primary={`owes ${transfer.amount}$ to`} />
-                                    <Tooltip title={transfer.to.toString()}>
-                                        <ListItemAvatar>
-                                            <AddressAvatar address={transfer.to.toString()} />
-                                        </ListItemAvatar>
-                                    </Tooltip>
-                                    <ListItemText primary={sessionCurrent.members[transfer.to.toString()].name} />
+                                <ListItem key={`transfer_${idx}`}>
+                                    <Grid container alignItems="center" spacing={2}>
+                                        <Grid item xs={2} sm={2}>
+                                            <Tooltip title={transfer.from.toString()}>
+                                                <ListItemAvatar>
+                                                    <AddressAvatar address={transfer.from.toString()} />
+                                                </ListItemAvatar>
+                                            </Tooltip>
+                                        </Grid>
+                                        <Grid item xs={8} sm={8}>
+                                            <Typography variant="body1" mt={2} pb={2}>
+                                                {`${sessionCurrent.members[transfer.from.toString()].name} owes ${transfer.amount}$ to ${sessionCurrent.members[transfer.to.toString()].name}`}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={2} sm={2}>
+                                            <Tooltip title={transfer.to.toString()}>
+                                                <ListItemAvatar>
+                                                    <AddressAvatar address={transfer.to.toString()} />
+                                                </ListItemAvatar>
+                                            </Tooltip>
+                                        </Grid>
+                                    </Grid>
                                 </ListItem>
                             );
                         })}
