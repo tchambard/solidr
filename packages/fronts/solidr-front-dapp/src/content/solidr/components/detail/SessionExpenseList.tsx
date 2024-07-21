@@ -23,13 +23,15 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import { formatRelative } from 'date-fns';
 import SessionUpdateExpenseDialog from './SessionUpdateExpenseDialog';
 import AddressAvatarGroup from '@/components/AddressAvatarGroup';
+import { useAnchorWallet } from '@solana/wallet-adapter-react';
 
 export default () => {
     const theme = useTheme();
+    const anchorWallet = useAnchorWallet();
 
     const [addExpenseDialogVisible, setAddExpenseDialogVisible] = useState(false);
     const [updateExpenseDialogVisible, setUpdatExpenseDialogVisible] = useState(false);
-    const [currentExpense, setCurrentExpense] = useState(undefined);
+    const [currentExpense, setCurrentExpense] = useState<Expense>(undefined);
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
@@ -49,8 +51,10 @@ export default () => {
                     primary={expense.name}
                     secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
                     onClick={() => {
-                        setCurrentExpense(expense);
-                        setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
+                        if (expense?.owner.toString() === anchorWallet.publicKey.toString()) {
+                            setCurrentExpense(expense);
+                            setUpdatExpenseDialogVisible(!updateExpenseDialogVisible);
+                        }
                     }}
                 />
                 <ListItemText primary={expense.amount + '$'} />
