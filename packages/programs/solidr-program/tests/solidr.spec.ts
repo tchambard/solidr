@@ -599,7 +599,7 @@ describe('solidr', () => {
                 });
             });
 
-            describe.only('> updateExpense', () => {
+            describe('> updateExpense', () => {
                 let currentExpenseId: BN;
                 let currentExpenseAccountPubkey: PublicKey;
 
