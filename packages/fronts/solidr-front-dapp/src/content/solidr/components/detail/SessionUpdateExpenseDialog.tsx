@@ -90,7 +90,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                     onSuccess={(data: IModifyExpenseParams) => {
                         setFormData(data);
 
-                        const participantList = _.map(participants, (participant) => participant.address);
+                        const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
                         solidrClient
                             ?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(currentExpense.expenseId), data.name, data.amount, participantList)
                             .then(() => {

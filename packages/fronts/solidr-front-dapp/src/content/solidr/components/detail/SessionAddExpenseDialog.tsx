@@ -81,7 +81,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                     onSuccess={(data: IRegisterExpenseParams) => {
                         setFormData(data);
 
-                        const participantList = _.map(participants, (participant) => participant.address);
+                        const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
                         solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount, participantList).then(() => {
                             setDialogVisible(false);
                         });
