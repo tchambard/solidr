@@ -42,23 +42,6 @@ const StyledTab = styled(Tab)(({ theme }: { theme: Theme }) => ({
     },
 }));
 
-const Item = styled(Paper)(({ theme }) => ({
-    // color: theme.palette.text.secondary,
-}));
-
-const Head = styled(Paper)(({ theme }: { theme: Theme }) => ({
-    padding: '20px',
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    height: '100%',
-    border: `2px solid ${theme.palette.primary.main}`,
-    borderRadius: theme.shape.borderRadius,
-    transition: 'border-color 0.3s ease',
-    '&:hover': {
-        borderColor: theme.palette.primary.dark,
-    },
-}));
-
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
@@ -276,9 +259,7 @@ export default () => {
                             </Container>
                             <Grid container spacing={2} direction={'column'}>
                                 <Grid item xs={1}>
-                                    <Item>
-                                        <SessionMemberList />
-                                    </Item>
+                                    <SessionMemberList />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -286,21 +267,15 @@ export default () => {
                     <TabPanel value={value} index={1}>
                         <Grid container spacing={2} direction={'column'}>
                             <Grid item xs={1}>
-                                <Item>
-                                    <SessionExpenseSummary />
-                                </Item>
+                                <SessionExpenseSummary />
                             </Grid>
                             <Grid item xs={1}>
-                                <Item>
-                                    <SessionExpenseList />
-                                </Item>
+                                <SessionExpenseList />
                             </Grid>
                         </Grid>
                     </TabPanel>
                     <TabPanel value={value} index={2}>
-                        <Item>
-                            <SessionTransfers />
-                        </Item>
+                        <SessionTransfers />
                     </TabPanel>
                 </Grid>
             </Grid>

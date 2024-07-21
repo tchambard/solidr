@@ -5,13 +5,27 @@ import { LightModeRounded, DarkModeRounded } from '@mui/icons-material';
 
 import { EpicsGrey, EpicsBlue } from '@/constants/colors';
 import { useRecoilState } from 'recoil';
-import { colorModeState } from '@/store/colorMode';
+import { ColorModeState, colorModeState } from '@/store/colorMode';
+import { useLocalStorage } from '@solana/wallet-adapter-react';
 
 export default function ColorModeChanger() {
+    const [localColorMode, setLocalColorMode] = useLocalStorage<ColorModeState>(`solidr.color.mode`, "dark");
+
     const [colorMode, setColorMode] = useRecoilState(colorModeState);
+
     const toggleColorMode = useCallback(() => {
-        colorMode === 'light' ? setColorMode('dark') : setColorMode('light');
+        if (colorMode === 'light') {
+            setLocalColorMode('dark');
+            setColorMode('dark');
+        } else {
+            setLocalColorMode('light');
+            setColorMode('light');
+        }
     }, [colorMode, setColorMode]);
+
+    useEffect(() => {
+        setColorMode(localColorMode);
+    }, []);
 
     useEffect(() => {
         switch (colorMode) {

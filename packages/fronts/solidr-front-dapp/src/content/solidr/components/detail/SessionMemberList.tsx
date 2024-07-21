@@ -87,12 +87,14 @@ export default () => {
                                         </ListItemAvatar>
                                     </Tooltip>
                                     {wallet.publicKey.toString() == member.addr.toString() || sessionCurrent.isAdmin ? (
-                                        <ListItemText
-                                            primary={member.name}
-                                            secondary={<Edit fontSize={'small'} />}
-                                            disableTypography={true}
-                                            onClick={() => handleMemberClick(member)}
-                                        />
+                                        <>
+                                            <ListItemText
+                                                primary={member.name}
+                                            />
+                                            <IconButton color={'primary'} onClick={() => handleMemberClick(member)}>
+                                                <Edit fontSize={'small'} />
+                                            </IconButton>
+                                        </>
                                     ) : (
                                         <ListItemText primary={member.name} />
                                     )}
