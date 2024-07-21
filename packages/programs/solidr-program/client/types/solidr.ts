@@ -311,10 +311,6 @@ export type Solidr = {
         {
           "name": "session",
           "writable": true
-        },
-        {
-          "name": "systemProgram",
-          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -788,6 +784,77 @@ export type Solidr = {
           "type": "f32"
         }
       ]
+    },
+    {
+      "name": "updateSession",
+      "docs": [
+        "* Session's administrator can update the session's name and description.\n     *\n     * @param name The new session name\n     * @param description The new session description"
+      ],
+      "discriminator": [
+        173,
+        25,
+        235,
+        79,
+        40,
+        217,
+        155,
+        103
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "session",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateSessionMember",
+      "discriminator": [
+        115,
+        250,
+        161,
+        78,
+        77,
+        56,
+        115,
+        45
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "session",
+          "writable": true
+        },
+        {
+          "name": "member",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -950,6 +1017,19 @@ export type Solidr = {
       ]
     },
     {
+      "name": "memberUpdated",
+      "discriminator": [
+        122,
+        225,
+        250,
+        121,
+        60,
+        189,
+        11,
+        147
+      ]
+    },
+    {
       "name": "refundAdded",
       "discriminator": [
         97,
@@ -1013,6 +1093,19 @@ export type Solidr = {
         104,
         223
       ]
+    },
+    {
+      "name": "sessionUpdated",
+      "discriminator": [
+        44,
+        208,
+        225,
+        11,
+        203,
+        208,
+        34,
+        197
+      ]
     }
   ],
   "errors": [
@@ -1043,66 +1136,71 @@ export type Solidr = {
     },
     {
       "code": 6005,
+      "name": "forbiddenAsNonOwner",
+      "msg": "Only owner can update his informations"
+    },
+    {
+      "code": 6006,
       "name": "sessionClosed",
       "msg": "Session is closed"
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "sessionNotClosed",
       "msg": "Session is not closed"
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "memberAlreadyExists",
       "msg": "Member already exists"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "missingInvitationHash",
       "msg": "Missing invitation link hash"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "invalidInvitationHash",
       "msg": "Invalid invitation link hash"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "expenseAmountMustBeGreaterThanZero",
       "msg": "Expense amount must be greater than zero"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "refundAmountMustBeGreaterThanZero",
       "msg": "Refund amount must be greater than zero"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "expenseNameTooLong",
       "msg": "Expense's name can't exceed 20 characters"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "maxParticipantsReached",
       "msg": "Expense cannot have more than 20 participants"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "notSessionMember",
       "msg": "Only session member can add an expense"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "notExpenseOwner",
       "msg": "Only expense owner can update or delete expense"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "participantNotMember",
       "msg": "Only members can be added as participants"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "cannotRemoveExpenseOwner",
       "msg": "Expense owner cannot be removed from participants"
     }
@@ -1315,6 +1413,26 @@ export type Solidr = {
       }
     },
     {
+      "name": "memberUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sessionId",
+            "type": "u64"
+          },
+          {
+            "name": "addr",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
       "name": "refundAccount",
       "type": {
         "kind": "struct",
@@ -1477,6 +1595,18 @@ export type Solidr = {
           },
           {
             "name": "closed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sessionUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sessionId",
+            "type": "u64"
           }
         ]
       }

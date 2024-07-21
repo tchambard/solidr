@@ -77,14 +77,53 @@ pub fn open_session(
 }
 
 #[derive(Accounts)]
+pub struct UpdateSessionContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+}
+
+pub fn update_session(
+    ctx: Context<crate::instructions::sessions::UpdateSessionContextData>,
+    name: String,
+    description: String,
+) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+
+    require!(
+        session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonAdmin
+    );
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+
+    require!(name.len() <= 20, SolidrError::SessionNameTooLong);
+    require!(
+        description.len() <= 80,
+        SolidrError::SessionDescriptionTooLong
+    );
+
+    session.name.clone_from(&name);
+    session.description.clone_from(&description);
+
+    emit!(SessionUpdated {
+        session_id: session.session_id
+    });
+    Ok(())
+}
+
+#[derive(Accounts)]
 pub struct CloseSessionContextData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,
 
     #[account(mut)]
     pub session: Account<'info, SessionAccount>,
-
-    pub system_program: Program<'info, System>,
 }
 
 pub fn close_session(ctx: Context<CloseSessionContextData>) -> Result<()> {
