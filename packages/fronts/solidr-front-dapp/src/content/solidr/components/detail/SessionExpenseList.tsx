@@ -24,6 +24,8 @@ import { formatRelative } from 'date-fns';
 import SessionUpdateExpenseDialog from './SessionUpdateExpenseDialog';
 import AddressAvatarGroup from '@/components/AddressAvatarGroup';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
+import { Avatar, AvatarGroup } from '@mui/material';
+import { KeyboardDoubleArrowRight } from '@mui/icons-material';
 
 export default () => {
     const theme = useTheme();
@@ -81,10 +83,22 @@ export default () => {
                 <ListItemText primary={'Refund'} secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                 <ListItemText primary={refund.amount + '$'} />
                 <ListItemAvatar>
-                    <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
-                </ListItemAvatar>
-                <ListItemAvatar>
-                    <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} />
+                    <AvatarGroup>
+                        <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
+                        <Avatar
+                            sx={{
+                                width: 24,
+                                height: 24,
+                                bgcolor: '#ffffff',
+                                color: 'rgb(66, 66, 66)',
+                                fontSize: '12px',
+                                marginLeft: '6px !important',
+                            }}
+                        >
+                            <KeyboardDoubleArrowRight />
+                        </Avatar>
+                        <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} marginLeft={'6px !important'} />
+                    </AvatarGroup>
                 </ListItemAvatar>
             </ListItem>
         );
