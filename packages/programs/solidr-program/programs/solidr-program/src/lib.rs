@@ -176,9 +176,14 @@ pub mod solidr {
      * Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned "to" account
      *
      * @param amount The amount of the refund corresponding to session currency
+     * @param amount_in_lamports The amount in lamports of the refund. It must be calculated offchain.
      */
-    pub fn add_refund(ctx: Context<RefundContextData>, amount: f32) -> Result<()> {
-        refunds::add_refund(ctx, amount)
+    pub fn add_refund(
+        ctx: Context<RefundContextData>,
+        amount: f32,
+        amount_in_lamports: u64,
+    ) -> Result<()> {
+        refunds::add_refund(ctx, amount, amount_in_lamports)
     }
 
     pub fn delete_refund(ctx: Context<DeleteRefundContextData>) -> Result<()> {

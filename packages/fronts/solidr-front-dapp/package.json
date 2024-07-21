@@ -29,6 +29,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.10",
     "@solana/wallet-standard-wallet-adapter-react": "^1.1.2",
     "@solana/web3.js": "1.94.0",
+    "axios": "^1.7.2",
     "bn.js": "5.2.1",
     "chart.js": "4.4.3",
     "date-fns": "2.30.0",

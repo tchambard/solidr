@@ -140,7 +140,7 @@ export type Solidr = {
     {
       "name": "addRefund",
       "docs": [
-        "* Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned \"to\" account\n     *\n     * @param amount The amount of the refund corresponding to session currency"
+        "* Adds a new refund to the session. lamports corresponding to given amount will be transfered to mentionned \"to\" account\n     *\n     * @param amount The amount of the refund corresponding to session currency\n     * @param amount_in_lamports The amount in lamports of the refund. It must be calculated offchain."
       ],
       "discriminator": [
         174,
@@ -204,9 +204,6 @@ export type Solidr = {
           }
         },
         {
-          "name": "priceUpdate"
-        },
-        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
@@ -215,6 +212,10 @@ export type Solidr = {
         {
           "name": "amount",
           "type": "f32"
+        },
+        {
+          "name": "amountInLamports",
+          "type": "u64"
         }
       ]
     },
