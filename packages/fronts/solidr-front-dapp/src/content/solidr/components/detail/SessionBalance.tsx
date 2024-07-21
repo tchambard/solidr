@@ -47,10 +47,11 @@ export default () => {
         datasets: [
             {
                 data: sortedBalances.map((balance) => balance.balance),
-                backgroundColor: sortedBalances.map((balance) => stringToColor(balance.owner.toString())),
+                backgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.2).toString()),
+                borderColor: sortedBalances.map((balance) => stringToColor(balance.owner.toString())),
                 hoverBackgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString()),
                 barPercentage: 0.9,
-                borderWidth: 0,
+                borderWidth: 1,
             },
         ],
     };

@@ -1,20 +1,15 @@
-
-export function stringToColor(string: string) {
+export function stringToColor(string: string): string {
     let hash = 0;
-    let i;
-
-    for (i = 0; i < string.length; i += 1) {
+    for (let i = 0; i < string.length; i += 1) {
         hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    let color = '#';
+    // Generate a more contrasting color
+    const r = (hash & 0xff) | 0x80;
+    const g = ((hash >> 8) & 0xff) | 0x80;
+    const b = ((hash >> 16) & 0xff) | 0x80;
 
-    for (i = 0; i < 3; i += 1) {
-        const value = (hash >> (i * 8)) & 0xff;
-        color += `00${value.toString(16)}`.slice(-2);
-    }
-
-    return color;
+    return `#${(r.toString(16) + g.toString(16) + b.toString(16)).padStart(6, '0')}`;
 }
 
 export function hexToRgb(hex) {
