@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
+import { useLocalStorage } from '@solana/wallet-adapter-react';
 
 const languages = {
     en: { nativeName: 'English', flag: '🇬🇧' },
@@ -11,6 +12,8 @@ const languages = {
 const LanguageSwitcher = () => {
     const { i18n } = useTranslation();
     const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const [localLang, setLocalLang] = useLocalStorage(`solidr.lang`, 'en');
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -23,7 +26,12 @@ const LanguageSwitcher = () => {
     const changeLanguage = (lng) => {
         i18n.changeLanguage(lng);
         handleMenuClose();
+        setLocalLang(lng);
     };
+
+    useEffect(() => {
+        i18n.changeLanguage(localLang);
+    }, []);
 
     return (
         <div>
