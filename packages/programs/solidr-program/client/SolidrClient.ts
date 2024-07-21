@@ -166,6 +166,24 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
+    public async updateSession(admin: Wallet, sessionId: BN, name: string, description: string): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+
+            const tx = await this.program.methods
+                .updateSession(name, description)
+                .accountsPartial({
+                    admin: admin.publicKey,
+                    session: sessionAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(admin, tx, {
+                sessionAccountPubkey,
+            });
+        });
+    }
+
     public async closeSession(admin: Wallet, sessionId: BN): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
@@ -377,6 +395,26 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
             const tx = await this.program.methods
                 .addSessionMember(addr, name)
+                .accountsPartial({
+                    admin: payer.publicKey,
+                    session: sessionAccountPubkey,
+                    member: memberAccountPubkey,
+                })
+                .transaction();
+
+            return this.signAndSendTransaction(payer, tx, {
+                memberAccountPubkey,
+            });
+        });
+    }
+
+    public async updateSessionMember(payer: Wallet, sessionId: BN, addr: PublicKey, name: string): Promise<ITransactionResult> {
+        return this.wrapFn(async () => {
+            const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
+            const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, addr);
+
+            const tx = await this.program.methods
+                .updateSessionMember(name)
                 .accountsPartial({
                     admin: payer.publicKey,
                     session: sessionAccountPubkey,

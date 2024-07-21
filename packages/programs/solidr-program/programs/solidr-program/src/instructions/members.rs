@@ -47,6 +47,44 @@ pub fn add_session_member(
 }
 
 #[derive(Accounts)]
+pub struct UpdateSessionMemberContextData<'info> {
+    #[account(mut)]
+    pub admin: Signer<'info>,
+
+    #[account(mut)]
+    pub session: Account<'info, SessionAccount>,
+
+    #[account(mut)]
+    pub member: Account<'info, MemberAccount>,
+}
+
+pub fn update_session_member(
+    ctx: Context<crate::instructions::members::UpdateSessionMemberContextData>,
+    name: String,
+) -> Result<()> {
+    let session = &mut ctx.accounts.session;
+    let member = &mut ctx.accounts.member;
+
+    require!(
+        session.status == SessionStatus::Opened,
+        SolidrError::SessionClosed
+    );
+    require!(
+        member.addr == ctx.accounts.admin.key() || session.admin.key() == ctx.accounts.admin.key(),
+        SolidrError::ForbiddenAsNonOwner
+    );
+
+    member.name.clone_from(&name);
+
+    emit!(MemberUpdated {
+        session_id: member.session_id,
+        addr: member.addr,
+        name: member.name.clone(),
+    });
+    Ok(())
+}
+
+#[derive(Accounts)]
 pub struct DeleteSessionMemberContextData<'info> {
     #[account(mut)]
     pub admin: Signer<'info>,

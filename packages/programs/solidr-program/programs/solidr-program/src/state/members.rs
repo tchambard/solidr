@@ -22,6 +22,12 @@ pub struct MemberAdded {
     pub is_admin: bool,
 }
 #[event]
+pub struct MemberUpdated {
+    pub session_id: u64,
+    pub addr: Pubkey,
+    pub name: String,
+}
+#[event]
 pub struct MemberDeleted {
     pub session_id: u64,
     pub addr: Pubkey,
