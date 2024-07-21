@@ -1,7 +1,6 @@
 {
     "name": "solidr",
     "version": "1.0.0",
-    "private": true,
     "scripts": {
         "lint-all": "yarn workspaces foreach -Apt run lint",
         "lint-fix-all": "yarn workspaces foreach -Apt run lint-fix",

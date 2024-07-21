@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
+import { LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
 import { Solidr } from './types/solidr';
 import { generateSessionLinkTokenData } from './TokenHelpers';
+import { HermesClient } from '@pythnetwork/hermes-client';
 
 export type Global = {
     sessionCount: BN;
@@ -48,6 +49,8 @@ type InternalRefund = {
     amount: number;
     amountInLamports: BN;
 };
+
+type PriceData = { price: string; expo: number };
 
 export enum SessionStatus {
     Opened = 'opened',
@@ -121,9 +124,12 @@ export const MISSING_INVITATION_HASH = new Array(32).fill(0).toString();
 export class SolidrClient extends AbstractSolanaClient<Solidr> {
     public readonly globalAccountPubkey: PublicKey;
 
+    private readonly hermesConnection: HermesClient;
+
     constructor(program: Program<Solidr>, options?: SendOptions, wrapFn?: ProgramInstructionWrapper<Solidr>) {
         super(program, options, wrapFn);
         this.globalAccountPubkey = PublicKey.findProgramAddressSync([Buffer.from('global')], program.programId)[0];
+        this.hermesConnection = new HermesClient('https://hermes.pyth.network');
     }
 
     public async initGlobal(payer: Wallet) {
@@ -756,6 +762,8 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
             let refundId = await this._getNextRefundId(sessionAccountPubkey);
 
+            const priceData = await this.getPriceData();
+
             let instructions: TransactionInstruction[] = [];
             let refundsAccountPubkeys: NodeJS.Dict<PublicKey> = {};
             for (const transfer of refundsToSend) {
@@ -763,11 +771,9 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 const refundAccountPubkey = this.findRefundAccountAddress(sessionId, refundId);
                 refundId = new BN(refundId + 1);
 
-                // All accounts available: https://pyth.network/developers/accounts?cluster=solana-devnet
-                const solPriceAccount = new PublicKey('3Mnn2fX6rQyUsyELYms1sBJyChWofzSNRoqYzvgMVz5E'); // Crypto.SOL/USD
-
+                const amountInLamports = this.computePriceInLamportsFromAmount(transfer.amount, priceData);
                 const instruction = await this.program.methods
-                    .addRefund(transfer.amount)
+                    .addRefund(transfer.amount, amountInLamports)
                     .accountsPartial({
                         fromAddr: payer.publicKey,
                         sender: fromMemberAccountPubkey,
@@ -775,7 +781,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                         receiver: toMemberAccountPubkey,
                         session: sessionAccountPubkey,
                         refund: refundAccountPubkey,
-                        priceUpdate: solPriceAccount,
                     })
                     .instruction();
                 refundsAccountPubkeys = { ...refundsAccountPubkeys, refundAccountPubkey };
@@ -903,5 +908,18 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             const refundsCount = (await this.program.account.sessionAccount.fetch(sessionAccountPubkey)).refundsCount ?? 0;
             return new BN(refundsCount);
         });
+    }
+
+    private computePriceInLamportsFromAmount(amount: number, priceData: PriceData): BN {
+        const priceBN = new BN(priceData.price);
+        const exponentBN = new BN(10).pow(new BN(Math.abs(priceData.expo).toString()));
+        return new BN(amount * 1e9).mul(exponentBN).div(priceBN);
+    }
+
+    private async getPriceData(): Promise<PriceData> {
+        const priceUpdates = await this.hermesConnection.getLatestPriceUpdates([
+            '0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d', // SOL -> USD
+        ]);
+        return priceUpdates.parsed[0].price as PriceData;
     }
 }
