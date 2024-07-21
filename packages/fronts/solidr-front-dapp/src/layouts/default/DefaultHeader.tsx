@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router';
 
 import ColorModeChanger from '@/components/theme/ColorModeChanger';
 
-import logo from '@/assets/img/logo/solana-sol-logo.svg';
+import logo from '/img/SolidR-logo-transparent.svg';
 
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
