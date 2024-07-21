@@ -9,7 +9,7 @@ import { ColorModeState, colorModeState } from '@/store/colorMode';
 import { useLocalStorage } from '@solana/wallet-adapter-react';
 
 export default function ColorModeChanger() {
-    const [localColorMode, setLocalColorMode] = useLocalStorage<ColorModeState>(`solidr.color.mode`, "light");
+    const [localColorMode, setLocalColorMode] = useLocalStorage<ColorModeState>(`solidr.color.mode`, "dark");
 
     const [colorMode, setColorMode] = useRecoilState(colorModeState);
 

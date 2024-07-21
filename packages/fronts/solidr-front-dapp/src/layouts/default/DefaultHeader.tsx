@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router';
 
 import ColorModeChanger from '@/components/theme/ColorModeChanger';
 
-import logo from '@/assets/img/logo/solana-sol-logo.svg';
-
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -46,7 +44,7 @@ export default function DefaultHeader() {
                             <LazyLoadImage
                                 width="40"
                                 height="40"
-                                src={logo}
+                                src={'/logo.png'}
                                 alt="Logo"
                                 effect="opacity"
                             />
