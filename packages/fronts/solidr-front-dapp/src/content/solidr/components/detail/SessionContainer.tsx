@@ -286,9 +286,7 @@ export default () => {
                     <TabPanel value={value} index={1}>
                         <Grid container spacing={2} direction={'column'}>
                             <Grid item xs={1}>
-                                <Item>
-                                    <SessionExpenseSummary />
-                                </Item>
+                                <SessionExpenseSummary />
                             </Grid>
                             <Grid item xs={1}>
                                 <Item>
