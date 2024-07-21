@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Card, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Card, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import SessionListItemActions from './SessionListItemActions';
@@ -10,6 +10,7 @@ import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { useTranslation } from 'react-i18next';
+import { SessionStatus } from '@solidr';
 
 export default () => {
 
@@ -75,6 +76,9 @@ export default () => {
                                             <Link to={`/sessions/${session.sessionId}`}>
                                                 <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
                                                     {session.name}
+                                                    {session.status == SessionStatus.Closed && (
+                                                        <Chip label="Session Closed" size="small" color="error" variant="outlined" sx={{ marginLeft: '4px' }} />
+                                                    )}
                                                 </Typography>
                                             </Link>
                                         </TableCell>
