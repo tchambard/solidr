@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-import { Card, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Chip, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-
-import SessionListItemActions from './SessionListItemActions';
 
 import { defaultSessionState, sessionCurrentState, sessionListState } from '@/store/sessions';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
@@ -11,6 +9,13 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { useTranslation } from 'react-i18next';
 import { SessionStatus } from '@solidr';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Grid from '@mui/material/Grid';
+import PageTitleWrapper from '@/components/PageTitleWrapper';
+import SessionCreateButton from '@/content/solidr/components/list/SessionCreateButton';
+import Divider from '@mui/material/Divider';
 
 export default () => {
     const { t } = useTranslation();
@@ -56,46 +61,43 @@ export default () => {
 
     return (
         <>
-            <Card>
-                <TableContainer>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{t('sessions.table.head.name')}</TableCell>
-                                <TableCell>{t('sessions.table.head.description')}</TableCell>
-                                <TableCell align={'right'}>Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
+            <PageTitleWrapper>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+                    <Grid item>
+                        <Typography variant={'h5'} component={'h5'} gutterBottom>
+                            {t('sessions.list.title')}
+                        </Typography>
+                    </Grid>
+                    <Grid item>
+                        <SessionCreateButton />
+                    </Grid>
+                </Grid>
+            </PageTitleWrapper>
 
-                        <TableBody>
-                            {sessionList.items.map((session) => {
-                                return (
-                                    <TableRow hover key={session.sessionId.toString()}>
-                                        <TableCell>
-                                            <Link to={`/sessions/${session.sessionId}`}>
-                                                <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
-                                                    {session.name}
-                                                    {session.status == SessionStatus.Closed && (
-                                                        <Chip label="Session Closed" size="small" color="error" variant="outlined" sx={{ marginLeft: '16px' }} />
-                                                    )}
-                                                </Typography>
-                                            </Link>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
-                                                {session.description}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align={'right'}>
-                                            <SessionListItemActions currentView={'list'} session={session} />
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Card>
+            <Divider variant={'middle'} />
+
+            <List sx={{ width: '100%' }}>
+                {sessionList.items.map((session) => {
+                    return (
+                        <>
+                            <ListItem key={`session_${session.sessionId}`}>
+                                <ListItemText secondary={session.description}>
+                                    <Link to={`/sessions/${session.sessionId}`}>
+                                        <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
+                                            {session.name}
+                                            {session.status == SessionStatus.Closed && (
+                                                <Chip label="Session Closed" size="small" color="error" variant="outlined" sx={{ marginLeft: '16px' }} />
+                                            )}
+                                        </Typography>
+                                    </Link>
+                                </ListItemText>
+                            </ListItem>
+
+                            <Divider variant={'middle'} />
+                        </>
+                    );
+                })}
+            </List>
         </>
     );
 };
