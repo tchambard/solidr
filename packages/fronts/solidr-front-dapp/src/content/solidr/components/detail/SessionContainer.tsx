@@ -276,9 +276,7 @@ export default () => {
                             </Container>
                             <Grid container spacing={2} direction={'column'}>
                                 <Grid item xs={1}>
-                                    <Item>
-                                        <SessionMemberList />
-                                    </Item>
+                                    <SessionMemberList />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -289,16 +287,12 @@ export default () => {
                                 <SessionExpenseSummary />
                             </Grid>
                             <Grid item xs={1}>
-                                <Item>
-                                    <SessionExpenseList />
-                                </Item>
+                                <SessionExpenseList />
                             </Grid>
                         </Grid>
                     </TabPanel>
                     <TabPanel value={value} index={2}>
-                        <Item>
-                            <SessionTransfers />
-                        </Item>
+                        <SessionTransfers />
                     </TabPanel>
                 </Grid>
             </Grid>

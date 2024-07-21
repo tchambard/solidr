@@ -55,10 +55,13 @@ export default function DefaultHeader() {
 
                     <div style={{ flexGrow: 1 }} />
 
+                    <>
+                        <LanguageSwitcher />
+                        <ColorModeChanger />
+                    </>
+
                     {!xsDisplay && (
                         <>
-                            <LanguageSwitcher />
-                            <ColorModeChanger />
                             <div>
                                 {solanaBalance !== null && (
                                     <div>
