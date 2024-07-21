@@ -12,8 +12,8 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { ReactNode, useEffect } from 'react';
 
-import { connection, txState, solidrClientState } from '@/store/wallet';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { txState, solidrClientState } from '@/store/wallet';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { Solidr, SolidrClient } from '@solidr';
 import idl from '@solidr-idl';
@@ -26,6 +26,7 @@ interface IWalletContainerWrapperProps {
 
 export default ({ children }: IWalletContainerWrapperProps) => {
     const theme = useTheme();
+    const { connection } = useConnection();
     const xsDisplay = useMediaQuery(theme.breakpoints.down('sm'));
     const { t } = useTranslation();
     const { publicKey } = useWallet();

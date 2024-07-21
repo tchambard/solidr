@@ -10,14 +10,19 @@ import { createDefaultAddressSelector, createDefaultAuthorizationResultCache, cr
 import '@/assets/style/WalletAdapter.css';
 import { useSnackbar } from 'notistack';
 import { useRecoilValue } from 'recoil';
-import { walletState } from '@/store/wallet';
+import { Connection, clusterApiUrl } from '@solana/web3.js';
 
 type Props = {
     children: ReactNode;
 };
 
+
+export const network = WalletAdapterNetwork.Devnet;
+
 export default function SolanaWalletProvider({ children }: Props) {
-    const { network, endpoint } = useRecoilValue(walletState);
+
+    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+
     const wallets = useMemo(() => [
         new SolanaMobileWalletAdapter({
             addressSelector: createDefaultAddressSelector(),

@@ -8,12 +8,13 @@ import ColorModeChanger from '@/components/theme/ColorModeChanger';
 
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { getSolanaBalance } from '@/store/wallet';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export default function DefaultHeader() {
     const navigate = useNavigate();
+    const { connection } = useConnection();
     const theme = useTheme();
     const xsDisplay = useMediaQuery(theme.breakpoints.down('sm'));
     const { publicKey } = useWallet();
@@ -22,9 +23,7 @@ export default function DefaultHeader() {
 
     useEffect(() => {
         if (publicKey) {
-            getSolanaBalance(publicKey.toBase58()).then((balance) =>
-                setSolanaBalance(balance),
-            );
+            connection.getBalance(publicKey).then((balance) => setSolanaBalance(balance / LAMPORTS_PER_SOL));
         } else {
             setSolanaBalance(null);
         }
