@@ -9,7 +9,7 @@ pub struct RefundAccount {
     pub date: i64,               // 8
     pub from: Pubkey,            // 32
     pub to: Pubkey,              // 32
-    pub amount: u16,             // 8
+    pub amount: f32,             // 16
     pub amount_in_lamports: u64, // 32
 }
 

@@ -32,8 +32,11 @@ pub fn get_price(price_update: &UncheckedAccount) -> Result<Price> {
             exponent: pyth_price.exponent,
             publish_time: pyth_price.publish_time,
         }),
-        Err(_) => {
-            msg!("Warning: Unable to get valid price. Using default value.");
+        Err(e) => {
+            msg!(
+                "Warning: Unable to get valid price. Using default value. {}",
+                e
+            );
             Ok(get_default_price())
         }
     }
@@ -48,7 +51,7 @@ fn get_default_price() -> Price {
     }
 }
 
-pub fn convert_to_lamports(amount: f64, price: Price) -> Result<u64> {
+pub fn convert_to_lamports(amount: f32, price: Price) -> Result<u64> {
     let amount_in_cents = (amount * 100.0).round() as u64;
     let exp = 10_u64.pow(
         price

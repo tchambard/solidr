@@ -89,9 +89,7 @@ pub mod solidr {
      * @dev Members can be removed only by session administrator when session is opened
      * An event MemberRemoved is emitted
      */
-    pub fn delete_session_member(
-        ctx: Context<DeleteSessionMemberContextData>,
-    ) -> Result<()> {
+    pub fn delete_session_member(ctx: Context<DeleteSessionMemberContextData>) -> Result<()> {
         members::delete_session_member(ctx)
     }
 
@@ -179,7 +177,7 @@ pub mod solidr {
      *
      * @param amount The amount of the refund corresponding to session currency
      */
-    pub fn add_refund(ctx: Context<RefundContextData>, amount: u16) -> Result<()> {
+    pub fn add_refund(ctx: Context<RefundContextData>, amount: f32) -> Result<()> {
         refunds::add_refund(ctx, amount)
     }
 
