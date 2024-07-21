@@ -1,15 +1,16 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Container, Grid, Paper } from '@mui/material';
+import { Box, Container, Divider, Grid, IconButton, Paper, Tab, Tabs, Typography, useMediaQuery, useTheme } from '@mui/material';
 import * as _ from 'lodash';
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import { useParams } from 'react-router';
+import EditIcon from '@mui/icons-material/Edit';
 
 import SessionMemberList from './SessionMemberList';
 import SessionExpenseList from './SessionExpenseList';
 import styled from '@mui/styles/styled';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { SessionCurrentState, sessionCurrentState } from '@/store/sessions';
+import { SessionCurrentState, defaultSessionState, sessionCurrentState } from '@/store/sessions';
 import BN from 'bn.js';
 import AppLoading from '@/components/loading/AppLoading';
 import { solidrClientState } from '@/store/wallet';
@@ -22,20 +23,82 @@ import SessionAccessDenied from './SessionAccessDenied';
 import { useHashParams } from '@/hooks/useHashParams';
 import SessionJoinDialog from './SessionJoinDialog';
 import SessionNavigation from '@/content/solidr/components/navigation/SessionNavigation';
+import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
+import { Theme } from '@mui/material/styles';
+
+const StyledTabs = styled(Tabs)(({ theme }: { theme: Theme }) => ({
+    minHeight: 48,
+    '& .MuiTabs-indicator': {
+        height: 3,
+        borderTopLeftRadius: 3,
+        borderTopRightRadius: 3,
+    },
+}));
+
+const StyledTab = styled(Tab)(({ theme }: { theme: Theme }) => ({
+    minHeight: 48,
+    textTransform: 'none',
+    fontWeight: 700,
+    fontSize: theme.typography.pxToRem(15),
+    marginRight: theme.spacing(1),
+    '&.Mui-selected': {
+        color: theme.palette.primary.main,
+    },
+}));
 
 const Item = styled(Paper)(({ theme }) => ({
     // color: theme.palette.text.secondary,
 }));
 
+const Head = styled(Paper)(({ theme }: { theme: Theme }) => ({
+    padding: '20px',
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    height: '100%',
+    border: `2px solid ${theme.palette.primary.main}`,
+    borderRadius: theme.shape.borderRadius,
+    transition: 'border-color 0.3s ease',
+    '&:hover': {
+        borderColor: theme.palette.primary.dark,
+    },
+}));
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ py: { xs: 1, sm: 2 } }}>
+                    {children}
+                </Box>
+            )}
+        </div>
+    );
+}
+
 export default () => {
     const [joinSessionDialogVisible, setJoinSessionDialogVisible] = useState(true);
+
+    const [value, setValue] = useState(0);
+    const theme = useTheme();
+
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const { sessionId } = useParams();
     const [sessionCurrent, setSessionCurrent] = useRecoilState(sessionCurrentState);
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
     const params = useHashParams();
-
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
     useEffect(() => {
         if (solidrClient == null || sessionId == null) return;
 
@@ -67,6 +130,7 @@ export default () => {
                 solidrClient.listSessionRefunds(sid),
             ]).then(([session, members, expenses, refunds]) => {
                 const newSessionState: SessionCurrentState = {
+                    ...defaultSessionState,
                     session,
                     members: members.reduce(
                         (acc, member) => {
@@ -77,10 +141,6 @@ export default () => {
                     ),
                     expenses,
                     refunds,
-                    balances: {},
-                    transfers: [],
-                    myTotalCost: 0,
-                    totalExpenses: 0,
                     isAdmin: anchorWallet?.publicKey.toString() === session.admin.toString(),
                 };
                 setSessionCurrent(newSessionState);
@@ -187,32 +247,45 @@ export default () => {
                     {sessionCurrent.session.name} - {sessionCurrent.session.description}
                 </title>
             </Helmet>
-            <PageTitleWrapper>
-                <SessionNavigation />
-                <SessionCloseButton />
-            </PageTitleWrapper>
-            <Container maxWidth={'xl'}>
-                <Grid container alignItems={'stretch'} spacing={3} columns={{ xs: 1, sm: 2 }}>
-                    <Grid item xs={1}>
+
+            <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2 } }}>
+                <Box>
+                    <SessionNavigation />
+                </Box>
+                <StyledTabs
+                    value={value}
+                    onChange={handleChange}
+                    variant={isMobile ? "fullWidth" : "standard"}
+                    centered={!isMobile}
+                >
+                    <StyledTab label="Settings" />
+                    <StyledTab label="Expenses" />
+                    <StyledTab label="Balance" />
+                </StyledTabs>
+                <TabPanel value={value} index={0}>
+                    <Grid container spacing={2}>
+                        <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                            <SessionCloseButton />
+                        </Container>
                         <Grid container spacing={2} direction={'column'}>
                             <Grid item xs={1}>
                                 <Item>
                                     <SessionMemberList />
                                 </Item>
                             </Grid>
-                            <Grid item xs={1}>
-                                <Item>
-                                    <SessionTransfers />
-                                </Item>
-                            </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={1}>
-                        <Item>
-                            <SessionExpenseList />
-                        </Item>
-                    </Grid>
-                </Grid>
+                </TabPanel>
+                <TabPanel value={value} index={1}>
+                    <Item>
+                        <SessionExpenseList />
+                    </Item>
+                </TabPanel>
+                <TabPanel value={value} index={2}>
+                    <Item>
+                        <SessionTransfers />
+                    </Item>
+                </TabPanel>
             </Container>
         </>
     );

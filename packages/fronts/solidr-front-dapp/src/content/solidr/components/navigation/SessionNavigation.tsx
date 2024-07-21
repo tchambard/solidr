@@ -17,25 +17,23 @@ export default () => {
     };
 
     return (
-        <>
-            <Breadcrumbs aria-label="breadcrumb">
-                <Link
-                    underline="hover"
-                    color="inherit"
-                    onClick={() => handleDisplayAllSessions()}
-                    sx={{
-                        cursor: 'pointer',
-                    }}
-                >
-                    My Solidr sessions
-                </Link>
+        <Breadcrumbs aria-label="breadcrumb">
+            <Link
+                underline="hover"
+                color="inherit"
+                onClick={() => handleDisplayAllSessions()}
+                sx={{
+                    cursor: 'pointer',
+                }}
+            >
+                My Solidr sessions
+            </Link>
 
-                {sessionCurrent.session && (
-                    <Typography color="text.primary">
-                        {sessionCurrent.session.name} - {sessionCurrent.session.description}
-                    </Typography>
-                )}
-            </Breadcrumbs>
-        </>
+            {sessionCurrent.session && (
+                <Typography color="text.primary">
+                    {sessionCurrent.session.name} - {sessionCurrent.session.description}
+                </Typography>
+            )}
+        </Breadcrumbs>
     );
 };

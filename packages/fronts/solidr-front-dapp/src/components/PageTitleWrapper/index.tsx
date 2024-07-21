@@ -5,7 +5,7 @@ import { styled } from '@mui/material/styles';
 
 const PageTitle = styled(Box)(
     ({ theme }) => `
-    padding: ${theme.spacing(2, 0)};
+    padding: ${theme.spacing(0, 0)};
 `,
 );
 
