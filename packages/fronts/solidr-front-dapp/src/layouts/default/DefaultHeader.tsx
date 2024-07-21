@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Container, Toolbar, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router';
 import ColorModeChanger from '@/components/theme/ColorModeChanger';
 
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSolanaBalance } from '@/store/wallet';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -22,9 +21,7 @@ export default function DefaultHeader() {
 
     useEffect(() => {
         if (publicKey) {
-            getSolanaBalance(publicKey.toBase58()).then((balance) =>
-                setSolanaBalance(balance),
-            );
+            getSolanaBalance(publicKey.toBase58()).then((balance) => setSolanaBalance(balance));
         } else {
             setSolanaBalance(null);
         }
@@ -39,15 +36,9 @@ export default function DefaultHeader() {
                             onClick={() => {
                                 navigate('/');
                             }}
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: 'pointer', marginTop: '14px' }}
                         >
-                            <LazyLoadImage
-                                width="40"
-                                height="40"
-                                src={'/logo.png'}
-                                alt="Logo"
-                                effect="opacity"
-                            />
+                            <LazyLoadImage width="40" height="40" src={'/logo.png'} alt="Logo" effect="opacity" />
                         </Box>
                     }
 
