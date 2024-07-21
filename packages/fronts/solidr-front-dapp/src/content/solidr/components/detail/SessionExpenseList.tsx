@@ -98,7 +98,7 @@ export default () => {
     return (
         <>
             <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
                         <Typography variant={'h5'} component={'h5'} gutterBottom>
                             List of operations
@@ -135,11 +135,6 @@ export default () => {
                                 : renderRefund(expenseOrRefund as Refund)
                         ))}
 
-                        <Divider variant="middle" />
-                        <ListItem key="expense_total">
-                            <MyTotalCost totalCost={sessionCurrent?.myTotalCost} />
-                            <TotalExpenses totalExpenses={sessionCurrent?.totalExpenses} />
-                        </ListItem>
                     </>
                 ) : (
                     <Typography variant="body1" align="center" mt={2} pb={2}>

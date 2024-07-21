@@ -20,7 +20,7 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
     const tx = useRecoilValue(txState);
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
-    const [transfers, setTransfers] = useState<Array<MemberTransfer>>([]);
+    const [transfers, setTransfers] = useState<MemberTransfer[]>([]);
 
     useEffect(() => {
         if (!sessionCurrent) {
@@ -59,8 +59,8 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
             <DialogContent dividers>
                 <FormContainer>
                     <Stack direction={'column'}>
-                        {transfers.map((transfer) => (
-                            <>
+                        {transfers.map((transfer, idx) => (
+                            <div key={`transfer_${idx}`}>
                                 <FormControl fullWidth sx={{ m: 1 }}>
                                     <InputLabel htmlFor={`to_${transfer.to.toString()}`}>{`to ${sessionCurrent.members[transfer.to.toString()].name}`}</InputLabel>
                                     <OutlinedInput
@@ -73,7 +73,7 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
                                     />
                                 </FormControl>
                                 <br />
-                            </>
+                            </div>
                         ))}
 
                         <LoadingButton
