@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Grid from '@mui/material/Grid';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
@@ -17,14 +17,29 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import AddressAvatar from '@/components/AddressAvatar';
 import ListItemText from '@mui/material/ListItemText';
-import { SessionStatus } from '@solidr';
+import { SessionMember, SessionStatus } from '@solidr';
 import SessionInviteMemberDialog from './SessionInviteMemberDialog';
 import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
+import SessionEditMemberDialog from '@/content/solidr/components/detail/SessionEditMemberDialog';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Edit } from '@mui/icons-material';
 
 export default () => {
+    const wallet = useWallet();
     const [addMemberDialogVisible, setAddMemberDialogVisible] = useState(false);
     const [inviteMemberDialogVisible, setInviteMemberDialogVisible] = useState(false);
+    const [editExpenseDialogVisible, setEditExpenseDialogVisible] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<SessionMember>(undefined);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
+
+    const handleMemberClick = (member: SessionMember) => {
+        if (wallet.publicKey.toString() != member.addr.toString() && !sessionCurrent.isAdmin) {
+            return;
+        }
+
+        setSelectedMember(member);
+        setEditExpenseDialogVisible(true);
+    };
 
     return (
         <>
@@ -67,7 +82,16 @@ export default () => {
                                             <AddressAvatar address={address} />
                                         </ListItemAvatar>
                                     </Tooltip>
-                                    <ListItemText primary={member.name} />
+                                    {wallet.publicKey.toString() == member.addr.toString() || sessionCurrent.isAdmin ? (
+                                        <ListItemText
+                                            primary={member.name}
+                                            secondary={<Edit fontSize={'small'} />}
+                                            disableTypography={true}
+                                            onClick={() => handleMemberClick(member)}
+                                        />
+                                    ) : (
+                                        <ListItemText primary={member.name} />
+                                    )}
                                 </ListItem>
                             );
                         })}
@@ -80,6 +104,9 @@ export default () => {
 
             {addMemberDialogVisible && <SessionAddMemberDialog dialogVisible={addMemberDialogVisible} setDialogVisible={setAddMemberDialogVisible} />}
             {inviteMemberDialogVisible && <SessionInviteMemberDialog dialogVisible={inviteMemberDialogVisible} setDialogVisible={setInviteMemberDialogVisible} />}
+            {editExpenseDialogVisible && (
+                <SessionEditMemberDialog member={selectedMember} dialogVisible={editExpenseDialogVisible} setDialogVisible={setEditExpenseDialogVisible} />
+            )}
         </>
     );
 };
