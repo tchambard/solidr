@@ -101,9 +101,9 @@ export default () => {
         layout: {
             padding: {
                 top: 40,
-                right: 50,
+                right: 40,
                 bottom: 40,
-                left: 0,
+                left: 40,
             },
         },
         maintainAspectRatio: false, // Set this to false to allow the chart to resize freely
