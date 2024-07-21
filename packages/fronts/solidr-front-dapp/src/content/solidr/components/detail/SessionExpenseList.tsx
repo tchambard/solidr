@@ -135,11 +135,6 @@ export default () => {
                                 : renderRefund(expenseOrRefund as Refund)
                         ))}
 
-                        <Divider variant="middle" />
-                        <ListItem key="expense_total">
-                            <MyTotalCost totalCost={sessionCurrent?.myTotalCost} />
-                            <TotalExpenses totalExpenses={sessionCurrent?.totalExpenses} />
-                        </ListItem>
                     </>
                 ) : (
                     <Typography variant="body1" align="center" mt={2} pb={2}>
