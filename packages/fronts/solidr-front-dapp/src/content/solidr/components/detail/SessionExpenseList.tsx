@@ -14,7 +14,7 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 
 import PageTitleWrapper from '@/components/PageTitleWrapper';
 import SessionAddExpenseDialog from './SessionAddExpenseDialog';
-import { Expense, Refund, SessionMember, SessionStatus } from '@solidr';
+import { Expense, Refund, SessionStatus } from '@solidr';
 import { sessionCurrentState } from '@/store/sessions';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -40,7 +40,7 @@ export default () => {
     const itemsList = _.sortBy([...sessionCurrent?.expenses, ...sessionCurrent?.refunds], 'date');
 
     const renderExpense = (expense: Expense) => {
-        const expenseOwner = _.find(sessionCurrent?.members, member => expense.owner.toString() === member.addr.toString());
+        const expenseOwner = _.find(sessionCurrent?.members, (member) => expense.owner.toString() === member.addr.toString());
         if (!expenseOwner) return null;
 
         return (
@@ -75,8 +75,8 @@ export default () => {
     };
 
     const renderRefund = (refund: Refund) => {
-        const refundFrom = _.find(sessionCurrent?.members, member => refund.from.toString() === member.addr.toString());
-        const refundTo = _.find(sessionCurrent?.members, member => refund.to.toString() === member.addr.toString());
+        const refundFrom = _.find(sessionCurrent?.members, (member) => refund.from.toString() === member.addr.toString());
+        const refundTo = _.find(sessionCurrent?.members, (member) => refund.to.toString() === member.addr.toString());
         if (!refundFrom || !refundTo) return null;
 
         return (
@@ -86,15 +86,12 @@ export default () => {
                         <GetAppIcon style={{ color: 'green' }} />
                     </Grid>
                     <Grid item xs={5} sm={5}>
-                        <ListItemText
-                            primary="Refund"
-                            secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`}
-                        />
+                        <ListItemText primary="Refund" secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                     </Grid>
                     <Grid item xs={2} sm={2}>
                         <ListItemText primary={`${refund.amount}$`} />
                     </Grid>
-                    <Grid item xs={2} sm={2}>
+                    <Grid item xs={4} sm={4}>
                         <ListItemAvatar>
                             <AvatarGroup>
                                 <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
@@ -112,11 +109,6 @@ export default () => {
                                 </Avatar>
                                 <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} marginLeft={'6px !important'} />
                             </AvatarGroup>
-                        </ListItemAvatar>
-                    </Grid>
-                    <Grid item xs={2} sm={2}>
-                        <ListItemAvatar>
-                            <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} />
                         </ListItemAvatar>
                     </Grid>
                 </Grid>
@@ -150,20 +142,20 @@ export default () => {
             <List
                 sx={{
                     width: '100%',
-                    '& .MuiListItem-root:hover': sessionCurrent.session?.status === SessionStatus.Opened ? {
-                        bgcolor: theme.palette.action.hover,
-                        cursor: 'pointer',
-                    } : undefined,
+                    '& .MuiListItem-root:hover':
+                        sessionCurrent.session?.status === SessionStatus.Opened
+                            ? {
+                                  bgcolor: theme.palette.action.hover,
+                                  cursor: 'pointer',
+                              }
+                            : undefined,
                 }}
             >
                 {itemsList.length > 0 ? (
                     <>
-                        {itemsList.map(expenseOrRefund => (
-                            ((expenseOrRefund as Expense).expenseId != null)
-                                ? renderExpense(expenseOrRefund as Expense)
-                                : renderRefund(expenseOrRefund as Refund)
-                        ))}
-
+                        {itemsList.map((expenseOrRefund) =>
+                            (expenseOrRefund as Expense).expenseId != null ? renderExpense(expenseOrRefund as Expense) : renderRefund(expenseOrRefund as Refund),
+                        )}
                     </>
                 ) : (
                     <Typography variant="body1" align="center" mt={2} pb={2}>

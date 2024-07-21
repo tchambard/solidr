@@ -32,7 +32,11 @@ export default ({ participants, handleParticipantOnClick }: LabelContextProps) =
             <FormGroup>
                 <FormControlLabel control={<Checkbox checked={true} disabled={true} name={current.name} />} label={current.name} />
                 {_.map(others, (member) => (
-                    <FormControlLabel control={<Checkbox checked={member.checked} name={member.name} onChange={() => handleParticipantOnClick(member)} />} label={member.name} />
+                    <FormControlLabel
+                        key={`participant_${member.address}`}
+                        control={<Checkbox checked={member.checked} name={member.name} onChange={() => handleParticipantOnClick(member)} />}
+                        label={member.name}
+                    />
                 ))}
             </FormGroup>
         </FormControl>
