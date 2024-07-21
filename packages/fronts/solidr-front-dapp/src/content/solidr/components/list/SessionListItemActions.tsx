@@ -9,6 +9,7 @@ import SessionDeleteDialog from '@/content/solidr/components/detail/SessionDelet
 import SessionUpdateDialog from '@/content/solidr/components/list/SessionUpdateDialog';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 interface IProps {
     currentView: 'list' | 'edit' | 'detail';
@@ -16,8 +17,8 @@ interface IProps {
 }
 
 export default ({ session, currentView }: IProps) => {
-
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const anchorWallet = useAnchorWallet();
     const [confirmClose, setConfirmClose] = useState<boolean>(false);
@@ -30,7 +31,7 @@ export default ({ session, currentView }: IProps) => {
             {
                 title: t('sessions.item.action.details.title'),
                 description: t('sessions.item.action.details.description'),
-                url: `/sessions/${session.sessionId}`,
+                onClick: () => navigate(`/sessions/${session.sessionId}`),
                 color: 'primary',
                 icon: <AutoGraphIcon fontSize={'small'} />,
                 hidden: currentView === 'detail',
@@ -40,18 +41,18 @@ export default ({ session, currentView }: IProps) => {
         if (session.admin.toString() === anchorWallet.publicKey.toString()) {
             if (session.status == SessionStatus.Opened) {
                 _menuItems.push({
-                    title: t('sessions.item.action.close.title'),
-                    description: t('sessions.item.action.close.description'),
-                    onClick: () => setConfirmClose(true),
-                    color: 'primary',
-                    icon: <DoDisturbOn fontSize={'small'} />,
-                });
-                _menuItems.push({
                     title: t('sessions.item.action.edit.title'),
                     description: t('sessions.item.action.edit.description'),
                     onClick: () => setUpdateSessionVisibility(true),
                     color: 'primary',
                     icon: <Edit fontSize={'small'} />,
+                });
+                _menuItems.push({
+                    title: t('sessions.item.action.close.title'),
+                    description: t('sessions.item.action.close.description'),
+                    onClick: () => setConfirmClose(true),
+                    color: 'primary',
+                    icon: <DoDisturbOn fontSize={'small'} />,
                 });
             }
             if (session.status == SessionStatus.Closed) {

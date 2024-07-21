@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as _ from 'lodash';
 import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import ListItemText from '@mui/material/ListItemText';
 
 export interface IActionMenuItem {
     title: string;
@@ -111,21 +112,9 @@ export default ({ items }: IProps) => {
                             _.map(items, (item) => {
                                 if (!item.hidden) {
                                     return (
-                                        <MenuItem key={item.title}>
-                                            <Link to={item.url} onClick={item.onClick}>
-                                                <ListItemIcon
-                                                    // sx={{
-                                                    //     '&:hover': {
-                                                    //         background: theme.colors[item.color].lighter,
-                                                    //     },
-                                                    //     color: theme.palette[item.color].main,
-                                                    // }}
-                                                    color={'inherit'}
-                                                >
-                                                    {item.icon}
-                                                </ListItemIcon>
-                                                {item.title}
-                                            </Link>
+                                        <MenuItem key={item.title} onClick={item.onClick}>
+                                            <ListItemIcon color={'inherit'}>{item.icon}</ListItemIcon>
+                                            <ListItemText>{item.title}</ListItemText>
                                         </MenuItem>
                                     );
                                 }
