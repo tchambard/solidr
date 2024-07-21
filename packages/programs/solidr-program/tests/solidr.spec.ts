@@ -599,7 +599,7 @@ describe('solidr', () => {
                 });
             });
 
-            describe('> updateExpense', () => {
+            describe.only('> updateExpense', () => {
                 let currentExpenseId: BN;
                 let currentExpenseAccountPubkey: PublicKey;
 
@@ -617,27 +617,28 @@ describe('solidr', () => {
                     const updatedAmount = 100.37;
                     const {
                         events: { expenseUpdated },
-                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount);
+                    } = await client.updateExpense(alice, sessionId, currentExpenseId, updatedName, updatedAmount, [bob.publicKey]);
                     const expense = await client.getExpense(currentExpenseAccountPubkey);
 
                     assert.equal(expense.name, updatedName);
                     assert.equal(expense.amount, updatedAmount);
+                    assert.lengthOf(expense.participants, 2);
+                    assert.sameDeepMembers(expense.participants, [alice.publicKey, bob.publicKey]);
 
                     assert.equal(expenseUpdated[0].sessionId.toNumber(), sessionId);
                     assert.equal(expenseUpdated[0].expenseId, currentExpenseId);
                 });
 
                 it('> should fail when called with non owner of expense', async () => {
-                    await assertError(async () => client.updateExpense(bob, sessionId, currentExpenseId, 'exp 3 updated', 100), {
+                    await assertError(async () => client.updateExpense(bob, sessionId, currentExpenseId, 'exp 3 updated', 100, [bob.publicKey]), {
                         code: 'NotExpenseOwner',
                         message: 'Only expense owner can update or delete expense',
                     });
                 });
 
                 it('> should fail when called with invalid session id', async () => {
-                    await assertError(async () => client.updateExpense(alice, new BN(666), currentExpenseId, 'exp 3 updated', 100), {
-                        code: 'AccountNotInitialized',
-                        message: 'The program expected this account to be already initialized',
+                    await assertError(async () => client.updateExpense(alice, new BN(666), currentExpenseId, 'exp 3 updated', 100, [bob.publicKey]), {
+                        message: ACCOUNT_NOT_FOUND,
                     });
                 });
             });

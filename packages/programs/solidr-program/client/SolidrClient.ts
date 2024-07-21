@@ -564,7 +564,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async updateExpense(member: Wallet, sessionId: BN, expenseId: BN, name: string, amount: number): Promise<ITransactionResult> {
+    public async updateExpense(member: Wallet, sessionId: BN, expenseId: BN, name: string, amount: number, participants: PublicKey[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
@@ -578,6 +578,49 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                     expense: expenseAccountPubkey,
                 })
                 .transaction();
+
+            const oldParticipants = (await this.getExpense(expenseAccountPubkey)).participants;
+            const newParticipants = _.uniqBy([...participants, member.publicKey], (pk) => pk.toString());
+            let participantToRemove = _.differenceBy(oldParticipants, newParticipants, (pk) => pk.toString());
+            if (participantToRemove.length > 0) {
+                tx.add(
+                    await this.program.methods
+                        .removeExpenseParticipants(participantToRemove)
+                        .accountsPartial({
+                            owner: member.publicKey,
+                            expense: expenseAccountPubkey,
+                            session: sessionAccountPubkey,
+                        })
+                        .remainingAccounts(
+                            _.map(participantToRemove, (p) => ({
+                                pubkey: this.findSessionMemberAccountAddress(sessionId, p),
+                                isSigner: false,
+                                isWritable: false,
+                            })),
+                        )
+                        .instruction(),
+                );
+            }
+            let participantToAdd = _.differenceBy(participants, oldParticipants, (pk) => pk.toString());
+            if (participantToAdd.length > 0) {
+                tx.add(
+                    await this.program.methods
+                        .addExpenseParticipants(participantToAdd)
+                        .accountsPartial({
+                            owner: member.publicKey,
+                            expense: expenseAccountPubkey,
+                            session: sessionAccountPubkey,
+                        })
+                        .remainingAccounts(
+                            _.map(participantToAdd, (p) => ({
+                                pubkey: this.findSessionMemberAccountAddress(sessionId, p),
+                                isSigner: false,
+                                isWritable: false,
+                            })),
+                        )
+                        .instruction(),
+                );
+            }
 
             return this.signAndSendTransaction(member, tx, {
                 sessionAccountPubkey,

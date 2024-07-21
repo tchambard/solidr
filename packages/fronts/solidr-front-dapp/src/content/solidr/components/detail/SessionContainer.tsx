@@ -188,6 +188,26 @@ export default () => {
             });
             expensesRegistrationListener && listeners.push(expensesRegistrationListener);
 
+            const expensesUpdateListener = solidrClient.addEventListener('expenseUpdated', (event) => {
+                solidrClient.listSessionExpenses(sessionCurrent.session?.sessionId).then((expenses) => {
+                    if (!sessionCurrent.session) {
+                        return;
+                    }
+                    const newSessionCurrent = {
+                        ...sessionCurrent,
+                        expenses,
+                        session: {
+                            ...sessionCurrent.session,
+                            expensesCount: sessionCurrent.session.expensesCount + 1,
+                        },
+                    };
+
+                    setSessionCurrent(newSessionCurrent);
+                    reloadSessionBalance(newSessionCurrent, anchorWallet);
+                });
+            });
+            expensesUpdateListener && listeners.push(expensesUpdateListener);
+
             const refundRegistrationListener = solidrClient.addEventListener('refundAdded', (event) => {
                 solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refunds) => {
                     if (!sessionCurrent.session) {
