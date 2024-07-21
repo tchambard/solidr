@@ -86,7 +86,7 @@ export default () => {
                                         <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>
                                             {session.name}
                                             {session.status == SessionStatus.Closed && (
-                                                <Chip label="Session Closed" size="small" color="error" variant="outlined" sx={{ marginLeft: '16px' }} />
+                                                <Chip label={t('session.closed.title')} size="small" color="error" variant="outlined" sx={{ marginLeft: '16px' }} />
                                             )}
                                         </Typography>
                                     </Link>
