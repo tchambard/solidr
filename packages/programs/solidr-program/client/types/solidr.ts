@@ -214,7 +214,7 @@ export type Solidr = {
       "args": [
         {
           "name": "amount",
-          "type": "u16"
+          "type": "f32"
         }
       ]
     },
@@ -1341,7 +1341,7 @@ export type Solidr = {
           },
           {
             "name": "amount",
-            "type": "u16"
+            "type": "f32"
           },
           {
             "name": "amountInLamports",
