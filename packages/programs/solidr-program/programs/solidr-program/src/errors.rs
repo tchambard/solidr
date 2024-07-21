@@ -12,6 +12,8 @@ pub enum SolidrError {
     SessionDescriptionTooLong,
     #[msg("Only session administrator is granted")]
     ForbiddenAsNonAdmin,
+    #[msg("Only owner can update his informations")]
+    ForbiddenAsNonOwner,
     #[msg("Session is closed")]
     SessionClosed,
     #[msg("Session is not closed")]

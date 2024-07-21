@@ -118,6 +118,51 @@ describe('solidr', () => {
         });
     });
 
+    describe('> updateSession', () => {
+        it('> should update session info when called by admin', async () => {
+            // setup
+            const {
+                events: { sessionOpened },
+                accounts: { sessionAccountPubkey },
+            } = await client.openSession(administrator, 'Session C', 'desc', 'Admin');
+            const sid = sessionOpened[0].sessionId;
+
+            const updatedSessionName = 'New Session C';
+            const updatedSessionDesc = 'New desc';
+            const {
+                events: { sessionUpdated },
+            } = await client.updateSession(administrator, sid, updatedSessionName, updatedSessionDesc);
+
+            let session = await client.getSession(sessionAccountPubkey);
+            assert.deepEqual(session.status, SessionStatus.Opened);
+            assert.equal(session.name, updatedSessionName);
+            assert.equal(session.description, updatedSessionDesc);
+            // assert
+            assert.equal(sessionUpdated[0].sessionId.toNumber(), sid);
+        });
+        it('> should failed when called with on close session', async () => {
+            const {
+                events: { sessionOpened },
+            } = await client.openSession(administrator, 'name', 'description', 'Admin');
+            const sessionId = sessionOpened[0].sessionId;
+            await client.closeSession(administrator, sessionId);
+            await assertError(async () => client.updateSession(administrator, sessionId, 'new name', 'new description'), {
+                code: 'SessionClosed',
+                message: 'Session is closed',
+            });
+        });
+        it('> should failed when called by non admin', async () => {
+            const {
+                events: { sessionOpened },
+            } = await client.openSession(administrator, 'name', 'description', 'Admin');
+            const sessionId = sessionOpened[0].sessionId;
+            await assertError(async () => client.updateSession(alice, sessionId, 'new name', 'new description'), {
+                code: 'ForbiddenAsNonAdmin',
+                message: 'Only session administrator is granted',
+            });
+        });
+    });
+
     describe('> closeSession', () => {
         it('> should change session status and reset invitationHash', async () => {
             const name = 'Session C';
@@ -146,7 +191,6 @@ describe('solidr', () => {
         it('> should failed when called with on open session', async () => {
             const {
                 events: { sessionOpened },
-                accounts: { sessionAccountPubkey },
             } = await client.openSession(administrator, 'name', 'description', 'Admin');
             const sessionId = sessionOpened[0].sessionId;
             await assertError(async () => client.deleteSession(administrator, sessionId), {
@@ -157,7 +201,6 @@ describe('solidr', () => {
         it('> should failed when called by non admin', async () => {
             const {
                 events: { sessionOpened },
-                accounts: { sessionAccountPubkey },
             } = await client.openSession(administrator, 'name', 'description', 'Admin');
             const sessionId = sessionOpened[0].sessionId;
             await client.closeSession(administrator, sessionId);
@@ -270,11 +313,67 @@ describe('solidr', () => {
             });
         });
 
-        describe('> delete session member', () => {
-            it('> should failed when called with on open session', async () => {
+        describe('> update session member', () => {
+            it('> should update member account when called by admin', async () => {
                 const {
                     accounts: { memberAccountPubkey },
                 } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+
+                const updatedName = 'Bobby';
+                const {
+                    events: { memberUpdated },
+                } = await client.updateSessionMember(alice, sessionId, bob.publicKey, updatedName);
+
+                const member = await client.getSessionMember(memberAccountPubkey);
+                assert.equal(member.name, updatedName);
+                assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
+
+                assert.equal(memberUpdated[0].sessionId.toNumber(), sessionId.toNumber());
+                assert.equal(memberUpdated[0].name, updatedName);
+                assert.equal(memberUpdated[0].addr.toString(), bob.publicKey.toString());
+            });
+
+            it('> should update member account when called by owner', async () => {
+                const {
+                    accounts: { memberAccountPubkey },
+                } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+
+                const updatedName = 'Bobby';
+                const {
+                    events: { memberUpdated },
+                } = await client.updateSessionMember(bob, sessionId, bob.publicKey, updatedName);
+
+                const member = await client.getSessionMember(memberAccountPubkey);
+                assert.equal(member.name, updatedName);
+                assert.equal(member.addr.toString(), bob.publicKey.toString());
+                assert.isFalse(member.isAdmin);
+
+                assert.equal(memberUpdated[0].sessionId.toNumber(), sessionId.toNumber());
+                assert.equal(memberUpdated[0].name, updatedName);
+                assert.equal(memberUpdated[0].addr.toString(), bob.publicKey.toString());
+            });
+
+            it('> should fail when called with non session owner and non admin', async () => {
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+                await assertError(async () => client.updateSessionMember(charlie, sessionId, bob.publicKey, 'Bobby'), {
+                    code: 'ForbiddenAsNonOwner',
+                    message: `Only owner can update his informations`,
+                });
+            });
+            it('> should failed when called with on close session', async () => {
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+                await client.closeSession(alice, sessionId);
+                await assertError(async () => client.updateSessionMember(alice, sessionId, bob.publicKey, 'Bobby'), {
+                    code: 'SessionClosed',
+                    message: 'Session is closed',
+                });
+            });
+        });
+
+        describe('> delete session member', () => {
+            it('> should failed when called with on open session', async () => {
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
 
                 await assertError(async () => client.deleteSessionMember(alice, sessionId, bob.publicKey), {
                     code: 'SessionNotClosed',
@@ -282,9 +381,7 @@ describe('solidr', () => {
                 });
             });
             it('> should failed when called by non admin', async () => {
-                const {
-                    accounts: { memberAccountPubkey },
-                } = await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
+                await client.addSessionMember(alice, sessionId, bob.publicKey, 'Bob');
                 await client.closeSession(alice, sessionId);
                 await assertError(async () => client.deleteSessionMember(bob, sessionId, bob.publicKey), {
                     code: 'ForbiddenAsNonAdmin',
@@ -721,30 +818,66 @@ describe('solidr', () => {
             describe('> sendRefunds', () => {
                 it('> should fail when called with invalid session id', async () => {
                     const invalidSessionId = new BN(666);
-                    await assertError(async () => client.sendRefunds(alice, invalidSessionId, [{ amount: 10, to: bob.publicKey }]), {
-                        message: ACCOUNT_NOT_FOUND_ERROR,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, invalidSessionId, [
+                                {
+                                    amount: 10,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            message: ACCOUNT_NOT_FOUND_ERROR,
+                        },
+                    );
                 });
 
                 it('> should fail when called with amount equals to 0', async () => {
-                    await assertError(async () => client.sendRefunds(alice, sessionId, [{ amount: 0, to: bob.publicKey }]), {
-                        code: 'RefundAmountMustBeGreaterThanZero',
-                        message: `Refund amount must be greater than zero`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 0,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'RefundAmountMustBeGreaterThanZero',
+                            message: `Refund amount must be greater than zero`,
+                        },
+                    );
                 });
 
                 it('> should failed when called by a non member', async () => {
-                    await assertError(async () => client.sendRefunds(paul, sessionId, [{ amount: 10, to: bob.publicKey }]), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(paul, sessionId, [
+                                {
+                                    amount: 10,
+                                    to: bob.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should failed when receiver is not a member', async () => {
-                    await assertError(async () => client.sendRefunds(alice, sessionId, [{ amount: 10, to: paul.publicKey }]), {
-                        code: 'AccountNotInitialized',
-                        message: `The program expected this account to be already initialized`,
-                    });
+                    await assertError(
+                        async () =>
+                            client.sendRefunds(alice, sessionId, [
+                                {
+                                    amount: 10,
+                                    to: paul.publicKey,
+                                },
+                            ]),
+                        {
+                            code: 'AccountNotInitialized',
+                            message: `The program expected this account to be already initialized`,
+                        },
+                    );
                 });
 
                 it('> should succeed when called by session administrator ', async () => {
@@ -822,7 +955,6 @@ describe('solidr', () => {
                 it('> should failed when called with on open session', async () => {
                     const {
                         events: { refundAdded },
-                        accounts: { refundAccountPubkey },
                     } = await client.sendRefunds(alice, sessionId, [{ amount: 20, to: bob.publicKey }]);
 
                     await assertError(async () => client.deleteRefund(alice, sessionId, new BN(refundAdded[0].refundId)), {
@@ -831,10 +963,7 @@ describe('solidr', () => {
                     });
                 });
                 it('> should failed when called by non admin', async () => {
-                    const {
-                        events: { refundAdded },
-                        accounts: { refundAccountPubkey },
-                    } = await client.sendRefunds(alice, sessionId, [{ amount: 20, to: bob.publicKey }]);
+                    await client.sendRefunds(alice, sessionId, [{ amount: 20, to: bob.publicKey }]);
                     await client.closeSession(alice, sessionId);
                     await assertError(async () => client.deleteSessionMember(bob, sessionId, bob.publicKey), {
                         code: 'ForbiddenAsNonAdmin',
@@ -843,7 +972,6 @@ describe('solidr', () => {
                 });
                 it('> should close refund pda', async () => {
                     const {
-                        events: { refundAdded },
                         accounts: { refundAccountPubkey },
                     } = await client.sendRefunds(alice, sessionId, [{ amount: 20, to: bob.publicKey }]);
 

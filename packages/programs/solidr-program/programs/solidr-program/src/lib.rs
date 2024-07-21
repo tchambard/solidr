@@ -37,6 +37,20 @@ pub mod solidr {
     }
 
     /**
+     * Session's administrator can update the session's name and description.
+     *
+     * @param name The new session name
+     * @param description The new session description
+     */
+    pub fn update_session(
+        ctx: Context<UpdateSessionContextData>,
+        name: String,
+        description: String,
+    ) -> Result<()> {
+        sessions::update_session(ctx, name, description)
+    }
+
+    /**
      * Administrator can close sessions he created.
      *
      * @dev An event SessionClosed is emitted
@@ -81,6 +95,13 @@ pub mod solidr {
         name: String,
     ) -> Result<()> {
         members::add_session_member(ctx, addr, name)
+    }
+
+    pub fn update_session_member(
+        ctx: Context<UpdateSessionMemberContextData>,
+        name: String,
+    ) -> Result<()> {
+        members::update_session_member(ctx, name)
     }
 
     /**
