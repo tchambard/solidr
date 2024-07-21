@@ -8,28 +8,33 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { useRecoilValue } from 'recoil';
 import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
-import { Wallet } from '@coral-xyz/anchor';
+import { BN, Wallet } from '@coral-xyz/anchor';
+import { Expense } from 'solidr-program';
 import SessionExpenseParticipantsList, { IParticipant } from '@/content/solidr/components/detail/SessionExpenseParticipantsList';
 
-interface IAddExpenseDialogProps {
+interface IModifyExpenseDialogProps {
     dialogVisible: boolean;
     setDialogVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    currentExpense: Expense;
 }
 
-interface IRegisterExpenseParams {
+interface IModifyExpenseParams {
     name: string;
     amount: number;
     members: IParticipant[];
 }
 
-export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => {
+export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpenseDialogProps) => {
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const tx = useRecoilValue(txState);
 
-    const [formData, setFormData] = useState<Partial<IRegisterExpenseParams>>({});
+    const [formData, setFormData] = useState<Partial<IModifyExpenseParams>>({
+        name: currentExpense.name,
+        amount: currentExpense.amount,
+    });
 
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
@@ -45,7 +50,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
             participants[address] = {
                 name: member.name,
                 address: member.addr,
-                checked: false,
+                checked: currentExpense.participants.find((participant) => participant.toString() == member.addr.toString()),
             };
         });
         setParticipants(participants);
@@ -61,18 +66,18 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
         });
     };
 
-    const formSuccessHandler = (data: IRegisterExpenseParams) => {
+    const formSuccessHandler = (data: IModifyExpenseParams) => {
         setFormData(data);
 
         const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
-        solidrClient?.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount, participantList).then(() => {
+        solidrClient?.updateExpense(anchorWallet, sessionCurrent.session?.sessionId, new BN(currentExpense.expenseId), data.name, data.amount, participantList).then(() => {
             setDialogVisible(false);
         });
     };
 
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'dialog-expense-title'} open={dialogVisible}>
-            <DialogTitle id={'dialog-expense-title'}>{'Add a new expense'}</DialogTitle>
+            <DialogTitle id={'dialog-expense-title'}>{'Modify an expense'}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer defaultValues={formData} onSuccess={formSuccessHandler}>
                     <Stack direction={'column'}>
