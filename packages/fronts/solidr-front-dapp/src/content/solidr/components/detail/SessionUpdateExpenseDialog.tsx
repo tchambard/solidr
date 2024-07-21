@@ -44,11 +44,6 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
 
     if (!anchorWallet || !solidrClient || !sessionCurrent) return <></>;
 
-    const [currentUser, setCurrentUser] = useState<IParticipant>({
-        name: '',
-        address: anchorWallet.publicKey,
-        checked: true,
-    });
     const [participants, setParticipants] = React.useState<{ [address: string]: IParticipant }>({});
 
     useEffect(() => {
@@ -58,10 +53,6 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
 
         const participants = {};
         _.forEach(sessionCurrent.members, (member, address) => {
-            if (anchorWallet.publicKey.toString() == member.addr.toString()) {
-                setCurrentUser({ name: member.name, address: member.addr, checked: true });
-                return;
-            }
             participants[address] = {
                 name: member.name,
                 address: member.addr,
@@ -79,6 +70,31 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                 checked: !participant.checked,
             },
         });
+    };
+
+    const participantsList = (participants: { [address: string]: IParticipant }) => {
+        if (_.isEmpty(participants)) return;
+
+        const current = _.find(participants, (part) => part.address.toString() == anchorWallet.publicKey.toString());
+        const others = _.sortBy(
+            _.filter(participants, (part) => part.address.toString() != anchorWallet.publicKey.toString()),
+            ['name'],
+        );
+
+        return (
+            <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
+                <FormLabel component="legend">Choose participants</FormLabel>
+                <FormGroup>
+                    <FormControlLabel control={<Checkbox checked={true} disabled={true} name={current.name} />} label={current.name} />
+                    {_.map(others, (member) => (
+                        <FormControlLabel
+                            control={<Checkbox checked={member.checked} name={member.name} onChange={() => handleParticipantOnClick(member)} />}
+                            label={member.name}
+                        />
+                    ))}
+                </FormGroup>
+            </FormControl>
+        );
     };
 
     return (
@@ -103,25 +119,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IModifyExpe
                         <br />
                         <TextFieldElement type={'text'} name={'amount'} label={'Amount'} required={true} />
                         <br />
-                        <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
-                            <FormLabel component="legend">Choose participants</FormLabel>
-                            <FormGroup>
-                                <FormControlLabel control={<Checkbox checked={currentUser.checked} disabled={true} name={currentUser.name} />} label={currentUser.name} />
-                                {_.map(participants, (member) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={member.checked}
-                                                disabled={anchorWallet.publicKey.toString() == member.address.toString()}
-                                                onChange={() => handleParticipantOnClick(member)}
-                                                name={member.name}
-                                            />
-                                        }
-                                        label={member.name}
-                                    />
-                                ))}
-                            </FormGroup>
-                        </FormControl>
+                        {participantsList(participants)}
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
                             Submit
                         </LoadingButton>
