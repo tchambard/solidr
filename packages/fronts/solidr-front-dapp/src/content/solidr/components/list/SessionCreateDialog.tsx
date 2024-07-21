@@ -7,6 +7,7 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { solidrClientState, txState } from '@/store/wallet';
 import { useRecoilValue } from 'recoil';
 import { Wallet } from '@coral-xyz/anchor';
+import { useTranslation } from 'react-i18next';
 
 export interface IDialogProps {
     dialogVisible: boolean;
@@ -20,6 +21,9 @@ interface ICreateSessionParams {
 }
 
 export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const [formData, setFormData] = useState<Partial<ICreateSessionParams>>();
@@ -28,7 +32,7 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
     if (!anchorWallet || !solidrClient) return <></>;
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'new-session-title'} open={dialogVisible}>
-            <DialogTitle id={'new-session-title'}>{'Create new session'}</DialogTitle>
+            <DialogTitle id={'new-session-title'}>{t('sessions.create.new')}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer
                     defaultValues={formData}
@@ -50,14 +54,14 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
                         <TextFieldElement type={'text'} name={'memberName'} label={'My name'} required={true} />
                         <br />
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
-                            Submit
+                            {t('submit')}
                         </LoadingButton>
                     </Stack>
                 </FormContainer>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

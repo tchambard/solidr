@@ -5,12 +5,16 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { BN, Wallet } from '@coral-xyz/anchor';
 import React from 'react';
 import { IDialogProps } from '@/content/solidr/components/list/SessionCreateDialog';
+import { useTranslation } from 'react-i18next';
 
 interface CloseDialogProps extends IDialogProps {
     sessionId: BN;
 }
 
 export default ({ sessionId, dialogVisible, setDialogVisible }: CloseDialogProps) => {
+
+    const { t } = useTranslation();
+
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
 

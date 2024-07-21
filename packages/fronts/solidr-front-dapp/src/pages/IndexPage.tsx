@@ -1,7 +1,9 @@
 import { Box, Button } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export default function IndexPage() {
+    const { t } = useTranslation();
     return (
         <>
             <Box
@@ -27,7 +29,7 @@ export default function IndexPage() {
                             fontSize: '32px',
                         }}
                     >
-                        Start
+                        {t('start')}
                     </Button>
                 </Link>
             </Box>

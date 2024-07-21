@@ -1,11 +1,13 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom'
 
 export default () => {
 
-    
+    const { t } = useTranslation();
+
     return <Box
         sx={{
             display: 'flex',
@@ -18,10 +20,10 @@ export default () => {
         }}
     >
         <Typography variant="h4" sx={{ marginBottom: '20px' }}>
-            Access denied
+            {t('access.denied.title')}
         </Typography>
         <Typography variant="body1" sx={{ marginBottom: '40px' }}>
-            You don't have the authorization to access this session.
+            {t('access.denied.message')}
         </Typography>
         <Link to={`/sessions`}>
             <Button
@@ -32,7 +34,7 @@ export default () => {
                     fontSize: '16px',
                 }}
             >
-                Cancel
+                {t('home')}
             </Button>
         </Link>
     </Box>

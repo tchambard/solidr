@@ -10,6 +10,7 @@ import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface IJoinSessionDialogProps {
     dialogVisible: boolean;
@@ -22,6 +23,9 @@ interface IJoinSessionParams {
 }
 
 export default ({ dialogVisible, setDialogVisible, token }: IJoinSessionDialogProps) => {
+
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
 
     const anchorWallet = useAnchorWallet() as Wallet;
@@ -40,7 +44,7 @@ export default ({ dialogVisible, setDialogVisible, token }: IJoinSessionDialogPr
 
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'join-session-title'} open={dialogVisible}>
-            <DialogTitle id={'join-session-title'}>{`Join session ${sessionCurrent.session.name}`}</DialogTitle>
+            <DialogTitle id={'join-session-title'}>{`${t('session.join.title')} ${sessionCurrent.session.name}`}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer
                     defaultValues={formData}
@@ -53,10 +57,10 @@ export default ({ dialogVisible, setDialogVisible, token }: IJoinSessionDialogPr
                     }}
                 >
                     <Stack direction={'column'}>
-                        <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
+                        <TextFieldElement type={'text'} name={'name'} label={t('session.join.form.name')} required={true} />
                         <br />
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
-                            Submit
+                            {t('submit')}
                         </LoadingButton>
                     </Stack>
                 </FormContainer>
@@ -64,7 +68,7 @@ export default ({ dialogVisible, setDialogVisible, token }: IJoinSessionDialogPr
             <DialogActions>
                 <Link to={`/sessions`}>
                     <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                        Close
+                        {t('cancel')}
                     </Button>
                 </Link>
             </DialogActions>

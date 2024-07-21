@@ -19,6 +19,7 @@ import { useAnchorWallet, useLocalStorage } from '@solana/wallet-adapter-react';
 import { BN, Wallet } from '@coral-xyz/anchor';
 import { sessionCurrentState } from '@/store/sessions';
 import QRCode from 'qrcode.react';
+import { useTranslation } from 'react-i18next';
 
 interface IInviteMemberDialogProps {
     dialogVisible: boolean;
@@ -26,6 +27,9 @@ interface IInviteMemberDialogProps {
 }
 
 export default ({ dialogVisible, setDialogVisible }: IInviteMemberDialogProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -53,7 +57,7 @@ export default ({ dialogVisible, setDialogVisible }: IInviteMemberDialogProps) =
             aria-labelledby={'register-member-title'}
             open={dialogVisible}
         >
-            <DialogTitle id={'register-member-title'}>{'Invite a new member'}</DialogTitle>
+            <DialogTitle id={'register-member-title'}>{t('session.share.invite.title')}</DialogTitle>
             <DialogContent dividers>
                 <Box
                     display="flex"
@@ -64,12 +68,12 @@ export default ({ dialogVisible, setDialogVisible }: IInviteMemberDialogProps) =
                     p={2}
                 >
                     <Typography variant="h4" gutterBottom>
-                        Share
+                        {t('session.share.title')}
                     </Typography>
                     {url && invitationToken && (
                         <>
                             <TextField
-                                label="URL générée"
+                                label={t('session.share.generatedUrl.title')}
                                 variant="outlined"
                                 value={url}
                                 InputProps={{
@@ -97,13 +101,13 @@ export default ({ dialogVisible, setDialogVisible }: IInviteMemberDialogProps) =
                                 generateUrl();
                             });
                     }}>
-                        Generate new link
+                        {t('session.share.generate.newLink.title')}
                     </Button>
                 </Box>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Close
+                    {t('cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

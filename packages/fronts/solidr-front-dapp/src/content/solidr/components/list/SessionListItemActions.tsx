@@ -1,13 +1,14 @@
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 
 import ActionsMenu, { IActionMenuItem } from '@/components/ActionsMenu';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SessionCloseDialog from '@/content/solidr/components/detail/SessionCloseDialog';
 import { DeleteForever, DoDisturbOn, Edit } from '@mui/icons-material';
 import { Session, SessionStatus } from '@solidr';
 import SessionDeleteDialog from '@/content/solidr/components/detail/SessionDeleteDialog';
 import SessionUpdateDialog from '@/content/solidr/components/list/SessionUpdateDialog';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
     currentView: 'list' | 'edit' | 'detail';
@@ -15,6 +16,9 @@ interface IProps {
 }
 
 export default ({ session, currentView }: IProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet();
     const [confirmClose, setConfirmClose] = useState<boolean>(false);
     const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
@@ -24,8 +28,8 @@ export default ({ session, currentView }: IProps) => {
     useEffect(() => {
         const _menuItems: IActionMenuItem[] = [
             {
-                title: 'Details',
-                description: 'View session details',
+                title: t('sessions.item.action.details.title'),
+                description: t('sessions.item.action.details.description'),
                 url: `/sessions/${session.sessionId}`,
                 color: 'primary',
                 icon: <AutoGraphIcon fontSize={'small'} />,
@@ -36,15 +40,15 @@ export default ({ session, currentView }: IProps) => {
         if (session.admin.toString() === anchorWallet.publicKey.toString()) {
             if (session.status == SessionStatus.Opened) {
                 _menuItems.push({
-                    title: 'Close',
-                    description: 'Close session',
+                    title: t('sessions.item.action.close.title'),
+                    description: t('sessions.item.action.close.description'),
                     onClick: () => setConfirmClose(true),
                     color: 'primary',
                     icon: <DoDisturbOn fontSize={'small'} />,
                 });
                 _menuItems.push({
-                    title: 'Edit',
-                    description: 'Edit session',
+                    title: t('sessions.item.action.edit.title'),
+                    description: t('sessions.item.action.edit.description'),
                     onClick: () => setUpdateSessionVisibility(true),
                     color: 'primary',
                     icon: <Edit fontSize={'small'} />,
@@ -52,8 +56,8 @@ export default ({ session, currentView }: IProps) => {
             }
             if (session.status == SessionStatus.Closed) {
                 _menuItems.push({
-                    title: 'Delete',
-                    description: 'Delete session',
+                    title: t('sessions.item.action.delete.title'),
+                    description: t('sessions.item.action.delete.description'),
                     onClick: () => setConfirmDelete(true),
                     color: 'primary',
                     icon: <DeleteForever fontSize={'small'} />,

@@ -2,9 +2,11 @@ import { Card, CardContent, Grid, Typography } from '@mui/material';
 
 import { sessionCurrentState } from '@/store/sessions';
 import { useRecoilValue } from 'recoil';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
 
+    const { t } = useTranslation();
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
@@ -14,7 +16,7 @@ export default () => {
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
-                            My total cost
+                            {t('session.expense.summary.totalCost')}
                         </Typography>
                         <Typography variant="h4" color="primary">
                             {sessionCurrent.myTotalCost}$
@@ -26,7 +28,7 @@ export default () => {
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
-                            Total expenses
+                            {t('session.expense.summary.totalExpenses')}
                         </Typography>
                         <Typography variant="h4" color="primary">
                             {sessionCurrent.totalExpenses}$
@@ -38,7 +40,7 @@ export default () => {
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
-                            Total refunds
+                            {t('session.expense.summary.totalRefunds')}
                         </Typography>
                         <Typography variant="h4" color="primary">
                             {sessionCurrent.totalRefunds}$

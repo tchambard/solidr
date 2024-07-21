@@ -1,7 +1,7 @@
-import '@/lib/i18n';
+import '@/lib/i18n/config';
 import { Suspense, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Routes, Route, useRoutes } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import 'react-lazy-load-image-component/src/effects/opacity.css';

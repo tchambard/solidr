@@ -10,6 +10,7 @@ import { solidrClientState, txState } from '@/store/wallet';
 import { sessionCurrentState } from '@/store/sessions';
 import { Wallet } from '@coral-xyz/anchor';
 import SessionExpenseParticipantsList, { IParticipant } from '@/content/solidr/components/detail/SessionExpenseParticipantsList';
+import { useTranslation } from 'react-i18next';
 
 interface IAddExpenseDialogProps {
     dialogVisible: boolean;
@@ -23,6 +24,9 @@ interface IRegisterExpenseParams {
 }
 
 export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -72,24 +76,24 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
 
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'dialog-expense-title'} open={dialogVisible}>
-            <DialogTitle id={'dialog-expense-title'}>{'Add a new expense'}</DialogTitle>
+            <DialogTitle id={'dialog-expense-title'}>{t('session.expense.add.title')}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer defaultValues={formData} onSuccess={formSuccessHandler}>
                     <Stack direction={'column'}>
-                        <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
+                        <TextFieldElement type={'text'} name={'name'} label={t('session.expense.add.form.name')} required={true} />
                         <br />
-                        <TextFieldElement type={'text'} name={'amount'} label={'Amount'} required={true} />
+                        <TextFieldElement type={'text'} name={'amount'} label={t('session.expense.add.form.amount')} required={true} />
                         <br />
                         <SessionExpenseParticipantsList participants={participants} handleParticipantOnClick={handleParticipantOnClick} />
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
-                            Submit
+                            {t('submit')}
                         </LoadingButton>
                     </Stack>
                 </FormContainer>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

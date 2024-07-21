@@ -5,11 +5,14 @@ import { useRecoilValue, useResetRecoilState } from 'recoil';
 import { sessionCurrentState } from '@/store/sessions';
 import Link from '@mui/material/Link';
 import { useNavigate } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
     const navigate = useNavigate();
     const sessionCurrent = useRecoilValue(sessionCurrentState);
     const resetSessionCurrent = useResetRecoilState(sessionCurrentState);
+
+    const { t } = useTranslation();
 
     const handleDisplayAllSessions = () => {
         resetSessionCurrent();
@@ -26,7 +29,7 @@ export default () => {
                     cursor: 'pointer',
                 }}
             >
-                My Solidr sessions
+                {t('sessions.list.title')}
             </Link>
 
             {sessionCurrent.session && (

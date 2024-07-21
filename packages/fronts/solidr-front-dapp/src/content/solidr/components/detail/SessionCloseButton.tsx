@@ -4,8 +4,12 @@ import { sessionCurrentState } from '@/store/sessions';
 import React, { useState } from 'react';
 import { SessionStatus } from '@solidr';
 import SessionCloseDialog from '@/content/solidr/components/detail/SessionCloseDialog';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+
+    const { t } = useTranslation();
+
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const [confirmVisibility, setConfirmVisibility] = useState<boolean>(false);
@@ -20,7 +24,7 @@ export default () => {
                         setConfirmVisibility(true);
                     }}
                 >
-                    Close session
+                    {t('session.close.button.title')}
                 </Button>
             ) : (
                 <Chip label="Session Closed" color="error" variant="outlined" />

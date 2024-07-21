@@ -5,12 +5,16 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { BN, Wallet } from '@coral-xyz/anchor';
 import React from 'react';
 import { IDialogProps } from '@/content/solidr/components/list/SessionCreateDialog';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteDialogProps extends IDialogProps {
     sessionId: BN;
 }
 
 export default ({ sessionId, dialogVisible, setDialogVisible }: DeleteDialogProps) => {
+
+    const { t } = useTranslation();
+
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
 
@@ -26,18 +30,18 @@ export default ({ sessionId, dialogVisible, setDialogVisible }: DeleteDialogProp
 
     return (
         <Dialog open={dialogVisible} onClose={handleClose} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-            <DialogTitle id="alert-dialog-title">Delete Session</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{t('session.delete.dialog.title')}</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    Deleting this session will permanently erase all associated data and it cannot be recovered. Deleting the session will also release all rents.
+                    {t('session.delete.dialog.description')}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button color="secondary" onClick={handleClose}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 <Button color="error" onClick={() => handleCloseSessionClick()} autoFocus>
-                    Delete Session
+                    {t('submit')}
                 </Button>
             </DialogActions>
         </Dialog>

@@ -23,8 +23,12 @@ import SessionBalance from '@/content/solidr/components/detail/SessionBalance';
 import SessionEditMemberDialog from '@/content/solidr/components/detail/SessionEditMemberDialog';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Edit } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+
+    const { t } = useTranslation();
+
     const wallet = useWallet();
     const [addMemberDialogVisible, setAddMemberDialogVisible] = useState(false);
     const [inviteMemberDialogVisible, setInviteMemberDialogVisible] = useState(false);
@@ -47,18 +51,18 @@ export default () => {
                 <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
                         <Typography variant={'h5'} component={'h5'} gutterBottom>
-                            List of members
+                            {t('session.members.list.title')}
                         </Typography>
                     </Grid>
                     <Grid item>
                         {sessionCurrent.isAdmin && sessionCurrent.session?.status === SessionStatus.Opened && (
                             <>
-                                <Tooltip placement={'bottom'} title={'Register new member'}>
+                                <Tooltip placement={'bottom'} title={t('session.members.action.add')}>
                                     <IconButton color={'primary'} onClick={() => setAddMemberDialogVisible(!addMemberDialogVisible)}>
                                         <AddCircleIcon />
                                     </IconButton>
                                 </Tooltip>
-                                <Tooltip placement={'bottom'} title={'Invite new member'}>
+                                <Tooltip placement={'bottom'} title={t('session.members.action.invite')}>
                                     <IconButton color={'primary'} onClick={() => setInviteMemberDialogVisible(!inviteMemberDialogVisible)}>
                                         <SendIcon />
                                     </IconButton>
@@ -73,7 +77,7 @@ export default () => {
 
             <Grid container spacing={2}>
                 <Grid item xs={12} md={4}>
-                    <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+                    <List sx={{ width: '100%' }}>
                         {_.map(sessionCurrent.members, (member, address) => {
                             return (
                                 <ListItem key={`member_${address}`}>

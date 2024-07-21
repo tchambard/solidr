@@ -4,6 +4,7 @@ import React from 'react';
 import { PublicKey } from '@solana/web3.js';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
+import { useTranslation } from 'react-i18next';
 
 export interface IParticipant {
     name: string;
@@ -16,9 +17,11 @@ type LabelContextProps = {
     handleParticipantOnClick(participant: IParticipant): void;
 };
 export default ({ participants, handleParticipantOnClick }: LabelContextProps) => {
-    if (_.isEmpty(participants)) return;
 
+    const { t } = useTranslation();
     const anchorWallet = useAnchorWallet() as Wallet;
+
+    if (_.isEmpty(participants)) return;
 
     const current = _.find(participants, (part) => part.address.toString() == anchorWallet.publicKey.toString());
     const others = _.sortBy(
@@ -28,7 +31,7 @@ export default ({ participants, handleParticipantOnClick }: LabelContextProps) =
 
     return (
         <FormControl component="fieldset" sx={{ m: 3 }} variant="standard">
-            <FormLabel component="legend">Choose participants</FormLabel>
+            <FormLabel component="legend">{t('session.expense.participant.choose.title')}</FormLabel>
             <FormGroup>
                 <FormControlLabel control={<Checkbox checked={true} disabled={true} name={current.name} />} label={current.name} />
                 {_.map(others, (member) => (

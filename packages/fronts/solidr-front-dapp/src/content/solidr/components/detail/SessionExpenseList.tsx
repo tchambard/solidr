@@ -26,8 +26,11 @@ import AddressAvatarGroup from '@/components/AddressAvatarGroup';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Avatar, AvatarGroup } from '@mui/material';
 import { KeyboardDoubleArrowRight } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+
+    const { t } = useTranslation();
     const theme = useTheme();
     const anchorWallet = useAnchorWallet();
 
@@ -52,7 +55,7 @@ export default () => {
                     <Grid item xs={6} sm={6}>
                         <ListItemText
                             primary={expense.name}
-                            secondary={`Paid by ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
+                            secondary={`${t('session.expense.item.paidby')} ${expenseOwner.name} ${formatRelative(expense.date, new Date())}`}
                             onClick={() => {
                                 if (expense?.owner.toString() === anchorWallet.publicKey.toString()) {
                                     setCurrentExpense(expense);
@@ -86,7 +89,7 @@ export default () => {
                         <GetAppIcon style={{ color: 'green' }} />
                     </Grid>
                     <Grid item xs={5} sm={5}>
-                        <ListItemText primary="Refund" secondary={`Paid by ${refundFrom.name} to ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
+                        <ListItemText primary={t('session.refund.text')} secondary={`${t('session.refund.item.paidby')} ${refundFrom.name} ${t('session.refund.item.paidto')} ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                     </Grid>
                     <Grid item xs={2} sm={2}>
                         <ListItemText primary={`${refund.amount}$`} />
@@ -122,12 +125,12 @@ export default () => {
                 <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
                         <Typography variant={'h5'} component={'h5'} gutterBottom>
-                            List of operations
+                            {t('session.operation.list.title')}
                         </Typography>
                     </Grid>
                     <Grid item>
                         {sessionCurrent.session?.status === SessionStatus.Opened && (
-                            <Tooltip placement={'bottom'} title={'Register new expense'}>
+                            <Tooltip placement={'bottom'} title={t('session.expenses.register.tooltip')}>
                                 <IconButton color={'primary'} onClick={() => setAddExpenseDialogVisible(!addExpenseDialogVisible)}>
                                     <AddCircleIcon />
                                 </IconButton>
@@ -145,9 +148,9 @@ export default () => {
                     '& .MuiListItem-root:hover':
                         sessionCurrent.session?.status === SessionStatus.Opened
                             ? {
-                                  bgcolor: theme.palette.action.hover,
-                                  cursor: 'pointer',
-                              }
+                                bgcolor: theme.palette.action.hover,
+                                cursor: 'pointer',
+                            }
                             : undefined,
                 }}
             >
@@ -159,7 +162,7 @@ export default () => {
                     </>
                 ) : (
                     <Typography variant="body1" align="center" mt={2} pb={2}>
-                        Start by adding an expense
+                        {t('session.expenses.empty.message')}
                     </Typography>
                 )}
             </List>
@@ -170,12 +173,4 @@ export default () => {
             )}
         </>
     );
-};
-
-const MyTotalCost: React.FC<{ totalCost: number | undefined }> = ({ totalCost }) => {
-    return <ListItemText primary={`My total cost ${totalCost ?? 0}$`} />;
-};
-
-const TotalExpenses: React.FC<{ totalExpenses: number | undefined }> = ({ totalExpenses }) => {
-    return <ListItemText primary={`Total expenses ${totalExpenses ?? 0}$`} />;
 };
