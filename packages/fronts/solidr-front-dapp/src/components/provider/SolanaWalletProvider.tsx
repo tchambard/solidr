@@ -24,7 +24,7 @@ export default function SolanaWalletProvider({ children }: Props) {
             appIdentity: {
                 name: 'SolidR',
                 uri: 'https://solidr.vercel.app',
-                icon: 'relative/path/to/icon.png',
+                icon: '/logo.png',
             },
             authorizationResultCache: createDefaultAuthorizationResultCache(),
             chain: WalletAdapterNetwork.Devnet,

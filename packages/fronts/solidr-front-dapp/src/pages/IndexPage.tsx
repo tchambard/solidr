@@ -9,11 +9,10 @@ export default function IndexPage() {
         <Box
             sx={{
                 display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
+                flexDirection: { xs: 'column', md: 'column' },
                 justifyContent: 'center',
                 alignItems: 'center',
                 width: '100%',
-                height: '100%',
                 position: 'absolute',
                 top: '60%',
                 left: '50%',
@@ -27,7 +26,7 @@ export default function IndexPage() {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    mb: { xs: 2, md: 0 },
+                    mb: { xs: 2, md: 2 },
                     mr: -2,
                     zIndex: 1,
                 }}
@@ -46,6 +45,8 @@ export default function IndexPage() {
                     justifyContent: 'center',
                     alignItems: 'center',
                     ml: { xs: 0, md: 2 },
+                    mt: { xs: 0, md: 8 },
+
                     zIndex: 1,
                 }}
             >

@@ -39,11 +39,12 @@ export default function DefaultHeader() {
                             onClick={() => {
                                 navigate('/');
                             }}
+                            pt={'0.3em'}
                             style={{ cursor: 'pointer' }}
                         >
                             <LazyLoadImage
-                                width="40"
-                                height="40"
+                                width="36"
+                                height="36"
                                 src={'/logo.png'}
                                 alt="Logo"
                                 effect="opacity"
@@ -57,7 +58,6 @@ export default function DefaultHeader() {
                         <LanguageSwitcher />
                         <ColorModeChanger />
                     </>
-
                     {!xsDisplay && (
                         <>
                             <div>

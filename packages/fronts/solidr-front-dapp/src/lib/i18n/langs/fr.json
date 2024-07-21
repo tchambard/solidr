@@ -53,7 +53,7 @@
     "session.refund.dialog.title": "Rembourser mes amis",
     "session.refund.dialog.label.to": "à",
     "session.transfers.title": "Remboursements",
-    "session.transfers.button.title": "Rembourser mes amis",
+    "session.transfers.button.title": "Rembourser",
     "session.transfers.item.label.owes": "doit",
     "session.transfers.item.label.to": "à",
     "session.transfers.list.empty.message": "Les remboursements seront disponibles dès que les coûts deviendront déséquilibrés",

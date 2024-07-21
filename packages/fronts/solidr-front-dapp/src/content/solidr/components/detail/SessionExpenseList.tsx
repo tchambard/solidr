@@ -27,6 +27,7 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Avatar, AvatarGroup } from '@mui/material';
 import { KeyboardDoubleArrowRight } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export default () => {
 
@@ -48,7 +49,7 @@ export default () => {
 
         return (
             <ListItem key={`expense_${expense.expenseId}`}>
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container spacing={2}>
                     <Grid item xs={1} sm={1}>
                         <UploadIcon style={{ color: 'red' }} />
                     </Grid>
@@ -69,7 +70,7 @@ export default () => {
                     </Grid>
                     <Grid item xs={2} sm={2}>
                         <ListItemAvatar>
-                            <AddressAvatarGroup addresses={expense.participants.map((part) => part.toString())} size={24} />
+                            <AddressAvatarGroup addresses={expense.participants.map((part) => part.toString())} size={20} />
                         </ListItemAvatar>
                     </Grid>
                 </Grid>
@@ -91,26 +92,26 @@ export default () => {
                     <Grid item xs={5} sm={5}>
                         <ListItemText primary={t('session.refund.text')} secondary={`${t('session.refund.item.paidby')} ${refundFrom.name} ${t('session.refund.item.paidto')} ${refundTo.name} ${formatRelative(refund.date, new Date())}`} />
                     </Grid>
-                    <Grid item xs={2} sm={2}>
-                        <ListItemText primary={`${refund.amount}$`} />
-                    </Grid>
                     <Grid item xs={4} sm={4}>
-                        <ListItemAvatar>
-                            <AvatarGroup>
-                                <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={24} />
+                        <ListItemText primary={`${refund.amount}$`} secondary={`${refund.amountInLamports / LAMPORTS_PER_SOL} SOL`} />
+                    </Grid>
+                    <Grid item xs={2} sm={2}>
+                        <ListItemAvatar >
+                            <AvatarGroup spacing={1}>
+                                <AddressAvatar key={`refund_from_avatar-${refundFrom.addr.toString()}`} address={refundFrom.addr.toString()} size={20} />
                                 <Avatar
                                     sx={{
-                                        width: 24,
-                                        height: 24,
+                                        width: 20,
+                                        height: 20,
                                         bgcolor: '#ffffff',
                                         color: 'rgb(66, 66, 66)',
-                                        fontSize: '12px',
-                                        marginLeft: '6px !important',
+                                        fontSize: '10px',
+                                        margin: '0px !important',
                                     }}
                                 >
                                     <KeyboardDoubleArrowRight />
                                 </Avatar>
-                                <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={24} marginLeft={'6px !important'} />
+                                <AddressAvatar key={`refund_to_avatar-${refundTo.addr.toString()}`} address={refundTo.addr.toString()} size={20} marginLeft={'0px !important'} />
                             </AvatarGroup>
                         </ListItemAvatar>
                     </Grid>
