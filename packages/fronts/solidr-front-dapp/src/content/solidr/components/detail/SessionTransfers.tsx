@@ -92,7 +92,7 @@ export default () => {
                                                 </Grid>
                                                 <Grid item xs>
                                                     <Typography variant="h6" mt={2} pb={2}>
-                                                        ${transfer.amount}$
+                                                        {transfer.amount}$
                                                     </Typography>
                                                 </Grid>
                                             </Grid>
