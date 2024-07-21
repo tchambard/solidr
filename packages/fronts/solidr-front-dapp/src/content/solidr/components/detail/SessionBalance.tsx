@@ -1,12 +1,14 @@
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { sessionCurrentState } from '@/store/sessions';
 import { Bar } from 'react-chartjs-2';
 import { BarElement, CategoryScale, Chart as ChartJS, LinearScale, Tooltip as ChartTooltip } from 'chart.js/auto';
 import { hexToRgba, stringToColor } from '@/lib/colors';
 import React from 'react';
+import { colorModeState } from '@/store/colorMode';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, ChartTooltip);
 export default () => {
+    const [colorMode, setColorMode] = useRecoilState(colorModeState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const sortedBalances = Object.values(sessionCurrent.balances).sort((a, b) => {
@@ -83,7 +85,7 @@ export default () => {
                     drawBorder: false,
                     color: (context) => {
                         if (context.tick.value === 0) {
-                            return 'rgba(0, 0, 0, 0.1)'; // Color of the zero line
+                            return colorMode === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)'; // Color of the zero line
                         }
                         return 'rgba(0, 0, 0, 0)'; // Transparent color for other grid lines
                     },
