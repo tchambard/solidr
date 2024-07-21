@@ -4,15 +4,15 @@
 
 The decentralized application for simple sharing expenses.
 
-Developped on Solana.
+Developed on Solana.
 
 ## The authors
 
 - Chambard Teddy
-- Coquelet Nicolat
+- Coquelet Nicolas
 - Vardon Adrien
 
-## Useful linkk
+## Useful links
 
 - website: https://solidr.vercel.app
 - program: https://explorer.solana.com/address/7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv?cluster=devnet

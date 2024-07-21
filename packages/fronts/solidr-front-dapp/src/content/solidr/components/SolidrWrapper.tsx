@@ -86,7 +86,7 @@ export default ({ children }: IWalletContainerWrapperProps) => {
 
     return (
         <>
-            <Container sx={{ mt: 3, minHeight: '1024px' }} maxWidth="xl">
+            <Container sx={{ mt: 3 }} maxWidth="xl">
                 {children}
 
                 <Snackbar open={tx.error != null} onClose={handleCloseErrorSnack}>

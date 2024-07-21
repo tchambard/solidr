@@ -16,7 +16,7 @@ export default function DefaultLayout({ children }: Props) {
             </header>
             <main
                 id="page-component"
-                style={{ wordWrap: 'break-word', minHeight: 'calc(100vh - 128px)' }}
+                style={{ wordWrap: 'break-word', minHeight: 'calc(100vh - 112px)' }}
             >
                 <Box py={4}>{children}</Box>
             </main>
