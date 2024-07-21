@@ -5,14 +5,13 @@ import { useRecoilValue } from 'recoil';
 import { useTranslation } from 'react-i18next';
 
 export default () => {
-
     const { t } = useTranslation();
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     return (
-        <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
+        <Grid container spacing={2} mt={2}>
+            <Grid item xs={6} sm={4}>
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
@@ -24,7 +23,7 @@ export default () => {
                     </CardContent>
                 </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={6} sm={4}>
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
@@ -36,7 +35,7 @@ export default () => {
                     </CardContent>
                 </Card>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            {/*<Grid item xs={12} sm={4}>
                 <Card>
                     <CardContent>
                         <Typography variant="h6" gutterBottom>
@@ -47,7 +46,7 @@ export default () => {
                         </Typography>
                     </CardContent>
                 </Card>
-            </Grid>
+            </Grid>*/}
         </Grid>
     );
 };

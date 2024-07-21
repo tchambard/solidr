@@ -240,10 +240,11 @@ export default () => {
             </Helmet>
 
             <Grid container spacing={2} direction={'column'}>
-                <Grid item xs={1}>
+                <Grid item>
                     <SessionInfo />
+                    <SessionExpenseSummary />
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item>
                     <StyledTabs value={value} onChange={handleChange} variant={isMobile ? 'fullWidth' : 'standard'} centered={!isMobile}>
                         <StyledTab label={t('session.tabs.title.members')} />
                         <StyledTab label={t('session.tabs.title.expenses')} />
@@ -258,9 +259,6 @@ export default () => {
                     </TabPanel>
                     <TabPanel value={value} index={1}>
                         <Grid container spacing={2} direction={'column'}>
-                            <Grid item xs={1}>
-                                <SessionExpenseSummary />
-                            </Grid>
                             <Grid item xs={1}>
                                 <SessionExpenseList />
                             </Grid>
