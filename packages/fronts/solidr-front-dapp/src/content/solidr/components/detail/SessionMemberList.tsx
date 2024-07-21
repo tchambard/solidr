@@ -29,7 +29,7 @@ export default () => {
     return (
         <>
             <PageTitleWrapper>
-                <Grid container justifyContent={'space-between'} alignItems={'center'}>
+                <Grid container justifyContent={'space-between'} alignItems={'center'} style={{ paddingTop: '10px', paddingBottom: '10px' }}>
                     <Grid item>
                         <Typography variant={'h5'} component={'h5'} gutterBottom>
                             List of members
