@@ -9,6 +9,7 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { sessionCurrentState } from '@/store/sessions';
 import { PublicKey } from '@solana/web3.js';
+import { useTranslation } from 'react-i18next';
 
 interface IAddMemberDialogProps {
     dialogVisible: boolean;
@@ -21,6 +22,9 @@ interface IRegisterMemberParams {
 }
 
 export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -33,7 +37,7 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
 
     return (
         <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-member-title'} open={dialogVisible}>
-            <DialogTitle id={'register-member-title'}>{'Add a new member'}</DialogTitle>
+            <DialogTitle id={'register-member-title'}>{t('session.member.add.title')}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer
                     defaultValues={formData}
@@ -45,19 +49,19 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
                     }}
                 >
                     <Stack direction={'column'}>
-                        <TextFieldElement type={'text'} name={'address'} label={'Address'} required={true} />
+                        <TextFieldElement type={'text'} name={'address'} label={t('session.member.add.form.address')} required={true} />
                         <br />
-                        <TextFieldElement type={'text'} name={'name'} label={'Name'} required={true} />
+                        <TextFieldElement type={'text'} name={'name'} label={t('session.member.add.form.name')} required={true} />
                         <br />
                         <LoadingButton loading={tx.pending} loadingPosition={'end'} variant={'contained'} color={'primary'} endIcon={<SendIcon />} type={'submit'}>
-                            Submit
+                            {t('submit')}
                         </LoadingButton>
                     </Stack>
                 </FormContainer>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

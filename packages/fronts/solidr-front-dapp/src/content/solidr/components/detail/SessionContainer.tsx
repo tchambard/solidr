@@ -20,6 +20,7 @@ import SessionMemberList from '@/content/solidr/components/detail/SessionMemberL
 import SessionExpenseSummary from '@/content/solidr/components/detail/SessionExpenseSummary';
 import SessionExpenseList from '@/content/solidr/components/detail/SessionExpenseList';
 import SessionTransfers from '@/content/solidr/components/detail/SessionTransfers';
+import { useTranslation } from 'react-i18next';
 
 const StyledTabs = styled(Tabs)(({ theme }: { theme: Theme }) => ({
     minHeight: 48,
@@ -69,6 +70,8 @@ function TabPanel(props) {
 }
 
 export default () => {
+    const { t } = useTranslation();
+
     const [joinSessionDialogVisible, setJoinSessionDialogVisible] = useState(true);
 
     const [value, setValue] = useState(0);
@@ -262,9 +265,9 @@ export default () => {
                 </Grid>
                 <Grid item xs={1}>
                     <StyledTabs value={value} onChange={handleChange} variant={isMobile ? 'fullWidth' : 'standard'} centered={!isMobile}>
-                        <StyledTab label="Settings" />
-                        <StyledTab label="Expenses" />
-                        <StyledTab label="Balance" />
+                        <StyledTab label={t("session.tabs.title.members")} />
+                        <StyledTab label={t("session.tabs.title.expenses")} />
+                        <StyledTab label={t("session.tabs.title.balance")} />
                     </StyledTabs>
                     <TabPanel value={value} index={0}>
                         <Grid container spacing={2}>

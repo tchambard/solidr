@@ -9,8 +9,12 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+
+    const { t } = useTranslation();
+
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
     const [sessionList, setSessionList] = useRecoilState(sessionListState);
@@ -57,8 +61,8 @@ export default () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Description</TableCell>
+                                <TableCell>{t('sessions.table.head.name')}</TableCell>
+                                <TableCell>{t('sessions.table.head.description')}</TableCell>
                                 <TableCell align={'right'}>Actions</TableCell>
                             </TableRow>
                         </TableHead>

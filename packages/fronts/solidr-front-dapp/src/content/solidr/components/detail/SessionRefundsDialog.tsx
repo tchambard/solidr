@@ -11,8 +11,12 @@ import { LoadingButton } from '@mui/lab';
 import SendIcon from '@mui/icons-material/Send';
 import { PublicKey } from '@solana/web3.js';
 import { MemberTransfer } from '@solidr';
+import { useTranslation } from 'react-i18next';
 
 export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
+
+    const { t } = useTranslation();
+
     const anchorWallet = useAnchorWallet() as Wallet;
     const solidrClient = useRecoilValue(solidrClientState);
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -54,19 +58,19 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
     };
 
     return (
-        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'register-expense-title'} open={dialogVisible}>
-            <DialogTitle id={'register-expense-title'}>{'Refund my friends'}</DialogTitle>
+        <Dialog disableEscapeKeyDown maxWidth={'sm'} aria-labelledby={'refund-dialog-title'} open={dialogVisible}>
+            <DialogTitle id={'refund-dialog-title'}>{t('session.refund.dialog.title')}</DialogTitle>
             <DialogContent dividers>
                 <FormContainer>
                     <Stack direction={'column'}>
                         {transfers.map((transfer, idx) => (
                             <div key={`transfer_${idx}`}>
                                 <FormControl fullWidth sx={{ m: 1 }}>
-                                    <InputLabel htmlFor={`to_${transfer.to.toString()}`}>{`to ${sessionCurrent.members[transfer.to.toString()].name}`}</InputLabel>
+                                    <InputLabel htmlFor={`to_${transfer.to.toString()}`}>{`${t('session.refund.dialog.label.to')} ${sessionCurrent.members[transfer.to.toString()].name}`}</InputLabel>
                                     <OutlinedInput
                                         id={`to_${transfer.to.toString()}`}
                                         startAdornment={<InputAdornment position="start">€</InputAdornment>}
-                                        label={`to ${sessionCurrent.members[transfer.to.toString()].name}`}
+                                        label={`${t('session.refund.dialog.label.to')} ${sessionCurrent.members[transfer.to.toString()].name}`}
                                         defaultValue={transfer.amount}
                                         onChange={(e) => handleAmountUpdate(transfer.to, Number(e.currentTarget.value))}
                                         type={'number'}
@@ -84,14 +88,14 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
                             endIcon={<SendIcon />}
                             onClick={() => handleTransfersClick()}
                         >
-                            Submit
+                            {t('submit')}
                         </LoadingButton>
                     </Stack>
                 </FormContainer>
             </DialogContent>
             <DialogActions>
                 <Button autoFocus onClick={() => setDialogVisible(false)} color={'primary'}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
             </DialogActions>
         </Dialog>

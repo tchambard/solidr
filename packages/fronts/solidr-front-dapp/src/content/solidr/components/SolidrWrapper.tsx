@@ -27,7 +27,7 @@ interface IWalletContainerWrapperProps {
 export default ({ children }: IWalletContainerWrapperProps) => {
     const theme = useTheme();
     const xsDisplay = useMediaQuery(theme.breakpoints.down('sm'));
-    const { t } = useTranslation(['translation']);
+    const { t } = useTranslation();
     const { publicKey } = useWallet();
     const [tx, setTx] = useRecoilState(txState);
     const setSolidrClient = useSetRecoilState(solidrClientState);
