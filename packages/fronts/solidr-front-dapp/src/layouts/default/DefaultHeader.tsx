@@ -12,6 +12,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { getSolanaBalance } from '@/store/wallet';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function DefaultHeader() {
     const navigate = useNavigate();
@@ -56,6 +57,7 @@ export default function DefaultHeader() {
 
                     {!xsDisplay && (
                         <>
+                            <LanguageSwitcher />
                             <ColorModeChanger />
                             <div>
                                 {solanaBalance !== null && (
