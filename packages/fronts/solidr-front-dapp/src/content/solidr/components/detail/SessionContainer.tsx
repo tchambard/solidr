@@ -42,23 +42,6 @@ const StyledTab = styled(Tab)(({ theme }: { theme: Theme }) => ({
     },
 }));
 
-const Item = styled(Paper)(({ theme }) => ({
-    // color: theme.palette.text.secondary,
-}));
-
-const Head = styled(Paper)(({ theme }: { theme: Theme }) => ({
-    padding: '20px',
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    height: '100%',
-    border: `2px solid ${theme.palette.primary.main}`,
-    borderRadius: theme.shape.borderRadius,
-    transition: 'border-color 0.3s ease',
-    '&:hover': {
-        borderColor: theme.palette.primary.dark,
-    },
-}));
-
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
 
