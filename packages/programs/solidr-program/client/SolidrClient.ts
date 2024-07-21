@@ -564,7 +564,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async updateExpense(member: Wallet, sessionId: BN, expenseId: BN, name: string, amount: number, participants?: PublicKey[]): Promise<ITransactionResult> {
+    public async updateExpense(member: Wallet, sessionId: BN, expenseId: BN, name: string, amount: number, participants: PublicKey[]): Promise<ITransactionResult> {
         return this.wrapFn(async () => {
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
             const memberAccountPubkey = this.findSessionMemberAccountAddress(sessionId, member.publicKey);
