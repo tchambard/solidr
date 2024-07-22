@@ -26,7 +26,6 @@ import { Edit } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
 export default () => {
-
     const { t } = useTranslation();
 
     const wallet = useWallet();
@@ -88,12 +87,12 @@ export default () => {
                                     </Tooltip>
                                     {wallet.publicKey.toString() == member.addr.toString() || sessionCurrent.isAdmin ? (
                                         <>
-                                            <ListItemText
-                                                primary={member.name}
-                                            />
-                                            <IconButton color={'primary'} onClick={() => handleMemberClick(member)}>
-                                                <Edit fontSize={'small'} />
-                                            </IconButton>
+                                            <ListItemText primary={member.name} />
+                                            {sessionCurrent.session?.status === SessionStatus.Opened && (
+                                                <IconButton color={'primary'} onClick={() => handleMemberClick(member)}>
+                                                    <Edit fontSize={'small'} />
+                                                </IconButton>
+                                            )}
                                         </>
                                     ) : (
                                         <ListItemText primary={member.name} />
