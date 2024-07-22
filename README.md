@@ -1,4 +1,4 @@
-[![Prod Continuous integration](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml) [![Dev Continuous integration](https://github.com/tchambard/solidr/actions/workflows/ci.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci.yml)
+[![Prod](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml) [![Dev](https://github.com/tchambard/solidr/actions/workflows/ci.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci.yml)
 
 # Solid-R
 
