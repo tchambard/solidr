@@ -47,11 +47,6 @@ export default () => {
         });
         sessionOpenedListener && listeners.push(sessionOpenedListener);
 
-        const sessionClosedListener = solidrClient.addEventListener('sessionClosed', (event) => {
-            refreshUserSessions();
-        });
-        sessionClosedListener && listeners.push(sessionClosedListener);
-
         return () => {
             listeners.forEach((listener) => {
                 solidrClient.program.removeEventListener(listener);
@@ -80,7 +75,7 @@ export default () => {
                 {sessionList.items.map((session) => {
                     return (
                         <div key={`session_${session.sessionId}`}>
-                            <ListItem >
+                            <ListItem>
                                 <ListItemText secondary={session.description}>
                                     <Link to={`/sessions/${session.sessionId}`}>
                                         <Typography variant={'body1'} fontWeight={'bold'} color={'text.primary'} gutterBottom noWrap>

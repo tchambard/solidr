@@ -69,27 +69,89 @@ export default () => {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    const updateSessionClosed = () => {
+        if (!sessionCurrent.session) {
+            return;
+        }
+        const newSessionCurrent = {
+            ...sessionCurrent,
+            session: {
+                ...sessionCurrent.session,
+                status: SessionStatus.Closed,
+            },
+        };
+        setSessionCurrent(newSessionCurrent);
+        reloadSessionBalance(newSessionCurrent, anchorWallet);
+    };
+
+    const updateMemberList = () => {
+        solidrClient.listSessionMembers(sessionCurrent.session?.sessionId).then((members) => {
+            const newSessionCurrent = {
+                ...sessionCurrent,
+                members: members.reduce(
+                    (acc, member) => {
+                        acc[member.addr.toString()] = member;
+                        return acc;
+                    },
+                    {} as { [pubkey: string]: SessionMember },
+                ),
+            };
+            setSessionCurrent(newSessionCurrent);
+            reloadSessionBalance(newSessionCurrent, anchorWallet);
+        });
+    };
+
+    const updateExpenseList = () => {
+        solidrClient.listSessionExpenses(sessionCurrent.session?.sessionId).then((expenses) => {
+            if (!sessionCurrent.session) {
+                return;
+            }
+            const newSessionCurrent = {
+                ...sessionCurrent,
+                expenses,
+            };
+
+            setSessionCurrent(newSessionCurrent);
+            reloadSessionBalance(newSessionCurrent, anchorWallet);
+        });
+    };
+
+    const updateRefundList = () => {
+        solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refunds) => {
+            if (!sessionCurrent.session) {
+                return;
+            }
+            const newSessionCurrent = {
+                ...sessionCurrent,
+                refunds,
+            };
+            setSessionCurrent(newSessionCurrent);
+            reloadSessionBalance(newSessionCurrent, anchorWallet);
+        });
+    };
+
+    const reloadSessionBalance = (sessionCurrent: SessionCurrentState, anchorWallet: Wallet) => {
+        if (sessionCurrent.session) {
+            solidrClient
+                .computeBalance(Object.values(sessionCurrent.members), sessionCurrent.expenses, sessionCurrent.refunds)
+                .then(({ totalExpenses, totalRefunds, members, transfers }) => {
+                    setSessionCurrent({
+                        ...sessionCurrent,
+                        balances: members,
+                        transfers,
+                        myTotalCost: members[anchorWallet.publicKey.toString()]?.totalCost,
+                        totalExpenses,
+                        totalRefunds,
+                    });
+                });
+        }
+    };
+
     useEffect(() => {
         if (solidrClient == null || sessionId == null) return;
 
         const listeners: number[] = [];
-
-        const reloadSessionBalance = (sessionCurrent: SessionCurrentState, anchorWallet: Wallet) => {
-            if (sessionCurrent.session) {
-                solidrClient
-                    .computeBalance(Object.values(sessionCurrent.members), sessionCurrent.expenses, sessionCurrent.refunds)
-                    .then(({ totalExpenses, totalRefunds, members, transfers }) => {
-                        setSessionCurrent({
-                            ...sessionCurrent,
-                            balances: members,
-                            transfers,
-                            myTotalCost: members[anchorWallet.publicKey.toString()]?.totalCost,
-                            totalExpenses,
-                            totalRefunds,
-                        });
-                    });
-            }
-        };
 
         if (!sessionCurrent.session || sessionCurrent.session.sessionId.toString() !== sessionId) {
             const sid = new BN(sessionId);
@@ -119,98 +181,34 @@ export default () => {
                 reloadSessionBalance(newSessionState, anchorWallet);
             });
         } else {
-            const sessionStatusChangesListener = solidrClient.addEventListener('sessionClosed', (event) => {
-                if (!sessionCurrent.session) {
-                    return;
-                }
-                const newSessionCurrent = {
-                    ...sessionCurrent,
-                    session: {
-                        ...sessionCurrent.session,
-                        status: SessionStatus.Closed,
-                    },
-                };
-                setSessionCurrent(newSessionCurrent);
-                reloadSessionBalance(newSessionCurrent, anchorWallet);
+            const sessionClosedListener = solidrClient.addEventListener('sessionClosed', (event) => {
+                updateSessionClosed();
             });
-            sessionStatusChangesListener && listeners.push(sessionStatusChangesListener);
-
-            const memberRegistrationListener = solidrClient.addEventListener('memberAdded', (event) => {
-                solidrClient.listSessionMembers(sessionCurrent.session?.sessionId).then((members) => {
-                    const newSessionCurrent = {
-                        ...sessionCurrent,
-                        members: members.reduce(
-                            (acc, member) => {
-                                acc[member.addr.toString()] = member;
-                                return acc;
-                            },
-                            {} as { [pubkey: string]: SessionMember },
-                        ),
-                    };
-                    setSessionCurrent(newSessionCurrent);
-                    reloadSessionBalance(newSessionCurrent, anchorWallet);
-                });
+            sessionClosedListener && listeners.push(sessionClosedListener);
+            const memberAddedListener = solidrClient.addEventListener('memberAdded', (event) => {
+                updateMemberList();
             });
-            memberRegistrationListener && listeners.push(memberRegistrationListener);
-
-            const expensesRegistrationListener = solidrClient.addEventListener('expenseAdded', (event) => {
-                solidrClient.listSessionExpenses(sessionCurrent.session?.sessionId).then((expenses) => {
-                    if (!sessionCurrent.session) {
-                        return;
-                    }
-                    const newSessionCurrent = {
-                        ...sessionCurrent,
-                        expenses,
-                        session: {
-                            ...sessionCurrent.session,
-                            expensesCount: sessionCurrent.session.expensesCount + 1,
-                        },
-                    };
-
-                    setSessionCurrent(newSessionCurrent);
-                    reloadSessionBalance(newSessionCurrent, anchorWallet);
-                });
+            memberAddedListener && listeners.push(memberAddedListener);
+            const memberUpdatedListener = solidrClient.addEventListener('memberUpdated', (event) => {
+                updateMemberList();
             });
-            expensesRegistrationListener && listeners.push(expensesRegistrationListener);
-
-            const expensesUpdateListener = solidrClient.addEventListener('expenseUpdated', (event) => {
-                solidrClient.listSessionExpenses(sessionCurrent.session?.sessionId).then((expenses) => {
-                    if (!sessionCurrent.session) {
-                        return;
-                    }
-                    const newSessionCurrent = {
-                        ...sessionCurrent,
-                        expenses,
-                        session: {
-                            ...sessionCurrent.session,
-                            expensesCount: sessionCurrent.session.expensesCount + 1,
-                        },
-                    };
-
-                    setSessionCurrent(newSessionCurrent);
-                    reloadSessionBalance(newSessionCurrent, anchorWallet);
-                });
+            memberUpdatedListener && listeners.push(memberUpdatedListener);
+            const expenseAddedListener = solidrClient.addEventListener('expenseAdded', (event) => {
+                updateExpenseList();
             });
-            expensesUpdateListener && listeners.push(expensesUpdateListener);
-
-            const refundRegistrationListener = solidrClient.addEventListener('refundAdded', (event) => {
-                solidrClient.listSessionRefunds(sessionCurrent.session?.sessionId).then((refunds) => {
-                    if (!sessionCurrent.session) {
-                        return;
-                    }
-                    const newSessionCurrent = {
-                        ...sessionCurrent,
-                        refunds,
-                        session: {
-                            ...sessionCurrent.session,
-                            refundsCount: sessionCurrent.session.refundsCount + 1,
-                        },
-                    };
-                    setSessionCurrent(newSessionCurrent);
-                    reloadSessionBalance(newSessionCurrent, anchorWallet);
-                });
+            expenseAddedListener && listeners.push(expenseAddedListener);
+            const expenseUpdatedListener = solidrClient.addEventListener('expenseUpdated', (event) => {
+                updateExpenseList();
             });
-            refundRegistrationListener && listeners.push(refundRegistrationListener);
+            expenseUpdatedListener && listeners.push(expenseUpdatedListener);
+            const expenseDeletedListener = solidrClient.addEventListener('expenseDeleted', (event) => {
+                updateExpenseList();
+            });
+            expenseDeletedListener && listeners.push(expenseDeletedListener);
+            const refundAddedListener = solidrClient.addEventListener('refundAdded', (event) => {
+                updateRefundList();
+            });
+            refundAddedListener && listeners.push(refundAddedListener);
         }
 
         return () => {

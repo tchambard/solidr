@@ -1,6 +1,5 @@
-import { Address, BN, BorshCoder, EventParser, Idl, IdlEvents, Program, Wallet } from '@coral-xyz/anchor';
-import { Connection, LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction, TransactionSignature } from '@solana/web3.js';
-import * as _ from 'lodash';
+import { Address, BorshCoder, EventParser, Idl, IdlEvents, Program, Wallet } from '@coral-xyz/anchor';
+import { Connection, LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction } from '@solana/web3.js';
 
 export interface ITxInfo {
     events: NodeJS.Dict<any> | undefined;
@@ -59,7 +58,7 @@ export class AbstractSolanaClient<T extends Idl> {
 
     public addEventListener<E extends keyof IdlEvents<T>>(eventName: E & string, callback: (event: IdlEvents<T>[E], slot: number, signature: string) => void): number | undefined {
         try {
-            return this.program.addEventListener(eventName, callback);
+            this.program.addEventListener(eventName, callback);
         } catch (e) {
             // silent error. problem encountered on vite dev server because of esm
             return;
