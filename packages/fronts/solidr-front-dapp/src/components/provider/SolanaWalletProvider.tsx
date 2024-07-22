@@ -9,8 +9,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { createDefaultAddressSelector, createDefaultAuthorizationResultCache, createDefaultWalletNotFoundHandler, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
 import '@/assets/style/WalletAdapter.css';
 import { useSnackbar } from 'notistack';
-import { useRecoilValue } from 'recoil';
-import { Connection, clusterApiUrl } from '@solana/web3.js';
+import { clusterApiUrl } from '@solana/web3.js';
 
 type Props = {
     children: ReactNode;
@@ -52,7 +51,7 @@ export default function SolanaWalletProvider({ children }: Props) {
     return (
         <>
             <ConnectionProvider endpoint={endpoint}>
-                <WalletProvider wallets={wallets} onError={onError} autoConnect>
+                <WalletProvider wallets={wallets} onError={onError} autoConnect={false}>
                     <WalletModalProvider>{children}</WalletModalProvider>
                 </WalletProvider>
             </ConnectionProvider>
