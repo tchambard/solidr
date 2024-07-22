@@ -175,42 +175,50 @@ export default () => {
                 setSessionCurrent(reloadSessionBalance(newSessionState, anchorWallet));
             });
         } else {
-            const sessionClosedListener = solidrClient.addEventListener('sessionClosed', () => {
+            const sessionClosedListener = solidrClient.addEventListener('sessionClosed', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('sessionClosed');
                 updateSessionClosed();
             });
             sessionClosedListener && listeners.push(sessionClosedListener);
-            const sessionDeletedListener = solidrClient.addEventListener('sessionDeleted', () => {
+            const sessionDeletedListener = solidrClient.addEventListener('sessionDeleted', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('sessionDeleted');
                 navigate('/sessions');
             });
             sessionDeletedListener && listeners.push(sessionDeletedListener);
             const memberAddedListener = solidrClient.addEventListener('memberAdded', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('memberAdded');
                 updateMemberList(event.sessionId);
             });
             memberAddedListener && listeners.push(memberAddedListener);
             const memberUpdatedListener = solidrClient.addEventListener('memberUpdated', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('memberUpdated');
                 updateMemberList(event.sessionId);
             });
             memberUpdatedListener && listeners.push(memberUpdatedListener);
             const expenseAddedListener = solidrClient.addEventListener('expenseAdded', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('expenseAdded');
                 updateExpenseList(event.sessionId);
             });
             expenseAddedListener && listeners.push(expenseAddedListener);
             const expenseUpdatedListener = solidrClient.addEventListener('expenseUpdated', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('expenseUpdated');
                 updateExpenseList(event.sessionId);
             });
             expenseUpdatedListener && listeners.push(expenseUpdatedListener);
             const expenseDeletedListener = solidrClient.addEventListener('expenseDeleted', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('expenseDeleted');
                 updateExpenseList(event.sessionId);
             });
             expenseDeletedListener && listeners.push(expenseDeletedListener);
             const refundAddedListener = solidrClient.addEventListener('refundAdded', (event) => {
+                if (sessionId != event.sessionId) return;
                 console.log('refundAdded');
                 updateRefundList(event.sessionId);
             });
