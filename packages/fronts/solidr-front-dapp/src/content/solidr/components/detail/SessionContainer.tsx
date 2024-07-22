@@ -2,7 +2,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Box, Grid, Tab, Tabs, Theme, useMediaQuery, useTheme } from '@mui/material';
 import * as _ from 'lodash';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { styled } from '@mui/material/styles';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
@@ -53,6 +53,7 @@ function TabPanel(props) {
 
 export default () => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     const [joinSessionDialogVisible, setJoinSessionDialogVisible] = useState(true);
 
@@ -185,6 +186,10 @@ export default () => {
                 updateSessionClosed();
             });
             sessionClosedListener && listeners.push(sessionClosedListener);
+            const sessionDeletedListener = solidrClient.addEventListener('sessionDeleted', (event) => {
+                navigate('/sessions');
+            });
+            sessionDeletedListener && listeners.push(sessionDeletedListener);
             const memberAddedListener = solidrClient.addEventListener('memberAdded', (event) => {
                 updateMemberList();
             });
