@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Chip, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { defaultSessionState, sessionCurrentState, sessionListState } from '@/store/sessions';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { defaultSessionState, sessionCurrentState } from '@/store/sessions';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { solidrClientState } from '@/store/wallet';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { useTranslation } from 'react-i18next';
-import { SessionStatus } from '@solidr';
+import { Session, SessionStatus } from '@solidr';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -22,7 +22,8 @@ export default () => {
 
     const solidrClient = useRecoilValue(solidrClientState);
     const anchorWallet = useAnchorWallet() as Wallet;
-    const [sessionList, setSessionList] = useRecoilState(sessionListState);
+    //const [sessionList, setSessionList] = useRecoilState(sessionListState);
+    const [sessionList, setSessionList] = useState<Session[]>([]);
     const setSessionCurrentState = useSetRecoilState(sessionCurrentState);
 
     useEffect(() => {
@@ -32,9 +33,7 @@ export default () => {
 
         const refreshUserSessions = () => {
             solidrClient.listUserSessions(anchorWallet.publicKey).then((sessions) => {
-                setSessionList({
-                    items: sessions,
-                });
+                setSessionList(sessions);
             });
         };
 
@@ -72,7 +71,7 @@ export default () => {
             <Divider variant={'middle'} />
 
             <List sx={{ width: '100%' }}>
-                {sessionList.items.map((session) => {
+                {sessionList.map((session) => {
                     return (
                         <div key={`session_${session.sessionId}`}>
                             <ListItem>
