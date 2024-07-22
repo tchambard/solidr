@@ -37,7 +37,7 @@ export default () => {
 
                 ctx.fillStyle = value >= 0 ? 'rgb(255, 255, 255)' : '#e36f6f';
                 const yPos = value >= 0 ? y - 10 : y + 20;
-                ctx.fillText(`${value.toFixed(2)}€`, x, yPos);
+                ctx.fillText(`${value.toFixed(2)}$`, x, yPos);
             });
 
             ctx.restore();

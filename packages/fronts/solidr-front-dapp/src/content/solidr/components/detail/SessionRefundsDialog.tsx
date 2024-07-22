@@ -14,7 +14,6 @@ import { MemberTransfer } from '@solidr';
 import { useTranslation } from 'react-i18next';
 
 export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
-
     const { t } = useTranslation();
 
     const anchorWallet = useAnchorWallet() as Wallet;
@@ -66,10 +65,12 @@ export default ({ dialogVisible, setDialogVisible }: IDialogProps) => {
                         {transfers.map((transfer, idx) => (
                             <div key={`transfer_${idx}`}>
                                 <FormControl fullWidth sx={{ m: 1 }}>
-                                    <InputLabel htmlFor={`to_${transfer.to.toString()}`}>{`${t('session.refund.dialog.label.to')} ${sessionCurrent.members[transfer.to.toString()].name}`}</InputLabel>
+                                    <InputLabel
+                                        htmlFor={`to_${transfer.to.toString()}`}
+                                    >{`${t('session.refund.dialog.label.to')} ${sessionCurrent.members[transfer.to.toString()].name}`}</InputLabel>
                                     <OutlinedInput
                                         id={`to_${transfer.to.toString()}`}
-                                        startAdornment={<InputAdornment position="start">€</InputAdornment>}
+                                        startAdornment={<InputAdornment position="start">$</InputAdornment>}
                                         label={`${t('session.refund.dialog.label.to')} ${sessionCurrent.members[transfer.to.toString()].name}`}
                                         defaultValue={transfer.amount}
                                         onChange={(e) => handleAmountUpdate(transfer.to, Number(e.currentTarget.value))}
