@@ -35,7 +35,7 @@ export default () => {
                 const x = scales.x.getPixelForValue(index);
                 const y = scales.y.getPixelForValue(value);
 
-                ctx.fillStyle = value >= 0 ? '#71e36f' : '#e36f6f';
+                ctx.fillStyle = value >= 0 ? 'rgb(255, 255, 255)' : '#e36f6f';
                 const yPos = value >= 0 ? y - 10 : y + 20;
                 ctx.fillText(`${value.toFixed(2)}€`, x, yPos);
             });
@@ -49,7 +49,7 @@ export default () => {
         datasets: [
             {
                 data: sortedBalances.map((balance) => balance.balance),
-                backgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.2).toString()),
+                backgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 1).toString()),
                 borderColor: sortedBalances.map((balance) => stringToColor(balance.owner.toString())),
                 hoverBackgroundColor: sortedBalances.map((balance) => hexToRgba(stringToColor(balance.owner.toString()), 0.5).toString()),
                 barPercentage: 0.9,
