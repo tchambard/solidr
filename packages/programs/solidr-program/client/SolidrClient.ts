@@ -1,5 +1,5 @@
 import { BN, Program, Wallet } from '@coral-xyz/anchor';
-import { LAMPORTS_PER_SOL, PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, SendOptions, Transaction, TransactionInstruction } from '@solana/web3.js';
 import { sha256 } from 'js-sha256';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
@@ -115,7 +115,7 @@ export type MemberRefund = {
 export type Balance = {
     totalExpenses: number;
     totalRefunds: number;
-    members: { [key: string]: MemberBalance };
+    balances: { [key: string]: MemberBalance };
     transfers: MemberTransfer[];
 };
 
@@ -272,77 +272,75 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async computeBalance(sessionMembers: SessionMember[], expenses: Expense[], refunds: Refund[]): Promise<Balance> {
-        return this.wrapFn(async () => {
-            const members = sessionMembers.reduce(
-                (members, member) => {
-                    members[member.addr.toString()] = { owner: member.addr, balance: 0, totalCost: 0 };
-                    return members;
-                },
-                {} as { [key: string]: MemberBalance },
-            );
+    public computeBalance(sessionMembers: SessionMember[], expenses: Expense[], refunds: Refund[]): Balance {
+        const members = sessionMembers.reduce(
+            (members, member) => {
+                members[member.addr.toString()] = { owner: member.addr, balance: 0, totalCost: 0 };
+                return members;
+            },
+            {} as { [key: string]: MemberBalance },
+        );
 
-            let totalExpenses = 0;
-            let totalRefunds = 0;
+        let totalExpenses = 0;
+        let totalRefunds = 0;
 
-            // 1. Compute total of expenses and individual costs for each member
-            for (const expense of expenses) {
-                members[expense.owner.toString()].balance += expense.amount;
-                totalExpenses += expense.amount;
+        // 1. Compute total of expenses and individual costs for each member
+        for (const expense of expenses) {
+            members[expense.owner.toString()].balance += expense.amount;
+            totalExpenses += expense.amount;
 
-                const shareAmount = expense.amount / expense.participants.length;
-                for (const participant of expense.participants) {
-                    const participantKey = participant.toString();
-                    members[participantKey].balance -= shareAmount;
-                    members[participantKey].totalCost += shareAmount;
-                }
+            const shareAmount = expense.amount / expense.participants.length;
+            for (const participant of expense.participants) {
+                const participantKey = participant.toString();
+                members[participantKey].balance -= shareAmount;
+                members[participantKey].totalCost += shareAmount;
             }
+        }
 
-            // 2. Apply refunds
-            for (const refund of refunds) {
-                totalRefunds += refund.amount;
-                members[refund.from.toString()].balance += refund.amount;
-                members[refund.to.toString()].balance -= refund.amount;
+        // 2. Apply refunds
+        for (const refund of refunds) {
+            totalRefunds += refund.amount;
+            members[refund.from.toString()].balance += refund.amount;
+            members[refund.to.toString()].balance -= refund.amount;
+        }
+
+        // 3. Separate debtors and creditors, and round balances
+        const debtors: MemberBalance[] = [];
+        const creditors: MemberBalance[] = [];
+
+        for (const member of Object.values(members)) {
+            const roundedBalance = this._round2Precision(member.balance);
+            member.balance = roundedBalance === 0 ? 0 : roundedBalance; // hack to remove "-0"
+            member.totalCost = this._round2Precision(member.totalCost);
+            if (member.balance < 0) {
+                debtors.push({ ...member });
+            } else if (member.balance > 0) {
+                creditors.push({ ...member });
             }
+        }
 
-            // 3. Separate debtors and creditors, and round balances
-            const debtors: MemberBalance[] = [];
-            const creditors: MemberBalance[] = [];
+        // 4. Calculate transfers
+        const transfers: MemberTransfer[] = [];
 
-            for (const member of Object.values(members)) {
-                const roundedBalance = this._round2Precision(member.balance);
-                member.balance = roundedBalance === 0 ? 0 : roundedBalance; // hack to remove "-0"
-                member.totalCost = this._round2Precision(member.totalCost);
-                if (member.balance < 0) {
-                    debtors.push({ ...member });
-                } else if (member.balance > 0) {
-                    creditors.push({ ...member });
-                }
-            }
+        while (debtors.length > 0 && creditors.length > 0) {
+            const debtor = debtors[0];
+            const creditor = creditors[0];
 
-            // 4. Calculate transfers
-            const transfers: MemberTransfer[] = [];
+            const transferAmount = this._round2Precision(Math.min(Math.abs(debtor.balance), creditor.balance));
 
-            while (debtors.length > 0 && creditors.length > 0) {
-                const debtor = debtors[0];
-                const creditor = creditors[0];
+            transfers.push({
+                from: debtor.owner,
+                to: creditor.owner,
+                amount: transferAmount,
+            });
 
-                const transferAmount = this._round2Precision(Math.min(Math.abs(debtor.balance), creditor.balance));
+            debtor.balance = this._round2Precision(debtor.balance + transferAmount);
+            creditor.balance = this._round2Precision(creditor.balance - transferAmount);
 
-                transfers.push({
-                    from: debtor.owner,
-                    to: creditor.owner,
-                    amount: transferAmount,
-                });
-
-                debtor.balance = this._round2Precision(debtor.balance + transferAmount);
-                creditor.balance = this._round2Precision(creditor.balance - transferAmount);
-
-                if (debtor.balance === 0) debtors.shift();
-                if (creditor.balance === 0) creditors.shift();
-            }
-            return { totalExpenses, totalRefunds, members, transfers };
-        });
+            if (debtor.balance === 0) debtors.shift();
+            if (creditor.balance === 0) creditors.shift();
+        }
+        return { totalExpenses, totalRefunds, balances: members, transfers };
     }
 
     private _round2Precision = (amount: number) => {

@@ -58,7 +58,7 @@ export class AbstractSolanaClient<T extends Idl> {
 
     public addEventListener<E extends keyof IdlEvents<T>>(eventName: E & string, callback: (event: IdlEvents<T>[E], slot: number, signature: string) => void): number | undefined {
         try {
-            this.program.addEventListener(eventName, callback);
+            return this.program.addEventListener(eventName, callback);
         } catch (e) {
             // silent error. problem encountered on vite dev server because of esm
             return;
