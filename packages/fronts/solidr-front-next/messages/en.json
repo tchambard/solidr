@@ -1,0 +1,97 @@
+{
+    "wallet": {
+        "pleaseConnect": "Please connect your Solana wallet"
+    },
+    "homePage": {
+        "start": "Start"
+    },
+    "sessions": {
+        "list": {
+            "title": "My sessions",
+            "item": {
+                "closed": "Session closed"
+            }
+        },
+        "create": {
+            "title": "Create new session",
+            "form": {
+                "name": {
+                    "label": "Session name",
+                    "required": "Session name is required"
+                },
+                "description": {
+                    "label": "Session description",
+                    "required": "Session description is required"
+                },
+                "memberName": {
+                    "label": "Your name or nickname",
+                    "required": "Your name or nickname is required"
+                }
+            }
+        }
+    },
+    "session": {
+        "notFound": {
+            "title": "Session not found",
+            "message": "The session you trying to access does not exist."
+        },
+        "accessDenied": {
+            "title": "Access denied",
+            "message": "You don't have the authorization to access this session."
+        },
+        "closed": {
+            "title": "Session closed"
+        },
+        "edit": {
+            "title": "Edit session",
+            "form": {
+                "name": {
+                    "label": "Session name",
+                    "required": "Session name is required"
+                },
+                "description": {
+                    "label": "Session description",
+                    "required": "Session description is required"
+                }
+            }
+        },
+        "action": {
+            "close": {
+                "menu": {
+                    "title": "Close",
+                    "description": "Close session"
+                },
+                "confirm": {
+                    "title": "Close session ?",
+                    "description": "Closing this session will freeze the current session balance, preventing any further addition or modification of expenses. However, you will still be able to complete any pending refunds."
+                }
+            },
+            "edit": {
+                "menu": {
+                    "title": "Edit",
+                    "description": "Edit session"
+                }
+            },
+            "delete": {
+                "menu": {
+                    "title": "Delete",
+                    "description": "Delete session"
+                },
+                "confirm": {
+                    "title": "Delete session ?",
+                    "description": "Deleting this session will permanently erase all associated data and it cannot be recovered. Deleting the session will also release all rents."
+                }
+            }
+        },
+        "tabs": {
+            "members": "Members",
+            "expenses": "Operations",
+            "balance": "Balance"
+        }
+    },
+    "common": {
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "goToHome": "Go to home"
+    }
+}

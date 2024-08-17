@@ -1,0 +1,11 @@
+{
+    "wallet": {
+        "pleaseConnect": "Veuillez connecter votre portefeuille Solana"
+    },
+    "homePage": {
+        "start": "Démarrer"
+    },
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "home": "Aller à l'accueil"
+}
