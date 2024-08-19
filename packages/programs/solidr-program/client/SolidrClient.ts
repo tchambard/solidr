@@ -16,8 +16,8 @@ export type Global = {
 type InternalSessionStatus =
     | ({ closed?: never } & { opened: Record<string, never> })
     | ({ opened?: never } & {
-          closed: Record<string, never>;
-      });
+        closed: Record<string, never>;
+    });
 
 type InternalSession = {
     sessionId: BN;
@@ -157,7 +157,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         return globalAccountPubkey;
     }
 
-    public async openSession(admin: Wallet, name: string, description: string, memberName: string): Promise<ITransactionResult> {
+    public async openSession(admin: Wallet, name: string, description: string, memberName: string): Promise<ITransactionResult<{ sessionId: string }>> {
         return this.wrapFn(async () => {
             const sessionId = await this._getNextSessionId();
             const sessionAccountPubkey = this.findSessionAccountAddress(sessionId);
@@ -176,6 +176,8 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             return this.signAndSendTransaction(admin, tx, {
                 sessionAccountPubkey,
                 memberAccountAddress,
+            }, {
+                sessionId,
             });
         });
     }
@@ -454,10 +456,17 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         });
     }
 
-    public async getSession(sessionAccountPubkey: PublicKey): Promise<Session> {
+    public async getSession(sessionAccountPubkey: PublicKey): Promise<Session | undefined> {
         return this.wrapFn(async () => {
-            const internal = await this.program.account.sessionAccount.fetch(sessionAccountPubkey);
-            return this._mapSession(internal);
+            try {
+                const internal = await this.program.account.sessionAccount.fetch(sessionAccountPubkey);
+                return this._mapSession(internal);
+            } catch (e) {
+                if (e.message?.match(/Account does not exist/)) {
+                    return;
+                }
+                throw e;
+            }
         });
     }
 
@@ -487,7 +496,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     }
 
     public findSessionAccountAddress(sessionId: BN): PublicKey {
-        const [sessionAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('session'), sessionId.toBuffer('le', 8)], this.program.programId);
+        const [sessionAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('session'), sessionId.toArrayLike(Buffer, 'le', 8)], this.program.programId);
         return sessionAccountPubkey;
     }
 
@@ -510,7 +519,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 dataSlice: { offset: 8 + 8 + 32, length: 4 + 40 }, // name
                 filters: [
                     { memcmp: { offset: 0, bytes: bs58.encode(memberAccountDiscriminator) } }, // Ensure it's a MemberAccount account.
-                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } },
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toArrayLike(Buffer)) } },
                 ],
             });
             const addresses = accounts
@@ -530,7 +539,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
 
     public findSessionMemberAccountAddress(sessionId: BN, memberPubkey: PublicKey): PublicKey {
         const [sessionMemberAccountPubkey] = PublicKey.findProgramAddressSync(
-            [Buffer.from('member'), sessionId.toBuffer('le', 8), memberPubkey.toBuffer()],
+            [Buffer.from('member'), sessionId.toArrayLike(Buffer, 'le', 8), memberPubkey.toBuffer()],
             this.program.programId,
         );
         return sessionMemberAccountPubkey;
@@ -671,7 +680,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 dataSlice: { offset: 8 + 8 + 2, length: 8 }, // date
                 filters: _.compact([
                     { memcmp: { offset: 0, bytes: bs58.encode(expenseAccountDiscriminator) } }, // Ensure it's a ExpenseAccount account.
-                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } }, // sessionId
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toArrayLike(Buffer)) } }, // sessionId
                     filters?.owner ? { memcmp: { offset: 8 + 8 + 2 + 8, bytes: filters.owner.toBase58() } } : undefined, // owner
                 ]),
             });
@@ -690,7 +699,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     }
 
     public findExpenseAccountAddress(sessionId: BN, expenseId: BN): PublicKey {
-        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toBuffer('le', 8), expenseId.toBuffer('le', 2)], this.program.programId);
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toArrayLike(Buffer, 'le', 8), expenseId.toArrayLike(Buffer, 'le', 2)], this.program.programId);
         return expenseAccountPubkey;
     }
 
@@ -827,7 +836,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 dataSlice: { offset: 8 + 8 + 2, length: 8 }, // date
                 filters: _.compact([
                     { memcmp: { offset: 0, bytes: bs58.encode(refundAccountDiscriminator) } }, // Ensure it's a RefundAccount account.
-                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toBuffer()) } }, // sessionId
+                    { memcmp: { offset: 8, bytes: bs58.encode(sessionId.toArrayLike(Buffer)) } }, // sessionId
                     filters?.from ? { memcmp: { offset: 8 + 8 + 2 + 8, bytes: filters.from.toBase58() } } : undefined, // from
                     filters?.to ? { memcmp: { offset: 8 + 8 + 2 + 8 + 32, bytes: filters.to.toBase58() } } : undefined, // to
                 ]),
@@ -847,7 +856,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     }
 
     public findRefundAccountAddress(sessionId: BN, refundId: BN): PublicKey {
-        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('refund'), sessionId.toBuffer('le', 8), refundId.toBuffer('le', 2)], this.program.programId);
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('refund'), sessionId.toArrayLike(Buffer, 'le', 8), refundId.toArrayLike(Buffer, 'le', 2)], this.program.programId);
         return expenseAccountPubkey;
     }
 
@@ -918,6 +927,6 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
         const priceUpdates = await this.hermesConnection.getLatestPriceUpdates([
             '0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d', // SOL -> USD
         ]);
-        return priceUpdates.parsed[0].price as PriceData;
+        return priceUpdates.parsed![0].price as PriceData;
     }
 }
