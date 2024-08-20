@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { BN, Wallet } from '@coral-xyz/anchor';
-import { SessionMember, SessionStatus } from '@solidr';
+import { Session, SessionMember, SessionStatus } from '@solidr';
 import { SessionCurrentState, defaultSessionState, sessionCurrentState } from '@/store/sessions';
 import { useTranslations } from 'next-intl';
 import { useSolidrClient } from '@/providers/solidr/SolidrClientContext';
@@ -15,12 +15,16 @@ import SessionAccessDenied from './components/SessionAccessDenied';
 import SessionNotFound from './components/SessionNotFound';
 import SessionInfo from './components/SessionInfo';
 import { TabPanel, TabPanelButton } from '@/components/TabPanel.tsx';
+import SessionExpenseSummary from './components/SessionExpenseSummary';
+import SessionMemberList from './components/SessionMemberList';
+import { PublicKey } from '@solana/web3.js';
 
 export default () => {
     const t = useTranslations();
 
     const [value, setValue] = useState<number>(0);
     const [sessionNotFound, setSessionNotFound] = useState(false)
+    const [session, setSession] = useState<Session | undefined>()
 
     const handleChange = (index: number) => {
         setValue(index);
@@ -34,7 +38,6 @@ export default () => {
     const [sessionCurrent, setSessionCurrent] = useRecoilState(sessionCurrentState);
     const solidrClient = useSolidrClient();
     const anchorWallet = useAnchorWallet() as Wallet;
-    // const params = useHashParams();
 
     const updateSessionClosed = () => {
         setSessionCurrent((sessionState) => {
@@ -213,9 +216,6 @@ export default () => {
     }
 
     if (!_.keys(sessionCurrent.members).includes(anchorWallet.publicKey.toString())) {
-        // if (params.token) {
-        //     return <SessionJoinDialog dialogVisible={joinSessionDialogVisible} setDialogVisible={setJoinSessionDialogVisible} token={params.token} />;
-        // }
         return <SessionAccessDenied />;
     }
 
@@ -227,7 +227,11 @@ export default () => {
             <div className="space-y-4">
                 <div>
                     <SessionInfo session={sessionCurrent.session} />
-                    {/* <SessionExpenseSummary /> */}
+                    <SessionExpenseSummary
+                        myTotalCost={sessionCurrent.myTotalCost}
+                        totalExpenses={sessionCurrent.totalExpenses}
+                        totalRefunds={sessionCurrent.totalRefunds}
+                    />
                 </div>
                 <div>
                     <div className={`flex justify-center border-b border-gray-200`}>
@@ -239,7 +243,7 @@ export default () => {
                     <TabPanel value={value} index={0}>
                         <div className="space-y-4">
                             <div>
-                                {/* <SessionMemberList /> */}
+                                <SessionMemberList />
                             </div>
                         </div>
                     </TabPanel>

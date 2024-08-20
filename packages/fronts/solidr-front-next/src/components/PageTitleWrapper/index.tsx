@@ -3,7 +3,7 @@ import React from 'react';
 export default ({ children }: { children?: React.ReactNode }) => {
     return (
         <>
-            <div className="bg-gray-50 dark:bg-gray-900 py-4 rounded-md">
+            <div className="bg-gray-50 dark:bg-gray-900 py-4 rounded-lg">
                 <div className="container mx-auto max-w-7xl px-4">
                     <div className="flex justify-between items-center">
                         {children}

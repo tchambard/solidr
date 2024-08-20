@@ -28,7 +28,7 @@ export default () => {
         defaultValues: formData,
     });
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: Partial<ICreateSessionParams>) => {
         if (!solidrClient || !data.name || !data.description || !data.memberName) return;
         setFormData(data);
         const { data: { sessionId } } = await solidrClient.openSession(anchorWallet, data.name, data.description, data.memberName);
@@ -102,8 +102,8 @@ export default () => {
                         </Link>
                     </div>
                 </form>
-            </div >
-        </div >
+            </div>
+        </div>
 
     );
 };

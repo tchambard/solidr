@@ -55,6 +55,15 @@
                 }
             }
         },
+        "join": {
+            "title": "Join session {name}",
+            "form": {
+                "memberName": {
+                    "label": "Your member name",
+                    "required": "Member name is required"
+                }
+            }
+        },
         "action": {
             "close": {
                 "menu": {
@@ -83,6 +92,62 @@
                 }
             }
         },
+        "summary": {
+            "totalCost": "My total cost",
+            "totalExpenses": "Total expenses",
+            "totalRefunds": "Total refunds"
+        },
+        "share": {
+            "title": "Share",
+            "generatedUrl": {
+                "title": "Generated url"
+            },
+            "generateLink": {
+                "title": "Generate new link"
+            }
+        },
+        "members": {
+            "list": {
+                "title": "List of members"
+            },
+            "add": {
+                "title": "Add a new member",
+                "form": {
+                    "address": {
+                        "label": "Address",
+                        "required": "Member address is required"
+                    },
+                    "memberName": {
+                        "label": "Member name",
+                        "required": "Member name is required"
+                    }
+                }
+            },
+            "edit": {
+                "title": "Edit member",
+                "form": {
+                    "memberName": {
+                        "label": "Member name",
+                        "required": "Member name is required"
+                    }
+                }
+            }
+        },
+        "expenses": {
+            "add": {
+                "title": "Add a new expense",
+                "form": {
+                    "name": {
+                        "label": "Name",
+                        "required": "Expense name is required"
+                    },
+                    "amount": {
+                        "label": "Amount",
+                        "required": "Expense amount is required"
+                    }
+                }
+            }
+        },
         "tabs": {
             "members": "Members",
             "expenses": "Operations",
@@ -92,6 +157,7 @@
     "common": {
         "submit": "Submit",
         "cancel": "Cancel",
+        "confirm": "Confirm",
         "goToHome": "Go to home"
     }
 }

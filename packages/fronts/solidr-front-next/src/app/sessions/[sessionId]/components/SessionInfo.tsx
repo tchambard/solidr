@@ -32,13 +32,13 @@ export default ({ session }: { session: Session }) => {
                     title: t('session.action.edit.menu.title'),
                     description: t('session.action.edit.menu.description'),
                     onClick: () => router.push(`/sessions/${session.sessionId}/edit`),
-                    icon: <PencilIcon className="w-6 h-6" />,
+                    icon: <PencilIcon className="w-6 h-6 fill-customBlue" />,
                 });
                 _menuItems.push({
                     title: t('session.action.close.menu.title'),
                     description: t('session.action.close.menu.description'),
                     onClick: () => setShowConfirmCloseDialog(true),
-                    icon: <MinusCircleIcon className="w-6 h-6" />,
+                    icon: <MinusCircleIcon className="w-6 h-6 fill-customBlue" />,
                 });
             }
             if (session.status == SessionStatus.Closed) {
@@ -46,7 +46,7 @@ export default ({ session }: { session: Session }) => {
                     title: t('session.action.delete.menu.title'),
                     description: t('session.action.delete.menu.description'),
                     onClick: () => setShowConfirmDeleteDialog(true),
-                    icon: <ArchiveBoxXMarkIcon className="w-6 h-6" />,
+                    icon: <ArchiveBoxXMarkIcon className="w-6 h-6 fill-red-800" />,
                 });
             }
         }
