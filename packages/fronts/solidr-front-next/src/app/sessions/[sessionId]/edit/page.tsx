@@ -77,7 +77,7 @@ export default () => {
             <div className="w-full">
                 <PageTitleWrapper>
                     <div className="flex items-center">
-                        <button onClick={() => router.push(`/session/${session.sessionId}`)} className="mr-4 cursor-pointer">
+                        <button onClick={() => router.push(`/sessions/${session.sessionId}`)} className="mr-4 cursor-pointer">
                             <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
                         </button>
                         <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-wide">
