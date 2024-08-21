@@ -3,14 +3,17 @@
 import { useRecoilValue } from 'recoil';
 import { sessionCurrentState } from '@/store/sessions';
 import { Bar } from 'react-chartjs-2';
-import { BarElement, CategoryScale, Chart as ChartJS, LinearScale, Tooltip as ChartTooltip, ChartOptions } from 'chart.js/auto';
+import { BarElement, CategoryScale, Chart as ChartJS, LinearScale, Tooltip as ChartTooltip } from 'chart.js/auto';
 import { hexToRgba, stringToColor } from '@/services/colors';
 import { useTheme } from 'next-themes';
+import { useFormatter } from 'next-intl';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, ChartTooltip);
 
 export default () => {
     const { theme } = useTheme();
+    const format = useFormatter();
+
     const sessionCurrent = useRecoilValue(sessionCurrentState);
 
     const sortedBalances = Object.values(sessionCurrent.balances).sort((a, b) => {
@@ -105,7 +108,7 @@ export default () => {
 
                     ctx.fillStyle = Number(value) >= 0 ? '#1dc17d' : '#e36f6f';
                     const yPos = Number(value) >= 0 ? y - 10 : y + 20;
-                    ctx.fillText(`${Number(value).toFixed(2)}$`, x, yPos);
+                    ctx.fillText(`${format.number(+Number(value).toFixed(2), { style: 'currency', currency: 'USD' })}`, x, yPos);
                 });
 
                 ctx.restore();

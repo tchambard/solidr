@@ -18,6 +18,7 @@ import { TabPanel, TabPanelButton } from '@/components/TabPanel.tsx';
 import SessionExpenseSummary from './components/SessionExpenseSummary';
 import SessionMemberList from './components/SessionMemberList';
 import { PublicKey } from '@solana/web3.js';
+import SessionExpenseList from './components/SessionExpenseList';
 
 export default () => {
     const t = useTranslations();
@@ -238,7 +239,6 @@ export default () => {
                         <TabPanelButton label={t('session.tabs.members')} isActive={value === 0} onClick={() => handleChange(0)} />
                         <TabPanelButton label={t('session.tabs.expenses')} isActive={value === 1} onClick={() => handleChange(1)} />
                         <TabPanelButton label={t('session.tabs.balance')} isActive={value === 2} onClick={() => handleChange(2)} />
-
                     </div>
                     <TabPanel value={value} index={0}>
                         <div className="space-y-4">
@@ -250,7 +250,7 @@ export default () => {
                     <TabPanel value={value} index={1}>
                         <div className="space-y-4">
                             <div>
-                                {/* <SessionExpenseList /> */}
+                                <SessionExpenseList />
                             </div>
                         </div>
                     </TabPanel>

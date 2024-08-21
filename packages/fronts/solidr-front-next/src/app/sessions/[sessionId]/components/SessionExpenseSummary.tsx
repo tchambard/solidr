@@ -1,6 +1,7 @@
 
 
 import { useTranslations } from 'next-intl';
+import { useFormatter } from 'next-intl';
 
 interface Props {
     myTotalCost: number;
@@ -9,6 +10,8 @@ interface Props {
 }
 export default ({ myTotalCost, totalExpenses, totalRefunds }: Props) => {
     const t = useTranslations();
+    const format = useFormatter();
+    const currency = 'USD';
 
     return <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Total Cost */}
@@ -17,7 +20,7 @@ export default ({ myTotalCost, totalExpenses, totalRefunds }: Props) => {
                 {t('session.summary.totalCost')}
             </h6>
             <p className="text-2xl text-customBlue dark:text-customBlue">
-                {myTotalCost}$
+                {format.number(myTotalCost, { style: 'currency', currency })}
             </p>
         </div>
 
@@ -27,7 +30,7 @@ export default ({ myTotalCost, totalExpenses, totalRefunds }: Props) => {
                 {t('session.summary.totalExpenses')}
             </h6>
             <p className="text-2xl text-customBlue dark:text-customBlue">
-                {totalExpenses}$
+                {format.number(totalExpenses, { style: 'currency', currency })}
             </p>
         </div>
 
@@ -37,7 +40,7 @@ export default ({ myTotalCost, totalExpenses, totalRefunds }: Props) => {
                 {t('session.summary.totalRefunds')}
             </h6>
             <p className="text-2xl text-customBlue dark:text-customBlue">
-                {totalRefunds}$
+                {format.number(totalRefunds, { style: 'currency', currency })}
             </p>
         </div>
     </div>

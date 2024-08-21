@@ -133,6 +133,50 @@
                 }
             }
         },
+        "operations": {
+            "list": {
+                "title": "List of operations",
+                "empty": "Start by adding an expense",
+                "menu": {
+                    "add": {
+                        "title": "Add new expense"
+                    }
+                }
+            },
+            "addExpense": {
+                "title": "Add new expense",
+                "form": {
+                    "name": {
+                        "label": "Name",
+                        "required": "Expense name is required"
+                    },
+                    "amount": {
+                        "label": "Amount",
+                        "required": "Expense amount is required"
+                    },
+                    "members": {
+                        "label": "Members"
+                    }
+                }
+            },
+            "expense": {
+                "item": {
+                    "paidby": "Paid by",
+                    "menu": {
+                        "edit": {
+                            "title": "Edit expense"
+                        }
+                    }
+                }
+            },
+            "refund": {
+                "item": {
+                    "label": "Refund",
+                    "paidby": "Paid by",
+                    "paidto": "to"
+                }
+            }
+        },
         "expenses": {
             "add": {
                 "title": "Add a new expense",

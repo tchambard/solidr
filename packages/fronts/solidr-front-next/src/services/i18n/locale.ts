@@ -2,10 +2,25 @@
 
 import { cookies } from 'next/headers';
 import { Locale, defaultLocale } from './config';
+import { Formats } from 'next-intl';
 
 // In this example the locale is read from a cookie. You could alternatively
 // also read it from a database, backend service, or any other source.
 const COOKIE_NAME = 'NEXT_LOCALE';
+
+export async function getFormats(): Promise<Partial<Formats>> {
+    return {
+        dateTime: {
+            short: {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+            }
+        },
+    };
+}
 
 export async function getUserLocale() {
     return cookies().get(COOKIE_NAME)?.value || defaultLocale;
