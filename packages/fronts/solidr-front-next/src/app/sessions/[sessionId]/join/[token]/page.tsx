@@ -11,7 +11,7 @@ import PageTitleWrapper from '@/components/PageTitleWrapper';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { Session } from '@solidr';
-import SessionNotFound from '../../components/SessionNotFound';
+import SessionNotFound from '../../components/common/SessionNotFound';
 
 interface IEditSessionParams {
     memberName: string;

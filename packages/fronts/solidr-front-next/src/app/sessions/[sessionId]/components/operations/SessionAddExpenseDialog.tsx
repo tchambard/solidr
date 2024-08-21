@@ -6,11 +6,10 @@ import { useRecoilValue } from 'recoil';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Wallet } from '@coral-xyz/anchor';
 import { sessionCurrentState } from '@/store/sessions';
-import { PublicKey } from '@solana/web3.js';
 import { useTranslations } from 'next-intl';
 import Dialog from '@/components/Dialog';
 import { useSolidrClient } from '@/providers/solidr/SolidrClientContext';
-import { IParticipant } from './SessionExpenseParticipantsList';
+import SessionExpenseParticipantsList, { IParticipant } from './SessionExpenseParticipantsList';
 
 interface IAddExpenseDialogProps {
     dialogVisible: boolean;
@@ -20,7 +19,6 @@ interface IAddExpenseDialogProps {
 interface IAddExpenseParams {
     name: string;
     amount: number;
-    members: IParticipant[];
 }
 
 export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => {
@@ -67,10 +65,10 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
     });
 
     const onSubmit = async (data: Partial<IAddExpenseParams>) => {
-        if (!solidrClient || !session || !data.amount || !data.name || !data.members?.length) return;
+        if (!solidrClient || !session || !data.name || !data.amount) return;
         setFormData(data);
         const participantList = _.filter(participants, (participant) => participant.checked).map((participant) => participant.address);
-        await solidrClient.addExpense(anchorWallet, sessionCurrent.session?.sessionId, data.name, data.amount, participantList);
+        await solidrClient.addExpense(anchorWallet, session.sessionId, data.name, data.amount, participantList);
         setDialogVisible(false);
     };
 
@@ -112,6 +110,8 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
                         />
                         {errors.amount && <span className="text-red-500 text-sm">{t('session.operations.addExpense.form.amount.required')}</span>}
                     </div>
+
+                    <SessionExpenseParticipantsList participants={participants} handleParticipantOnClick={handleParticipantOnClick} />
 
                     <div className="flex space-x-4 pt-4">
                         <button

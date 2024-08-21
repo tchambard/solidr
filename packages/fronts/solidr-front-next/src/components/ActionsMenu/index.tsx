@@ -5,11 +5,10 @@ import { Bars3Icon } from '@heroicons/react/24/solid';
 
 export interface IActionMenuItem {
     title: string;
-    url?: string;
     icon: React.ReactNode;
     hidden?: boolean;
     description?: string;
-    onClick?: () => void;
+    onClick: () => void;
 }
 
 interface IProps {
@@ -43,15 +42,14 @@ const ActionMenu: React.FC<IProps> = ({ items }) => {
                                         return (
                                             <MenuItem key={`menu-item-${idx}`}>
                                                 {({ focus }) => (
-                                                    <a
-                                                        href="#"
-                                                        className={`${focus ? 'bg-gray-100 dark:bg-gray-700' : ''
-                                                            } group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 w-full text-left`}
-                                                        onClick={() => item.onClick && item.onClick()}
+                                                    <button
+                                                        type="button"
+                                                        className={`${focus ? 'bg-gray-100 dark:bg-gray-700' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 w-full text-left`}
+                                                        onClick={item.onClick}
                                                     >
                                                         <span className="flex-shrink-0">{item.icon}</span>
                                                         <span className="ml-2">{item.title}</span>
-                                                    </a>
+                                                    </button>
                                                 )}
                                             </MenuItem>
                                         );

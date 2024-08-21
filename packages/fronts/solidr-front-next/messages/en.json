@@ -154,8 +154,8 @@
                         "label": "Amount",
                         "required": "Expense amount is required"
                     },
-                    "members": {
-                        "label": "Members"
+                    "participants": {
+                        "label": "Select participants"
                     }
                 }
             },
@@ -188,6 +188,26 @@
                     "amount": {
                         "label": "Amount",
                         "required": "Expense amount is required"
+                    }
+                }
+            }
+        },
+        "transfers": {
+            "title": "Refunds",
+            "button": {
+                "title": "Refund other members"
+            },
+            "list": {
+                "empty": "Refunds will be available as soon as costs become unbalanced",
+                "item": {
+                    "owes": "owes"
+                }
+            },
+            "refunds": {
+                "dialog": {
+                    "title": "Refund other members",
+                    "to": {
+                        "label": "To"
                     }
                 }
             }

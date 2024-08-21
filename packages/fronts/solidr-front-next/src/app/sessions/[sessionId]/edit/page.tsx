@@ -14,8 +14,8 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 import { Session } from '@solidr';
 import { useRecoilValue } from 'recoil';
 import { sessionCurrentState } from '@/store/sessions';
-import SessionNotFound from '../components/SessionNotFound';
-import SessionAccessDenied from '../components/SessionAccessDenied';
+import SessionNotFound from '../components/common/SessionNotFound';
+import SessionAccessDenied from '../components/common/SessionAccessDenied';
 
 interface IEditSessionParams {
     name: string;

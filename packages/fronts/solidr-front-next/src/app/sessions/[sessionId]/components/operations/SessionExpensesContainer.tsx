@@ -14,6 +14,7 @@ import SectionTitleWrapper from '@/components/SectionTitleWrapper';
 import Tooltip from '@/components/Tooltip';
 import ActionsMenu, { IActionMenuItem } from '@/components/ActionsMenu';
 import SessionAddExpenseDialog from './SessionAddExpenseDialog';
+import SessionEditExpenseDialog from './SessionEditExpenseDialog';
 // import SessionAddExpenseDialog from './SessionAddExpenseDialog';
 // import SessionUpdateExpenseDialog from './SessionUpdateExpenseDialog';
 
@@ -24,7 +25,7 @@ export default () => {
     const anchorWallet = useAnchorWallet();
 
     const [addExpenseDialogVisible, setAddExpenseDialogVisible] = useState(false);
-    const [updateExpenseDialogVisible, setUpdatExpenseDialogVisible] = useState(false);
+    const [editExpenseDialogVisible, setEditExpenseDialogVisible] = useState(false);
     const [currentExpense, setCurrentExpense] = useState<Expense | undefined>(undefined);
 
     const sessionCurrent = useRecoilValue(sessionCurrentState);
@@ -39,7 +40,10 @@ export default () => {
         if (expenseOwner.addr.toString() === anchorWallet?.publicKey.toString()) {
             menuItems.push({
                 title: t('session.operations.expense.item.menu.edit.title'),
-                onClick: () => { },
+                onClick: () => {
+                    setCurrentExpense(expense);
+                    setEditExpenseDialogVisible(true);
+                },
                 icon: <PencilIcon className="w-6 h-6 fill-customBlue" />,
             });
         }
@@ -151,9 +155,9 @@ export default () => {
             </ul>
 
             {addExpenseDialogVisible && <SessionAddExpenseDialog dialogVisible={addExpenseDialogVisible} setDialogVisible={setAddExpenseDialogVisible} />}
-            {/* {updateExpenseDialogVisible && (
-                <SessionUpdateExpenseDialog dialogVisible={updateExpenseDialogVisible} setDialogVisible={setUpdatExpenseDialogVisible} currentExpense={currentExpense} />
-            )} */}
+            {editExpenseDialogVisible && (
+                <SessionEditExpenseDialog dialogVisible={editExpenseDialogVisible} setDialogVisible={setEditExpenseDialogVisible} currentExpense={currentExpense!} />
+            )}
         </>
     );
 };

@@ -11,14 +11,14 @@ import Head from 'next/head';
 import { useRecoilState } from 'recoil';
 import _ from 'lodash';
 import { useParams, useRouter } from 'next/navigation';
-import SessionAccessDenied from './components/SessionAccessDenied';
-import SessionNotFound from './components/SessionNotFound';
+import SessionAccessDenied from './components/common/SessionAccessDenied';
+import SessionNotFound from './components/common/SessionNotFound';
 import SessionInfo from './components/SessionInfo';
 import { TabPanel, TabPanelButton } from '@/components/TabPanel.tsx';
-import SessionExpenseSummary from './components/SessionExpenseSummary';
-import SessionMemberList from './components/SessionMemberList';
-import { PublicKey } from '@solana/web3.js';
-import SessionExpenseList from './components/SessionExpenseList';
+import SessionExpenseSummary from './components/SessionSummary';
+import SessionMembersContainer from './components/members/SessionMembersContainer';
+import SessionExpensesContainer from './components/operations/SessionExpensesContainer';
+import SessionTransfersContainer from './components/transfers/SessionTransfersContainer';
 
 export default () => {
     const t = useTranslations();
@@ -243,21 +243,21 @@ export default () => {
                     <TabPanel value={value} index={0}>
                         <div className="space-y-4">
                             <div>
-                                <SessionMemberList />
+                                <SessionMembersContainer />
                             </div>
                         </div>
                     </TabPanel>
                     <TabPanel value={value} index={1}>
                         <div className="space-y-4">
                             <div>
-                                <SessionExpenseList />
+                                <SessionExpensesContainer />
                             </div>
                         </div>
                     </TabPanel>
                     <TabPanel value={value} index={2}>
                         <div className="space-y-4">
                             <div>
-                                {/* <SessionTransfers /> */}
+                                <SessionTransfersContainer />
                             </div>
                         </div>
                     </TabPanel>
