@@ -20,7 +20,7 @@ Developed on Solana.
 ## Technical stack
 
 - Solana / Anchor
-- React.js / Typescript
+- Next.js / Tailwind / Typescript
 
 # How to contribute
 
