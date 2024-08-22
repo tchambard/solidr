@@ -16,8 +16,8 @@ export type Global = {
 type InternalSessionStatus =
     | ({ closed?: never } & { opened: Record<string, never> })
     | ({ opened?: never } & {
-        closed: Record<string, never>;
-    });
+          closed: Record<string, never>;
+      });
 
 type InternalSession = {
     sessionId: BN;
@@ -173,12 +173,17 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
                 })
                 .transaction();
 
-            return this.signAndSendTransaction(admin, tx, {
-                sessionAccountPubkey,
-                memberAccountAddress,
-            }, {
-                sessionId,
-            });
+            return this.signAndSendTransaction(
+                admin,
+                tx,
+                {
+                    sessionAccountPubkey,
+                    memberAccountAddress,
+                },
+                {
+                    sessionId,
+                },
+            );
         });
     }
 
@@ -461,7 +466,7 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
             try {
                 const internal = await this.program.account.sessionAccount.fetch(sessionAccountPubkey);
                 return this._mapSession(internal);
-            } catch (e) {
+            } catch (e: any) {
                 if (e.message?.match(/Account does not exist/)) {
                     return;
                 }
@@ -699,7 +704,10 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     }
 
     public findExpenseAccountAddress(sessionId: BN, expenseId: BN): PublicKey {
-        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('expense'), sessionId.toArrayLike(Buffer, 'le', 8), expenseId.toArrayLike(Buffer, 'le', 2)], this.program.programId);
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync(
+            [Buffer.from('expense'), sessionId.toArrayLike(Buffer, 'le', 8), expenseId.toArrayLike(Buffer, 'le', 2)],
+            this.program.programId,
+        );
         return expenseAccountPubkey;
     }
 
@@ -856,7 +864,10 @@ export class SolidrClient extends AbstractSolanaClient<Solidr> {
     }
 
     public findRefundAccountAddress(sessionId: BN, refundId: BN): PublicKey {
-        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync([Buffer.from('refund'), sessionId.toArrayLike(Buffer, 'le', 8), refundId.toArrayLike(Buffer, 'le', 2)], this.program.programId);
+        const [expenseAccountPubkey] = PublicKey.findProgramAddressSync(
+            [Buffer.from('refund'), sessionId.toArrayLike(Buffer, 'le', 8), refundId.toArrayLike(Buffer, 'le', 2)],
+            this.program.programId,
+        );
         return expenseAccountPubkey;
     }
 

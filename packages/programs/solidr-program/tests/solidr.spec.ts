@@ -239,14 +239,16 @@ describe('solidr', () => {
 
             await client.closeSession(administrator, sessionId);
 
+            assert.isDefined(await client.getSession(sessionAccountPubkey));
+
             const {
                 events: { sessionDeleted },
             } = await client.deleteSession(administrator, sessionId);
 
-            await assertError(async () => client.getSession(sessionAccountPubkey), {
-                message: ACCOUNT_NOT_FOUND,
-            });
             assert.equal(sessionDeleted[0].sessionId.toNumber(), sessionId);
+
+            assert.isUndefined(await client.getSession(sessionAccountPubkey));
+
             await assertError(async () => client.getExpense(exp1AccountPubkey), {
                 message: ACCOUNT_NOT_FOUND,
             });
