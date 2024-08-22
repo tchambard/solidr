@@ -3,9 +3,225 @@
         "pleaseConnect": "Veuillez connecter votre portefeuille Solana"
     },
     "homePage": {
-        "start": "Démarrer"
+        "start": "Commencer"
     },
-    "submit": "Soumettre",
-    "cancel": "Annuler",
-    "home": "Aller à l'accueil"
+    "sessions": {
+        "list": {
+            "title": "Mes sessions",
+            "item": {
+                "closed": "Session fermée"
+            }
+        },
+        "create": {
+            "title": "Créer une nouvelle session",
+            "form": {
+                "name": {
+                    "label": "Nom de la session",
+                    "required": "Le nom de la session est requis"
+                },
+                "description": {
+                    "label": "Description de la session",
+                    "required": "La description de la session est requise"
+                },
+                "memberName": {
+                    "label": "Votre nom ou pseudo",
+                    "required": "Votre nom ou pseudo est requis"
+                }
+            }
+        }
+    },
+    "session": {
+        "notFound": {
+            "title": "Session non trouvée",
+            "message": "La session que vous essayez d'accéder n'existe pas."
+        },
+        "accessDenied": {
+            "title": "Accès refusé",
+            "message": "Vous n'avez pas l'autorisation d'accéder à cette session."
+        },
+        "closed": {
+            "title": "Session fermée"
+        },
+        "edit": {
+            "title": "Modifier la session",
+            "form": {
+                "name": {
+                    "label": "Nom de la session",
+                    "required": "Le nom de la session est requis"
+                },
+                "description": {
+                    "label": "Description de la session",
+                    "required": "La description de la session est requise"
+                }
+            }
+        },
+        "join": {
+            "title": "Rejoindre la session {name}",
+            "form": {
+                "memberName": {
+                    "label": "Votre nom de membre",
+                    "required": "Le nom du membre est requis"
+                }
+            }
+        },
+        "action": {
+            "close": {
+                "menu": {
+                    "title": "Fermer",
+                    "description": "Fermer la session"
+                },
+                "confirm": {
+                    "title": "Fermer la session ?",
+                    "description": "La fermeture de cette session gèlera le solde actuel de la session, empêchant toute nouvelle addition ou modification de dépenses. Cependant, vous pourrez toujours finaliser les remboursements en attente."
+                }
+            },
+            "edit": {
+                "menu": {
+                    "title": "Modifier",
+                    "description": "Modifier la session"
+                }
+            },
+            "delete": {
+                "menu": {
+                    "title": "Supprimer",
+                    "description": "Supprimer la session"
+                },
+                "confirm": {
+                    "title": "Supprimer la session ?",
+                    "description": "La suppression de cette session effacera définitivement toutes les données associées et ne pourra pas être récupérée. La suppression de la session libérera également tous les loyers."
+                }
+            }
+        },
+        "summary": {
+            "totalCost": "Mon coût total",
+            "totalExpenses": "Dépenses totales",
+            "totalRefunds": "Remboursements totaux"
+        },
+        "share": {
+            "title": "Partager",
+            "generatedUrl": {
+                "title": "URL générée"
+            },
+            "generateLink": {
+                "title": "Générer un nouveau lien"
+            }
+        },
+        "members": {
+            "list": {
+                "title": "Liste des membres"
+            },
+            "add": {
+                "title": "Ajouter un nouveau membre",
+                "form": {
+                    "address": {
+                        "label": "Adresse",
+                        "required": "L'adresse du membre est requise"
+                    },
+                    "memberName": {
+                        "label": "Nom du membre",
+                        "required": "Le nom du membre est requis"
+                    }
+                }
+            },
+            "edit": {
+                "title": "Modifier le membre",
+                "form": {
+                    "memberName": {
+                        "label": "Nom du membre",
+                        "required": "Le nom du membre est requis"
+                    }
+                }
+            }
+        },
+        "operations": {
+            "list": {
+                "title": "Liste des opérations",
+                "empty": "Commencez par ajouter une dépense",
+                "menu": {
+                    "add": {
+                        "title": "Ajouter une nouvelle dépense"
+                    }
+                }
+            },
+            "addExpense": {
+                "title": "Ajouter une nouvelle dépense",
+                "form": {
+                    "name": {
+                        "label": "Nom",
+                        "required": "Le nom de la dépense est requis"
+                    },
+                    "amount": {
+                        "label": "Montant",
+                        "required": "Le montant de la dépense est requis"
+                    },
+                    "participants": {
+                        "label": "Sélectionnez les participants"
+                    }
+                }
+            },
+            "expense": {
+                "item": {
+                    "paidby": "Payé par",
+                    "menu": {
+                        "edit": {
+                            "title": "Modifier la dépense"
+                        }
+                    }
+                }
+            },
+            "refund": {
+                "item": {
+                    "label": "Remboursement",
+                    "paidby": "Payé par",
+                    "paidto": "à"
+                }
+            }
+        },
+        "expenses": {
+            "add": {
+                "title": "Ajouter une nouvelle dépense",
+                "form": {
+                    "name": {
+                        "label": "Nom",
+                        "required": "Le nom de la dépense est requis"
+                    },
+                    "amount": {
+                        "label": "Montant",
+                        "required": "Le montant de la dépense est requis"
+                    }
+                }
+            }
+        },
+        "transfers": {
+            "title": "Remboursements",
+            "button": {
+                "title": "Rembourser les autres membres"
+            },
+            "list": {
+                "empty": "Les remboursements seront disponibles dès que les coûts deviendront déséquilibrés",
+                "item": {
+                    "owes": "doit"
+                }
+            },
+            "refunds": {
+                "dialog": {
+                    "title": "Rembourser les autres membres",
+                    "to": {
+                        "label": "À"
+                    }
+                }
+            }
+        },
+        "tabs": {
+            "members": "Membres",
+            "expenses": "Opérations",
+            "balance": "Solde"
+        }
+    },
+    "common": {
+        "submit": "Soumettre",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "goToHome": "Aller à l'accueil"
+    }
 }
