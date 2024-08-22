@@ -22,7 +22,7 @@ export default () => {
     const setSessionCurrentState = useSetRecoilState(sessionCurrentState);
 
     useEffect(() => {
-        if (!solidrClient) return;
+        if (!anchorWallet || !solidrClient) return;
 
         setSessionCurrentState(defaultSessionState);
 
@@ -46,7 +46,7 @@ export default () => {
                 solidrClient.program.removeEventListener(listener);
             });
         };
-    }, [solidrClient]);
+    }, [solidrClient, anchorWallet.publicKey]);
 
     return (
         <>

@@ -39,7 +39,7 @@ export default ({ dialogVisible, setDialogVisible }: ISessionRefundsDialogProps)
                     };
                 }),
         );
-    }, [sessionCurrent.transfers]);
+    }, [sessionCurrent.transfers, anchorWallet.publicKey]);
 
     const { handleSubmit, formState: { isSubmitting } } = useForm({});
 

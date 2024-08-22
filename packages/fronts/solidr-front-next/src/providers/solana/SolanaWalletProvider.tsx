@@ -19,7 +19,7 @@ export default function SolanaWalletProvider({ children }: { children: ReactNode
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+    const endpoint = useMemo(() => clusterApiUrl(network), []);
 
     const wallets = useMemo(() => [
         new SolanaMobileWalletAdapter({
@@ -34,7 +34,7 @@ export default function SolanaWalletProvider({ children }: { children: ReactNode
             onWalletNotFound: createDefaultWalletNotFoundHandler(),
         }),
         new TorusWalletAdapter()
-    ], [network]);
+    ], []);
 
     const onError = useCallback(
         (error: WalletError) => {

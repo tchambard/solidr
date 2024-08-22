@@ -42,7 +42,7 @@ export function SolidrClientProvider({ children }: { children: React.ReactNode }
 
             setSolidrClient(client);
         }
-    }, [publicKey]);
+    }, [publicKey, connection]);
 
     if (!publicKey) {
         return (

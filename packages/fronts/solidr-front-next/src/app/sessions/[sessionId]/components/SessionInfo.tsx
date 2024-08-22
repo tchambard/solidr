@@ -26,7 +26,7 @@ export default ({ session }: { session: Session }) => {
     useEffect(() => {
         const _menuItems: IActionMenuItem[] = [];
 
-        if (anchorWallet && session.admin.toString() === anchorWallet.publicKey.toString()) {
+        if (session.admin.toString() === anchorWallet.publicKey.toString()) {
             if (session.status == SessionStatus.Opened) {
                 _menuItems.push({
                     title: t('session.action.edit.menu.title'),
@@ -52,7 +52,7 @@ export default ({ session }: { session: Session }) => {
         }
 
         setMenuItems(_menuItems);
-    }, [session]);
+    }, [session, anchorWallet.publicKey]);
 
     if (!solidrClient || !anchorWallet) {
         return <Suspense />;

@@ -21,9 +21,9 @@ export default () => {
     const [haveRefunds, setHaveRefunds] = useState(false);
 
     useEffect(() => {
-        if (!sessionCurrent) return;
+        if (!anchorWallet || !sessionCurrent) return;
         setHaveRefunds(sessionCurrent.transfers.filter((transfer) => transfer.from.toString() == anchorWallet.publicKey.toString()).length > 0);
-    }, [sessionCurrent.transfers]);
+    }, [sessionCurrent.transfers, anchorWallet.publicKey]);
 
     return (
         <div className="w-full">

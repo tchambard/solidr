@@ -54,7 +54,7 @@ export default ({ dialogVisible, setDialogVisible, currentExpense }: IEditExpens
             };
         });
         setParticipants(_participants);
-    }, [sessionCurrent]);
+    }, [sessionCurrent, currentExpense.participants]);
 
     const handleParticipantOnClick = (participant: IParticipant) => {
         setParticipants({
