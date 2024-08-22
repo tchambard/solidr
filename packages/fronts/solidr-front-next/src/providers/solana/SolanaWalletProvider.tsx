@@ -2,25 +2,20 @@
 
 import React, { Suspense } from 'react';
 import { ReactNode, useMemo, useCallback } from 'react';
-import {
-    ConnectionProvider,
-    WalletProvider,
-} from '@solana/wallet-adapter-react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork, WalletError } from '@solana/wallet-adapter-base';
+import { TorusWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { createDefaultAddressSelector, createDefaultAuthorizationResultCache, createDefaultWalletNotFoundHandler, SolanaMobileWalletAdapter } from '@solana-mobile/wallet-adapter-mobile';
-import { useSnackbar } from 'notistack';
 import { clusterApiUrl } from '@solana/web3.js';
+
+import { useSnackbar } from 'notistack';
 
 import './SolanaWalletProvider.css';
 
-type Props = {
-    children: ReactNode;
-};
-
 export const network = WalletAdapterNetwork.Devnet;
 
-export default function SolanaWalletProvider({ children }: Props) {
+export default function SolanaWalletProvider({ children }: { children: ReactNode }) {
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -37,9 +32,9 @@ export default function SolanaWalletProvider({ children }: Props) {
             authorizationResultCache: createDefaultAuthorizationResultCache(),
             chain: WalletAdapterNetwork.Devnet,
             onWalletNotFound: createDefaultWalletNotFoundHandler(),
-        })
+        }),
+        new TorusWalletAdapter()
     ], [network]);
-
 
     const onError = useCallback(
         (error: WalletError) => {
