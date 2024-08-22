@@ -1,0 +1,33 @@
+{
+    "name": "SolidR",
+    "short_name": "solidr",
+    "theme_color": "#3950a0",
+    "background_color": "#1e1e1e",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "start_url": "/",
+    "splash_pages": null,
+    "screenshots": [
+        {
+            "src": "logo.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "SolidR"
+        },
+        {
+            "src": "logo.png",
+            "sizes": "1024x1024",
+            "type": "image/png",
+            "label": "SolidR"
+        }
+    ],
+    "icons": [
+        {
+            "src": "logo.png",
+            "sizes": "1024x1024",
+            "type": "image/png"
+        }
+    ]
+}

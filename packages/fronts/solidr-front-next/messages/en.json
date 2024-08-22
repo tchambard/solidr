@@ -1,0 +1,227 @@
+{
+    "wallet": {
+        "pleaseConnect": "Please connect your Solana wallet"
+    },
+    "homePage": {
+        "start": "Start"
+    },
+    "sessions": {
+        "list": {
+            "title": "My sessions",
+            "item": {
+                "closed": "Session closed"
+            }
+        },
+        "create": {
+            "title": "Create new session",
+            "form": {
+                "name": {
+                    "label": "Session name",
+                    "required": "Session name is required"
+                },
+                "description": {
+                    "label": "Session description",
+                    "required": "Session description is required"
+                },
+                "memberName": {
+                    "label": "Your name or nickname",
+                    "required": "Your name or nickname is required"
+                }
+            }
+        }
+    },
+    "session": {
+        "notFound": {
+            "title": "Session not found",
+            "message": "The session you trying to access does not exist."
+        },
+        "accessDenied": {
+            "title": "Access denied",
+            "message": "You don't have the authorization to access this session."
+        },
+        "closed": {
+            "title": "Session closed"
+        },
+        "edit": {
+            "title": "Edit session",
+            "form": {
+                "name": {
+                    "label": "Session name",
+                    "required": "Session name is required"
+                },
+                "description": {
+                    "label": "Session description",
+                    "required": "Session description is required"
+                }
+            }
+        },
+        "join": {
+            "title": "Join session {name}",
+            "form": {
+                "memberName": {
+                    "label": "Your member name",
+                    "required": "Member name is required"
+                }
+            }
+        },
+        "action": {
+            "close": {
+                "menu": {
+                    "title": "Close",
+                    "description": "Close session"
+                },
+                "confirm": {
+                    "title": "Close session ?",
+                    "description": "Closing this session will freeze the current session balance, preventing any further addition or modification of expenses. However, you will still be able to complete any pending refunds."
+                }
+            },
+            "edit": {
+                "menu": {
+                    "title": "Edit",
+                    "description": "Edit session"
+                }
+            },
+            "delete": {
+                "menu": {
+                    "title": "Delete",
+                    "description": "Delete session"
+                },
+                "confirm": {
+                    "title": "Delete session ?",
+                    "description": "Deleting this session will permanently erase all associated data and it cannot be recovered. Deleting the session will also release all rents."
+                }
+            }
+        },
+        "summary": {
+            "totalCost": "My total cost",
+            "totalExpenses": "Total expenses",
+            "totalRefunds": "Total refunds"
+        },
+        "share": {
+            "title": "Share",
+            "generatedUrl": {
+                "title": "Generated url"
+            },
+            "generateLink": {
+                "title": "Generate new link"
+            }
+        },
+        "members": {
+            "list": {
+                "title": "List of members"
+            },
+            "add": {
+                "title": "Add a new member",
+                "form": {
+                    "address": {
+                        "label": "Address",
+                        "required": "Member address is required"
+                    },
+                    "memberName": {
+                        "label": "Member name",
+                        "required": "Member name is required"
+                    }
+                }
+            },
+            "edit": {
+                "title": "Edit member",
+                "form": {
+                    "memberName": {
+                        "label": "Member name",
+                        "required": "Member name is required"
+                    }
+                }
+            }
+        },
+        "operations": {
+            "list": {
+                "title": "List of operations",
+                "empty": "Start by adding an expense",
+                "menu": {
+                    "add": {
+                        "title": "Add new expense"
+                    }
+                }
+            },
+            "addExpense": {
+                "title": "Add new expense",
+                "form": {
+                    "name": {
+                        "label": "Name",
+                        "required": "Expense name is required"
+                    },
+                    "amount": {
+                        "label": "Amount",
+                        "required": "Expense amount is required"
+                    },
+                    "participants": {
+                        "label": "Select participants"
+                    }
+                }
+            },
+            "expense": {
+                "item": {
+                    "paidby": "Paid by",
+                    "menu": {
+                        "edit": {
+                            "title": "Edit expense"
+                        }
+                    }
+                }
+            },
+            "refund": {
+                "item": {
+                    "label": "Refund",
+                    "paidby": "Paid by",
+                    "paidto": "to"
+                }
+            }
+        },
+        "expenses": {
+            "add": {
+                "title": "Add a new expense",
+                "form": {
+                    "name": {
+                        "label": "Name",
+                        "required": "Expense name is required"
+                    },
+                    "amount": {
+                        "label": "Amount",
+                        "required": "Expense amount is required"
+                    }
+                }
+            }
+        },
+        "transfers": {
+            "title": "Refunds",
+            "button": {
+                "title": "Refund other members"
+            },
+            "list": {
+                "empty": "Refunds will be available as soon as costs become unbalanced",
+                "item": {
+                    "owes": "owes"
+                }
+            },
+            "refunds": {
+                "dialog": {
+                    "title": "Refund other members",
+                    "to": {
+                        "label": "To"
+                    }
+                }
+            }
+        },
+        "tabs": {
+            "members": "Members",
+            "expenses": "Operations",
+            "balance": "Balance"
+        }
+    },
+    "common": {
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "goToHome": "Go to home"
+    }
+}
