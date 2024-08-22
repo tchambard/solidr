@@ -53,18 +53,18 @@ export default () => {
                     <ArrowUpIcon className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                    <div className="font-medium text-gray-900 dark:text-gray-200">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-200">
                         {expense.name}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
                         {`${t('session.operations.expense.item.paidby')} ${expenseOwner.name}`}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
                         <Tooltip text={format.dateTime(expense.date, "short")}>
                             {`${format.relativeTime(expense.date)}`}
                         </Tooltip>
                     </div>
-                    <div className="text-gray-900 dark:text-gray-200">
+                    <div className="text-zinc-900 dark:text-zinc-200">
                         {`${format.number(expense.amount, { style: 'currency', currency: 'USD' })}`}
                     </div>
                 </div>
@@ -95,21 +95,21 @@ export default () => {
                     <ArrowDownIcon className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                    <div className="font-medium text-gray-900 dark:text-gray-200">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-200">
                         {t('session.operations.refund.item.label')}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
                         {`${t('session.operations.refund.item.paidby')} ${refundFrom.name} ${t('session.operations.refund.item.paidto')} ${refundTo.name}`}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-zinc-500 dark:text-zinc-400">
                         <Tooltip text={format.dateTime(refund.date, "short")}>
                             {`${format.relativeTime(refund.date)}`}
                         </Tooltip>
                     </div>
                     <div className="flex justify-between items-center py-2">
                         <div>
-                            <p className="text-gray-900 dark:text-white">{`${format.number(refund.amount, { style: 'currency', currency: 'USD' })}`}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{`${refund.amountInLamports / LAMPORTS_PER_SOL} SOL`}</p>
+                            <p className="text-zinc-900 dark:text-white">{`${format.number(refund.amount, { style: 'currency', currency: 'USD' })}`}</p>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400">{`${refund.amountInLamports / LAMPORTS_PER_SOL} SOL`}</p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@ export default () => {
     return (
         <>
             <SectionTitleWrapper>
-                <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-wide">
+                <h1 className="text-xl font-bold text-zinc-800 dark:text-white tracking-wide">
                     {t('session.operations.list.title')}
                 </h1>
                 <div className="flex items-center space-x-2">
@@ -140,15 +140,15 @@ export default () => {
                 </div>
             </SectionTitleWrapper>
 
-            <div className="border-t border-gray-200 dark:border-gray-700"></div>
+            <div className="border-t border-zinc-200 dark:border-zinc-700"></div>
 
-            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            <ul className="divide-y divide-zinc-200 dark:divide-zinc-700">
                 {itemsList.length > 0 ? (
                     itemsList.map((expenseOrRefund) =>
                         (expenseOrRefund as Expense).expenseId != null ? renderExpense(expenseOrRefund as Expense) : renderRefund(expenseOrRefund as Refund),
                     )
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 mt-4">
+                    <p className="text-center text-zinc-500 dark:text-zinc-400 mt-4">
                         {t('session.operations.list.empty')}
                     </p>
                 )}

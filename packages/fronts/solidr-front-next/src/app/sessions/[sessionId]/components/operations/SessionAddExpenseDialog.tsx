@@ -78,35 +78,35 @@ export default ({ dialogVisible, setDialogVisible }: IAddExpenseDialogProps) => 
         <Dialog isOpen={dialogVisible} onClose={() => setDialogVisible(false)}>
             <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:mt-0 sm:text-center">
-                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200">
+                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-zinc-900 dark:text-zinc-200">
                         {t('session.operations.addExpense.title')}
                     </DialogTitle>
                 </div>
-                <hr className="my-4 border-gray-300 dark:border-gray-700" />
+                <hr className="my-4 border-zinc-300 dark:border-zinc-700" />
             </div>
             <div className="mt-5 sm:mt-4">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="name">
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="name">
                             {t('session.operations.addExpense.form.name.label')}
                         </label>
                         <input
                             type="text"
                             id="name"
                             {...register('name', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.name && <span className="text-red-500 text-sm">{t('session.operations.addExpense.form.name.required')}</span>}
                     </div>
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="amount">
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="amount">
                             {t('session.operations.addExpense.form.amount.label')}
                         </label>
                         <input
                             type="text"
                             id="amount"
                             {...register('amount', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.amount && <span className="text-red-500 text-sm">{t('session.operations.addExpense.form.amount.required')}</span>}
                     </div>

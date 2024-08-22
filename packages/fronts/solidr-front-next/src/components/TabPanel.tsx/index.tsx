@@ -31,8 +31,8 @@ export const TabPanelButton: React.FC<TabPanelButtonProps> = ({ label, onClick, 
         <button
             onClick={onClick}
             className={`min-h-[48px] px-4 py-2 text-md font-bold ${isActive
-                ? 'text-customBlue border-b-3 border-customBlue'
-                : 'text-gray-600 hover:text-customBlue'
+                ? 'text-customPinkLight border-b-3 border-customPinkLight'
+                : 'text-zinc-600 hover:text-customPinkLight'
                 }`}
         >
             {label}

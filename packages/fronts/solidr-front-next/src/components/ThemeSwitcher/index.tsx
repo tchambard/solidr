@@ -30,10 +30,10 @@ const ThemeSwitcher = () => {
     return (
         <button
             onClick={toggleColorMode}
-            className="p-2 rounded-full text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700 focus:outline-none"
+            className="p-2 rounded-full text-zinc-700 hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-700 focus:outline-none"
         >
             {theme === "light" ? (
-                <MoonIcon className="h-6 w-6 text-gray-800" aria-label="Dark Mode" />
+                <MoonIcon className="h-6 w-6 text-zinc-800" aria-label="Dark Mode" />
             ) : (
                 <SunIcon className="h-6 w-6 text-yellow-400" aria-label="Light Mode" />
             )}

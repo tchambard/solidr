@@ -43,43 +43,43 @@ export default () => {
                 <PageTitleWrapper>
                     <div className="flex items-center">
                         <button onClick={() => router.push('/sessions')} className="mr-4 cursor-pointer">
-                            <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
+                            <ArrowLeftIcon className="w-6 h-6 text-zinc-700" />
                         </button>
-                        <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-wide">
+                        <h1 className="text-xl font-bold text-zinc-800 dark:text-white tracking-wide">
                             {t('sessions.create.title')}
                         </h1>
                     </div>
                 </PageTitleWrapper>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-4 rounded-lg max-w-sm mx-auto">
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="name">{t('sessions.create.form.name.label')}*</label>
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="name">{t('sessions.create.form.name.label')}*</label>
                         <input
                             type="text"
                             id="name"
                             {...register('name', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.name && <span className="text-red-500 text-sm">{t('sessions.create.form.name.required')}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="description">{t('sessions.create.form.description.label')}*</label>
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="description">{t('sessions.create.form.description.label')}*</label>
                         <input
                             type="text"
                             id="description"
                             {...register('description', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.description && <span className="text-red-500 text-sm">{t('sessions.create.form.description.required')}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="memberName">{t('sessions.create.form.memberName.label')}*</label>
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="memberName">{t('sessions.create.form.memberName.label')}*</label>
                         <input
                             type="text"
                             id="memberName"
                             {...register('memberName', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.memberName && <span className="text-red-500 text-sm">{t('sessions.create.form.memberName.required')}</span>}
                     </div>

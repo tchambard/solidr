@@ -72,11 +72,11 @@ export default ({ dialogVisible, setDialogVisible }: ISessionRefundsDialogProps)
         <Dialog isOpen={dialogVisible} onClose={() => setDialogVisible(false)}>
             <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:mt-0 sm:text-center">
-                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200">
+                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-zinc-900 dark:text-zinc-200">
                         {t('session.transfers.refunds.dialog.title')}
                     </DialogTitle>
                 </div>
-                <hr className="my-4 border-gray-300 dark:border-gray-700" />
+                <hr className="my-4 border-zinc-300 dark:border-zinc-700" />
             </div>
             <div className="mt-5 sm:mt-4">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
@@ -84,12 +84,12 @@ export default ({ dialogVisible, setDialogVisible }: ISessionRefundsDialogProps)
                         <div key={`transfer_${idx}`} className="mb-4">
                             <label
                                 htmlFor={`to_${transfer.to.toString()}`}
-                                className="block text-gray-900 dark:text-white mb-1"
+                                className="block text-zinc-900 dark:text-white mb-1"
                             >
                                 {`${t('session.transfers.refunds.dialog.to.label')} ${sessionCurrent.members[transfer.to.toString()].name}`}
                             </label>
                             <div className="relative">
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 dark:text-zinc-400">
                                     $
                                 </span>
                                 <input
@@ -99,7 +99,7 @@ export default ({ dialogVisible, setDialogVisible }: ISessionRefundsDialogProps)
                                     onChange={(e) =>
                                         handleAmountUpdate(transfer.to, Number(e.currentTarget.value))
                                     }
-                                    className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:ring-2 focus:ring-customBlue focus:outline-none"
+                                    className="w-full px-4 py-2 pl-10 border border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white bg-white dark:bg-zinc-800 focus:ring-2 focus:ring-customBlue focus:outline-none"
                                 />
                             </div>
                         </div>

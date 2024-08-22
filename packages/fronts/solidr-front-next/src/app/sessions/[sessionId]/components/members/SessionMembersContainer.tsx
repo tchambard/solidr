@@ -38,7 +38,7 @@ export default () => {
 
     return <div className="w-full">
         <SectionTitleWrapper>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-wide">
+            <h1 className="text-xl font-bold text-zinc-800 dark:text-white tracking-wide">
                 {t('session.members.list.title')}
             </h1>
             <div className="flex items-center space-x-2">
@@ -61,14 +61,14 @@ export default () => {
             <div className="md:col-span-1">
                 <ul className="w-full p-4 max-h-120 overflow-y-auto">
                     {_.map(sessionCurrent.members, (member, address) => (
-                        <li key={`member_${address}`} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
+                        <li key={`member_${address}`} className="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-700">
                             <div className="flex items-center space-x-4">
                                 <div className="tooltip" data-tooltip={address}>
                                     <div className="w-10 h-10 rounded-full overflow-hidden">
                                         <AddressAvatar address={address} />
                                     </div>
                                 </div>
-                                <span className="text-gray-800 dark:text-gray-200">{member.name}</span>
+                                <span className="text-zinc-800 dark:text-zinc-200">{member.name}</span>
                             </div>
                             {(wallet.publicKey.toString() === member.addr.toString() || sessionCurrent.isAdmin) && sessionCurrent.session?.status === SessionStatus.Opened && (
                                 <button

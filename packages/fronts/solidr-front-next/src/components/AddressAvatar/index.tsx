@@ -28,7 +28,7 @@ export default function AddressAvatar({ address, size, marginLeft }: IProps) {
 
     return (
         <div
-            className="flex items-center justify-center rounded-full text-white font-bold"
+            className="flex items-center justify-center rounded-full text-zinc-700 font-bold"
             style={avatarProps.style}
         >
             {avatarProps.children}

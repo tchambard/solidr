@@ -90,7 +90,7 @@ export const EpicsBrown = {
     contrastText: '#FFFFFF',
 };
 
-export const EpicsIndigo = {
+export const Epicszinc = {
     100: '#5B7EBD',
     200: '#4A5FA5',
     300: '#3950A0',

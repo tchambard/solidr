@@ -48,7 +48,7 @@ export default function DefaultHeader() {
 
             <div className="flex items-center space-x-2 sm:space-x-4">
                 {solanaBalance !== null && (
-                    <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                    <div className="text-sm sm:text-base text-zinc-700 dark:text-zinc-300">
                         <p>{solanaBalance.toFixed(4)} SOL</p>
                     </div>
                 )}

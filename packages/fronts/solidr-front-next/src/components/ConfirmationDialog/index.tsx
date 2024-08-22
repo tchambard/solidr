@@ -29,11 +29,11 @@ const ConfirmationDialog = ({
                     <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-100" aria-hidden="true" />
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200">
+                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-zinc-900 dark:text-zinc-200">
                         {title}
                     </DialogTitle>
                     <div className="mt-2">
-                        <p className="text-sm text-gray-500 dark:text-gray-300">
+                        <p className="text-sm text-zinc-500 dark:text-zinc-300">
                             {description}
                         </p>
                     </div>
@@ -49,7 +49,7 @@ const ConfirmationDialog = ({
                 </button>
                 <button
                     type="button"
-                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-base font-medium text-gray-700 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-customBlue dark:focus:ring-customBlue focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+                    className="mt-3 inline-flex w-full justify-center rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 px-4 py-2 text-base font-medium text-zinc-700 dark:text-zinc-300 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-customBlue dark:focus:ring-customBlue focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
                     onClick={onClose}
                 >
                     {t('common.cancel')}

@@ -30,10 +30,10 @@ export default ({ participants, handleParticipantOnClick }: LabelContextProps) =
 
     return (
         <div>
-            <label className="block text-gray-900 dark:text-white mb-1">
+            <label className="block text-zinc-900 dark:text-white mb-1">
                 {t('session.operations.addExpense.form.participants.label')}
             </label>
-            <div className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg">
+            <div className="w-full p-3 border border-zinc-300 dark:border-zinc-700 rounded-lg">
                 <fieldset>
                     <div className="space-y-2">
                         <div className="flex items-center">
@@ -42,11 +42,11 @@ export default ({ participants, handleParticipantOnClick }: LabelContextProps) =
                                 checked={true}
                                 disabled={true}
                                 id={`participant_${current.name}`}
-                                className="form-checkbox h-5 w-5 text-customBlue border-gray-300 dark:border-gray-700 rounded disabled:opacity-50"
+                                className="form-checkbox h-5 w-5 text-customBlue border-zinc-300 dark:border-zinc-700 rounded disabled:opacity-50"
                             />
                             <label
                                 htmlFor={`participant_${current.name}`}
-                                className="ml-2 text-gray-900 dark:text-white"
+                                className="ml-2 text-zinc-900 dark:text-white"
                             >
                                 {current.name}
                             </label>
@@ -59,11 +59,11 @@ export default ({ participants, handleParticipantOnClick }: LabelContextProps) =
                                     checked={member.checked}
                                     id={`participant_${member.name}`}
                                     onChange={() => handleParticipantOnClick(member)}
-                                    className="form-checkbox h-5 w-5 text-customBlue border-gray-300 dark:border-gray-700 rounded focus:ring-2 focus:ring-customBlue focus:outline-none"
+                                    className="form-checkbox h-5 w-5 text-customBlue border-zinc-300 dark:border-zinc-700 rounded focus:ring-2 focus:ring-customBlue focus:outline-none"
                                 />
                                 <label
                                     htmlFor={`participant_${member.name}`}
-                                    className="ml-2 text-gray-900 dark:text-white"
+                                    className="ml-2 text-zinc-900 dark:text-white"
                                 >
                                     {member.name}
                                 </label>

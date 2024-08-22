@@ -235,7 +235,7 @@ export default () => {
                     />
                 </div>
                 <div>
-                    <div className={`flex justify-center border-b border-gray-200`}>
+                    <div className={`flex justify-center border-b border-zinc-200`}>
                         <TabPanelButton label={t('session.tabs.members')} isActive={value === 0} onClick={() => handleChange(0)} />
                         <TabPanelButton label={t('session.tabs.expenses')} isActive={value === 1} onClick={() => handleChange(1)} />
                         <TabPanelButton label={t('session.tabs.balance')} isActive={value === 2} onClick={() => handleChange(2)} />

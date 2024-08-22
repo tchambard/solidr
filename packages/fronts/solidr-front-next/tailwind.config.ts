@@ -16,6 +16,7 @@ const config: Config = {
             colors: {
                 customBlue: '#3950a0',
                 customBlueLight: '#333e83',
+                customPinkLight: '#CCA3FE',
             },
         },
     },

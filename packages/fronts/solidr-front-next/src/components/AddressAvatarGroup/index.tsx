@@ -20,7 +20,7 @@ export default ({ addresses, size }: IProps) => {
             ))}
             {addresses.length > maxAvatars && (
                 <div
-                    className={`flex items-center justify-center rounded-full bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200`}
+                    className={`flex items-center justify-center rounded-full bg-zinc-300 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200`}
                     style={{ width: size || 30, height: size || 30, fontSize: `${(size || 30) / 2}px` }}
                 >
                     +{addresses.length - maxAvatars}

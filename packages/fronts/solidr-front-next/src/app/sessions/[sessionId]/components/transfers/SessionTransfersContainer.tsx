@@ -28,7 +28,7 @@ export default () => {
     return (
         <div className="w-full">
             <SectionTitleWrapper>
-                <h1 className="text-xl font-bold text-gray-800 dark:text-white tracking-wide">
+                <h1 className="text-xl font-bold text-zinc-800 dark:text-white tracking-wide">
                     {t('session.transfers.title')}
                 </h1>
                 <div className="flex items-center space-x-2">
@@ -56,20 +56,20 @@ export default () => {
                                             <AddressAvatar address={transfer.from.toString()} />
                                         </div>
                                     </Tooltip>
-                                    <p className="text-md text-gray-900 dark:text-gray-300 mt-2">
+                                    <p className="text-md text-zinc-900 dark:text-zinc-300 mt-2">
                                         {sessionCurrent.members[transfer.from.toString()].name}
                                     </p>
                                 </div>
 
                                 {/* Middle Section */}
                                 <div className="flex flex-col items-center w-3/5">
-                                    <span className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
                                         {t('session.transfers.list.item.owes')}
                                     </span>
-                                    <div className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-full p-1 my-2">
-                                        <ArrowRightIcon className="w-6 h-6 text-gray-900 dark:text-white" />
+                                    <div className="bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-200 rounded-full p-1 my-2">
+                                        <ArrowRightIcon className="w-6 h-6 text-zinc-900 dark:text-white" />
                                     </div>
-                                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    <p className="text-lg font-semibold text-zinc-900 dark:text-white">
                                         {format.number(+Number(transfer.amount).toFixed(2), { style: 'currency', currency: 'USD' })}
                                     </p>
                                 </div>
@@ -81,19 +81,19 @@ export default () => {
                                             <AddressAvatar address={transfer.to.toString()} />
                                         </div>
                                     </Tooltip>
-                                    <p className="text-md text-gray-900 dark:text-gray-300 mt-2">
+                                    <p className="text-md text-zinc-900 dark:text-zinc-300 mt-2">
                                         {sessionCurrent.members[transfer.to.toString()].name}
                                     </p>
                                 </div>
                             </div>
                             {idx < sessionCurrent.transfers.length - 1 && (
-                                <hr className="border-t border-gray-300 dark:border-gray-700 mt-4" />
+                                <hr className="border-t border-zinc-300 dark:border-zinc-700 mt-4" />
                             )}
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-gray-700 dark:text-gray-300 mt-4">
+                <p className="text-center text-zinc-700 dark:text-zinc-300 mt-4">
                     {t('session.transfers.list.empty')}
                 </p>
             )}

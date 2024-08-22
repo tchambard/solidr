@@ -47,36 +47,36 @@ export default ({ dialogVisible, setDialogVisible }: IAddMemberDialogProps) => {
         <Dialog isOpen={dialogVisible} onClose={() => setDialogVisible(false)}>
             <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:mt-0 sm:text-center">
-                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200">
+                    <DialogTitle as="h3" className="text-lg font-medium leading-6 text-zinc-900 dark:text-zinc-200">
                         {t('session.members.add.title')}
                     </DialogTitle>
                 </div>
-                <hr className="my-4 border-gray-300 dark:border-gray-700" />
+                <hr className="my-4 border-zinc-300 dark:border-zinc-700" />
             </div>
             <div className="mt-5 sm:mt-4">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="address">
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="address">
                             {t('session.members.add.form.address.label')}
                         </label>
                         <input
                             type="text"
                             id="address"
                             {...register('address', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.address && <span className="text-red-500 text-sm">{t('session.members.add.form.address.required')}</span>}
                     </div>
 
                     <div>
-                        <label className="block text-gray-900 dark:text-white mb-1" htmlFor="memberName">
+                        <label className="block text-zinc-900 dark:text-white mb-1" htmlFor="memberName">
                             {t('session.members.add.form.memberName.label')}
                         </label>
                         <input
                             type="text"
                             id="memberName"
                             {...register('memberName', { required: true })}
-                            className="w-full px-4 py-2 text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
+                            className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
                         {errors.memberName && <span className="text-red-500 text-sm">{t('session.members.add.form.memberName.required')}</span>}
                     </div>

@@ -63,7 +63,7 @@ export default ({ session }: { session: Session }) => {
             <PageTitleWrapper>
                 <div className="flex items-center">
                     <button onClick={() => router.push('/sessions')} className="mr-4 cursor-pointer">
-                        <ArrowLeftIcon className="w-6 h-6 text-gray-700" />
+                        <ArrowLeftIcon className="w-6 h-6 text-zinc-700" />
                     </button>
                     <div>
                         <h3 className="text-3xl mb-1 flex items-center">

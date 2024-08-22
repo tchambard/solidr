@@ -21,7 +21,7 @@ const ActionMenu: React.FC<IProps> = ({ items }) => {
             <Menu as="div" className="relative">
                 <div>
                     <MenuButton className="inline-flex justify-center items-center p-2 rounded-md focus:outline-none focus:ring-0">
-                        <Bars3Icon className="h-6 w-6 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" aria-hidden="true" />
+                        <Bars3Icon className="h-6 w-6 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white" aria-hidden="true" />
                     </MenuButton>
                 </div>
 
@@ -34,7 +34,7 @@ const ActionMenu: React.FC<IProps> = ({ items }) => {
                     leaveFrom="transform opacity-100 scale-100"
                     leaveTo="transform opacity-0 scale-95"
                 >
-                    <MenuItems className="z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-white ring-opacity-5 focus:outline-none">
+                    <MenuItems className="z-10 absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-zinc-800 ring-1 ring-black dark:ring-white ring-opacity-5 focus:outline-none">
                         <div className="py-1">
                             {_.compact(
                                 _.map(items, (item, idx) => {
@@ -44,7 +44,7 @@ const ActionMenu: React.FC<IProps> = ({ items }) => {
                                                 {({ focus }) => (
                                                     <button
                                                         type="button"
-                                                        className={`${focus ? 'bg-gray-100 dark:bg-gray-700' : ''} group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 w-full text-left`}
+                                                        className={`${focus ? 'bg-zinc-100 dark:bg-zinc-700' : ''} group flex items-center px-4 py-2 text-sm text-zinc-700 dark:text-zinc-300 w-full text-left`}
                                                         onClick={item.onClick}
                                                     >
                                                         <span className="flex-shrink-0">{item.icon}</span>
