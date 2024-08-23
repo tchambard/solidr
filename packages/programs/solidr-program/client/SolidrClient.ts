@@ -5,7 +5,7 @@ import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 import * as _ from 'lodash';
 
 import { AbstractSolanaClient, ITransactionResult, ProgramInstructionWrapper } from './AbstractSolanaClient';
-import { Solidr } from './types/solidr';
+import { Solidr } from '../target/types/solidr';
 import { generateSessionLinkTokenData } from './TokenHelpers';
 import { HermesClient } from '@pythnetwork/hermes-client';
 
