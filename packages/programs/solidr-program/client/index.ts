@@ -1,2 +1,2 @@
 export * from './SolidrClient';
-export * from './types/solidr';
+export * from '../target/types/solidr';

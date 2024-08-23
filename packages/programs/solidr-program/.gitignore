@@ -1,5 +1,8 @@
 .anchor
-target
+target/
+!target/idl
+!target/types/**/*
+
 **/*.rs.bk
 test-ledger
 .nyc_output

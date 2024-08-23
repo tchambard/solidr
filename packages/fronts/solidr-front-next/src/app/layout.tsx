@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { Inter } from "next/font/google";
@@ -11,6 +11,7 @@ import RecoilContextProvider from '@/providers/recoil/RecoilProvider';
 import { MyThemeProvider } from '@/providers/theme/ThemeProvider';
 import Content from './layout/Content';
 import { getFormats } from '@/services/i18n/locale';
+import { Author, IconDescriptor, ThemeColorDescriptor } from 'next/dist/lib/metadata/types/metadata-types';
 // import { Author, IconDescriptor, ThemeColorDescriptor } from 'next/dist/lib/metadata/types/metadata-types';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,20 +22,25 @@ export const metadata: Metadata = {
     generator: "Next.js",
     manifest: "/manifest.json",
     keywords: ["solidr", "sharing expenses", "solana"],
-    themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#1e1e1e" }],
     authors: [
         {
             name: "Teddy Chambard",
             url: "https://www.linkedin.com/in/teddy-chambard/",
         },
     ],
-    viewport:
-        "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover",
     icons: [
-        // { rel: "apple-touch-icon", url: "icons/icon-128x128.png" },
-        // { rel: "icon", url: "icons/icon-128x128.png" },
+        { rel: "apple-touch-icon", url: "/favicon.svg" },
+        { rel: "icon", url: "/favicon.svg" },
     ],
 };
+
+export const viewport: Viewport = {
+    minimumScale: 1,
+    initialScale: 1,
+    width: 'device-width',
+    viewportFit: 'cover',
+    themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#1e1e1e" }],
+}
 
 export default async function RootLayout({
     children,
@@ -47,15 +53,12 @@ export default async function RootLayout({
 
     return (
         <html lang={locale} className={`${inter.className} dark`}>
-            {/* <head>
+            <head>
                 <title>{metadata.title?.toString()}</title>
                 <meta name="description" content={metadata.description?.toString()} />
                 <meta name="generator" content={metadata.generator?.toString()} />
                 <link rel="manifest" href={metadata.manifest?.toString()} />
                 <meta name="keywords" content={(metadata.keywords as string[])?.join(", ")} />
-                {(metadata.themeColor as ThemeColorDescriptor[])?.map(({ media, color }, index) => (
-                    <meta key={index} name="theme-color" media={media} content={color} />
-                ))}
                 {(metadata.authors as Author[])?.map(({ name, url }, index) => (
                     <meta key={index} name="author" content={name} {...(url && { href: url })} />
                 ))}
@@ -63,7 +66,12 @@ export default async function RootLayout({
                 {(metadata.icons as IconDescriptor[])?.map(({ rel, url }, index) => (
                     <link key={index} rel={rel} href={url as string} />
                 ))}
-            </head> */}
+                <meta property="og:image" content="/logo.png" />
+                <meta property="og:site_name" content={metadata.title as string} />
+                <meta property="og:title" content={metadata.title as string} />
+                <meta property="og:description" content={metadata.description as string} />
+                <meta property="og:url" content="https://solidr.vercel.app" />
+            </head>
             <body suppressHydrationWarning={true} className="bg-lightbg text-black dark:bg-darkbg dark:text-white">
                 <RecoilContextProvider>
                     <MyThemeProvider>
