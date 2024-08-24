@@ -16,7 +16,7 @@ export default function Footer() {
                 </div>
                 <div className="flex space-x-4">
                     <a
-                        href="https://github.com/your-github-username"
+                        href="https://github.com/tchambard/solidr"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-zinc-900 dark:text-zinc-100 hover:text-solanaGreen dark:hover:text-solanaGreen transition-colors"
@@ -32,7 +32,7 @@ export default function Footer() {
                         </svg>
                     </a>
                     <a
-                        href="https://twitter.com/your-twitter-handle"
+                        href="https://x.com/s_olidr"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-zinc-900 dark:text-zinc-100 hover:text-solanaGreen dark:hover:text-solanaGreen transition-colors"
