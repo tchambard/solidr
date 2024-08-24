@@ -2,8 +2,65 @@
     "wallet": {
         "pleaseConnect": "Please connect your Solana wallet"
     },
-    "homePage": {
-        "start": "Start"
+    "home": {
+        "hero": {
+            "title": "Simplify Group Expense Management with SolidR",
+            "subtitle": "Manage, share, and settle expenses with one click on the Solana blockchain.",
+            "solanaText": "Powered by the Solana blockchain for secure and fast transactions.",
+            "getStarted": "Get Started",
+            "learnMore": "Learn More"
+        },
+        "features": {
+            "heading": "Key Features",
+            "items": [
+                {
+                    "title": "Easy Group Expense Management",
+                    "description": "Organize and track shared expenses with ease."
+                },
+                {
+                    "title": "Instant SOL Payments",
+                    "description": "Settle debts instantly using SOL."
+                },
+                {
+                    "title": "Secure and Transparent",
+                    "description": "All transactions are secured on the Solana blockchain."
+                }
+            ]
+        },
+        "howItWorks": {
+            "heading": "How It Works",
+            "steps": [
+                {
+                    "title": "Create a Session",
+                    "description": "Start by creating a new expense session."
+                },
+                {
+                    "title": "Add Members",
+                    "description": "Invite members to join and share expenses."
+                },
+                {
+                    "title": "Track Expenses",
+                    "description": "Record and track all shared expenses."
+                },
+                {
+                    "title": "Settle Debts",
+                    "description": "Easily settle debts with SOL payments."
+                }
+            ]
+        },
+        "testimonials": {
+            "heading": "Testimonials",
+            "comingSoon": "Coming soon! Stay tuned for what our users have to say."
+        },
+        "getStarted": {
+            "heading": "Ready to Simplify Your Group Expenses?",
+            "description": "Get started today and take the hassle out of managing group expenses.",
+            "button": "Get Started Now"
+        }
+    },
+    "footer": {
+        "text": "©{year} SolidR. All rights reserved.",
+        "solanaText": "Powered by the Solana blockchain for fast and secure transactions."
     },
     "sessions": {
         "list": {
@@ -195,7 +252,7 @@
         "transfers": {
             "title": "Refunds",
             "button": {
-                "title": "Refund other members"
+                "title": "Refund"
             },
             "list": {
                 "empty": "Refunds will be available as soon as costs become unbalanced",

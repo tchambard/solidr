@@ -82,7 +82,7 @@ export default async function RootLayout({
                                     </header>
                                     <main
                                         id="page-component"
-                                        className="break-words min-h-[calc(100vh-112px)] py-4"
+                                        className="break-words min-h-[calc(100vh-152px)] py-4 pt-16"
                                     >
                                         {children}
                                     </main>

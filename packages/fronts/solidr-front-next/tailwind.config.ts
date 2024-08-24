@@ -17,6 +17,8 @@ const config: Config = {
                 customBlue: '#3950a0',
                 customBlueLight: '#333e83',
                 customPinkLight: '#CCA3FE',
+                solanaGreen: '#00FFA3',
+                solanaPurple: '#9945FF',
             },
         },
     },

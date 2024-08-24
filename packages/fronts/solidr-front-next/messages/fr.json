@@ -2,8 +2,65 @@
     "wallet": {
         "pleaseConnect": "Veuillez connecter votre portefeuille Solana"
     },
-    "homePage": {
-        "start": "Commencer"
+    "home": {
+        "hero": {
+            "title": "Simplifiez la gestion des dépenses de groupe avec SolidR",
+            "subtitle": "Gérez, partagez et remboursez en un clic sur la blockchain Solana.",
+            "solanaText": "Propulsé par la blockchain Solana pour des transactions rapides et sécurisées.",
+            "getStarted": "Commencer",
+            "learnMore": "En savoir plus"
+        },
+        "features": {
+            "heading": "Fonctionnalités Clés",
+            "items": [
+                {
+                    "title": "Gestion facile des dépenses de groupe",
+                    "description": "Organisez et suivez les dépenses partagées facilement."
+                },
+                {
+                    "title": "Paiements instantanés en SOL",
+                    "description": "Régularisez les dettes instantanément avec SOL."
+                },
+                {
+                    "title": "Sécurisé et Transparent",
+                    "description": "Toutes les transactions sont sécurisées sur la blockchain Solana."
+                }
+            ]
+        },
+        "howItWorks": {
+            "heading": "Comment ça marche",
+            "steps": [
+                {
+                    "title": "Créer une session",
+                    "description": "Commencez par créer une nouvelle session de dépenses."
+                },
+                {
+                    "title": "Ajouter des membres",
+                    "description": "Invitez des membres à rejoindre et partager des dépenses."
+                },
+                {
+                    "title": "Suivre les dépenses",
+                    "description": "Enregistrez et suivez toutes les dépenses partagées."
+                },
+                {
+                    "title": "Régler les dettes",
+                    "description": "Régularisez facilement les dettes avec des paiements en SOL."
+                }
+            ]
+        },
+        "testimonials": {
+            "heading": "Témoignages",
+            "comingSoon": "Bientôt disponible ! Restez à l'écoute pour découvrir ce que nos utilisateurs ont à dire."
+        },
+        "getStarted": {
+            "heading": "Prêt à simplifier vos dépenses de groupe?",
+            "description": "Commencez dès aujourd'hui et éliminez les tracas de la gestion des dépenses de groupe.",
+            "button": "Commencer maintenant"
+        }
+    },
+    "footer": {
+        "text": "©{year} SolidR. Tous droits réservés.",
+        "solanaText": "Propulsé par la blockchain Solana pour des transactions rapides et sécurisées."
     },
     "sessions": {
         "list": {
@@ -195,7 +252,7 @@
         "transfers": {
             "title": "Remboursements",
             "button": {
-                "title": "Rembourser les autres membres"
+                "title": "Rembourser"
             },
             "list": {
                 "empty": "Les remboursements seront disponibles dès que les coûts deviendront déséquilibrés",

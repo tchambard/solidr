@@ -47,7 +47,7 @@ export function SolidrClientProvider({ children }: { children: React.ReactNode }
     if (!publicKey) {
         return (
             <div className="bg-lightbg text-black dark:bg-darkbg dark:text-white h-screen flex items-center justify-center">
-                <h1 className="text-2xl">{t('pleaseConnect')}</h1>
+                <h1 className="mt-4 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed">{t('pleaseConnect')}</h1>
             </div>
         );
     }
