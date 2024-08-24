@@ -62,7 +62,6 @@ export default async function RootLayout({
                 {(metadata.authors as Author[])?.map(({ name, url }, index) => (
                     <meta key={index} name="author" content={name} {...(url && { href: url })} />
                 ))}
-                <meta name="viewport" content={metadata.viewport as string} />
                 {(metadata.icons as IconDescriptor[])?.map(({ rel, url }, index) => (
                     <link key={index} rel={rel} href={url as string} />
                 ))}

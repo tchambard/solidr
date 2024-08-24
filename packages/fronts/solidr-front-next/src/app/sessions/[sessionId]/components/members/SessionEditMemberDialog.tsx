@@ -65,7 +65,7 @@ export default ({ dialogVisible, setDialogVisible, member }: IEditMemberDialogPr
                             {...register('memberName', { required: true })}
                             className="w-full px-4 py-2 text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg focus:ring-2 focus:ring-customBlue focus:outline-none"
                         />
-                        {errors.memberName && <span className="text-red-500 text-sm">{t('session.member.edit.form.memberName.required')}</span>}
+                        {errors.memberName && <span className="text-red-500 text-sm">{t('session.members.edit.form.memberName.required')}</span>}
                     </div>
 
                     <div className="flex space-x-4 pt-4">
