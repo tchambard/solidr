@@ -31,8 +31,8 @@ export default function DefaultHeader() {
     return (
         <header className="fixed top-0 left-0 w-full bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-md z-50">
             <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                <Link href="/">
-                    <Image src="/logo.png" alt="SolidR Logo" className="h-10" />
+                <Link href="/" className="hidden sm:block">
+                    <Image src="/logo.png" alt="SolidR Logo" width={40} height={40} className="h-10 w-auto" />
                 </Link>
                 <div className="flex items-center space-x-2 sm:space-x-4">
                     {solanaBalance !== null && (
@@ -40,15 +40,9 @@ export default function DefaultHeader() {
                             <p>{solanaBalance.toFixed(4)} SOL</p>
                         </div>
                     )}
-
                     <ThemeSwitcher />
                     <LanguageSwitcher />
-
-                    <div className="pl-2">
-                        <div className="mt-50">
-                            <WalletMultiButtonDynamic />
-                        </div>
-                    </div>
+                    <WalletMultiButtonDynamic />
                 </div>
             </div>
         </header>

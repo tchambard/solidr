@@ -8,14 +8,17 @@ export default function HeroSection() {
     return (
         <section className="bg-gradient-to-r from-solanaGreen to-solanaPurple text-white h-screen flex flex-col justify-center items-center text-center px-4">
             <div className="max-w-4xl mx-auto">
-                <Image
-                    src="/logo.png"
-                    alt="SolidR Logo"
-                    className="h-24 md:h-32 lg:h-40 mx-auto mb-8"
-                />
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                <div className="mb-8">
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold">
+                        SolidR
+                    </h1>
+                </div>
+                <div className="flex justify-center items-center mb-8 transform translate-x-2">
+                    <img src="/logo.png" alt="SolidR Logo" className="h-24 md:h-32 lg:h-40" />
+                </div>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                     {t('title')}
-                </h1>
+                </h2>
                 <p className="mt-4 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed">
                     {t('subtitle')}
                 </p>
