@@ -1,21 +1,33 @@
-MIT License
+# SolidR License
 
-Copyright (c) 2024 Adrien Vardon, Nicolas Coquelet, Teddy Chambard
+## Copyright © 2024 - SolidR
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+All rights reserved.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This repository and its associated code, designs, and documentation (collectively referred to as "the Software") are the property of **[Your Company Name]**, the owner of **SolidR**. The Software is protected by copyright laws and international treaties.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### Permissions
+
+You may:
+
+- View and fork the public repository for the purpose of evaluation or collaboration, but not for redistribution or modification without express written consent from **[Your Company Name]**.
+- Submit issues or suggestions to improve the Software via the repository's issue tracker, but this does not grant you any ownership or rights over the Software.
+
+### Restrictions
+
+You are not permitted to:
+
+- Copy, modify, merge, publish, distribute, sublicense, or sell copies of the Software without express written permission from **[Your Company Name]**.
+- Use the Software, in whole or in part, for commercial purposes without prior authorization.
+- Reverse-engineer, decompile, or disassemble the Software, except and only to the extent required by law.
+
+### Disclaimer
+
+The Software is provided "as-is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, or non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Software or the use or other dealings in the Software.
+
+---
+
+For inquiries regarding licensing or obtaining special permissions, please contact:
+
+**[SolidR]**  
+Email: [solidr_xyz@proton.me](mailto:solidr_xyz@proton.me)  
