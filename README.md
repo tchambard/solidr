@@ -1,78 +1,47 @@
-[![Prod](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml) [![Dev](https://github.com/tchambard/solidr/actions/workflows/ci.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci.yml)
+# SolidR
 
-# Solid-R
+**SolidR** is a decentralized app built on Solana that simplifies group expense management. Users can easily track, modify, and settle shared expenses with automatic SOL reimbursements using real-time price feeds powered by the Pyth Oracle.
 
-The decentralized application for simple sharing expenses.
+## 🚀 Features
+- Create and manage group expense sessions.
+- Add members via wallet address or QR code invite.
+- Record and modify expenses in dollars with participant lists.
+- One-click SOL reimbursements with Pyth Oracle for price conversion.
+- View balances, transactions, and proposed refunds.
+- Admins can close sessions to prevent new expenses while allowing reimbursements.
 
-Developed on Solana.
+## 📖 Table of Contents
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-## The authors
+## 💻 Usage
 
-- Chambard Teddy
-- Coquelet Nicolas
-- Vardon Adrien
+### Creating a Session
+1. Sign in with your wallet.
+2. Create a new expense session as an administrator.
+3. Add members via wallet address or invite them with a QR code.
 
-## Useful links
+### Managing Expenses
+1. Record expenses in USD, selecting participants.
+2. Modify or delete expenses if necessary.
 
-- website: https://solidr.vercel.app
-- program: https://explorer.solana.com/address/7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv?cluster=devnet
+### Refunds
+1. View balances and proposed reimbursements.
+2. Execute reimbursements in SOL, with automatic conversion via the Pyth Oracle.
 
-## Technical stack
+## 🌱 Contributing
 
-- Solana / Anchor
-- Next.js / Tailwind / Typescript
+Contributions are welcome! However, please note that **SolidR** may transition to a private or proprietary model in the future. If you'd like to contribute, please open an issue to discuss what you'd like to work on before submitting pull requests.
 
-# How to contribute
+## 📝 License
 
-## How to develop with docker
+At this time, **SolidR** is not licensed under an open-source license. All rights to the code are reserved, and the use, modification, or distribution of the code is restricted without explicit permission.
 
-cf [solana-test-validator-docker](https://github.com/tchambard/solana-test-validator-docker)
+## 📬 Contact
 
-## How to use this repository
+For any questions or issues, feel free to reach out:
 
-See all scripts in main package.json file.
-
-### Install dependencies
-
-```sh
-yarn install
-```
-
-### Compile all packages
-
-```sh
-yarn run compile:all
-```
-
-### Apply lint rules
-
-```sh
-yarn run lint:all
-```
-
-### Run unit tests
-
-```sh
-yarn run test:all
-```
-
-### Useful scripts
-
-Inside `packages/programs/solidr-program`
-
-```sh
-yarn run use-local -> solana-docker config set --url localhost --keypair /opt/.config/solana/id.json
-yarn run deploy-local -> anchor-docker deploy --provider.cluster localhost
-yarn run init-local -> ANCHOR_PROVIDER_URL=http://localhost:8899 ts-node migrations/initGlobal.ts
-yarn run use-devnet -> solana-docker config set --url devnet --keypair /opt/.config/solana/id.json
-yarn run deploy-devnet -> anchor-docker deploy --provider.cluster devnet
-yarn run init-devnet -> ANCHOR_PROVIDER_URL=https://api.devnet.solana.com ts-node migrations/initGlobal.ts
-yarn run start-local-test-validator -> solana-docker-shell exec "solana-test-validator --ledger /opt/.config/solana/.ledger --bind-address 0.0.0.0 --rpc-port 8899"
-```
-
-## Deployments
-
-### Devnet deployed program
-
--   program ID: 7kUL66rcAhxgisSeBtXoH7Pn9C5hWZa4m2Bp9mRcwtmv
--   init global tx: Cww3SNfRfJEAaKgBeRGp1Jy16m3LVe3djfJB9kzwQ2wAFHBHMQ5T8sqAh1p5a6ShHxrtbJt6VQb1w5dGFzcGrgZ
+- **Email**: [solidr_xyz@proton.me](mailto:solidr_xyz@proton.me)
+- **Twitter**: [@solidr_app](https://x.com/solidr_app)
