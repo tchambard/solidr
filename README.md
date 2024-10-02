@@ -1,3 +1,5 @@
+[![Prod](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci_prod.yml) [![Dev](https://github.com/tchambard/solidr/actions/workflows/ci.yml/badge.svg)](https://github.com/tchambard/solidr/actions/workflows/ci.yml)
+
 # SolidR
 
 **SolidR** is a decentralized app built on Solana that simplifies group expense management. Users can easily track, modify, and settle shared expenses with automatic SOL reimbursements using real-time price feeds powered by the Pyth Oracle.
