@@ -32,7 +32,7 @@ export default function Footer() {
                         </svg>
                     </a>
                     <a
-                        href="https://x.com/s_olidr"
+                        href="https://x.com/solidr_app"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-zinc-900 dark:text-zinc-100 hover:text-solanaGreen dark:hover:text-solanaGreen transition-colors"
